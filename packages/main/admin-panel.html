@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cuervok Admin Panel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #c9d1d9; }
+    
+    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; background: #161b22; border-right: 1px solid #30363d; padding: 16px 0; overflow-y: auto; }
+    .sidebar h1 { font-size: 16px; padding: 0 16px 16px; color: #58a6ff; border-bottom: 1px solid #30363d; }
+    .sidebar h1 span { color: #8b949e; font-size: 12px; font-weight: normal; }
+    .sidebar nav { padding: 8px 0; }
+    .sidebar nav a { display: block; padding: 8px 16px; color: #c9d1d9; text-decoration: none; font-size: 14px; transition: background 0.15s; }
+    .sidebar nav a:hover { background: #21262d; }
+    .sidebar nav a.active { background: #1f6feb22; color: #58a6ff; border-left: 3px solid #58a6ff; }
+    .sidebar .status { padding: 16px; font-size: 12px; color: #8b949e; border-top: 1px solid #30363d; margin-top: auto; position: absolute; bottom: 0; width: 100%; }
+    .sidebar .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3fb950; margin-right: 6px; }
+    
+    .main { margin-left: 220px; padding: 24px; min-height: 100vh; }
+    .main h2 { font-size: 20px; margin-bottom: 16px; color: #f0f6fc; }
+    
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+    .stat-card .label { font-size: 12px; color: #8b949e; text-transform: uppercase; }
+    .stat-card .value { font-size: 24px; font-weight: 600; color: #58a6ff; margin-top: 4px; }
+    
+    table { width: 100%; border-collapse: collapse; background: #161b22; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #30363d; font-size: 13px; }
+    th { background: #21262d; color: #8b949e; font-weight: 600; text-transform: uppercase; font-size: 11px; }
+    tr:hover td { background: #21262d; }
+    
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-green { background: #23863622; color: #3fb950; }
+    .badge-red { background: #da363622; color: #f85149; }
+    .badge-yellow { background: #9e6a03; color: #f0f6fc; }
+    .badge-blue { background: #1f6feb22; color: #58a6ff; }
+    
+    .btn { padding: 6px 12px; border: 1px solid #30363d; border-radius: 6px; background: #21262d; color: #c9d1d9; cursor: pointer; font-size: 12px; }
+    .btn:hover { background: #30363d; }
+    .btn-primary { background: #238636; border-color: #2ea043; color: white; }
+    .btn-primary:hover { background: #2ea043; }
+    .btn-danger { background: #da3633; border-color: #f85149; color: white; }
+    
+    .toolbar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+    .toolbar input { padding: 6px 12px; border: 1px solid #30363d; border-radius: 6px; background: #0d1117; color: #c9d1d9; font-size: 13px; width: 300px; }
+    
+    .query-box { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .query-box textarea { width: 100%; height: 80px; background: #0d1117; border: 1px solid #30363d; border-radius: 4px; color: #c9d1d9; padding: 8px; font-family: 'Fira Code', monospace; font-size: 13px; resize: vertical; }
+    .query-box .actions { margin-top: 8px; display: flex; gap: 8px; }
+    
+    .hidden { display: none; }
+    .page { }
+    
+    .anomaly-active { background: #8b5cf622; border-left: 3px solid #8b5cf6; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h1>🐦 Cuervok<br><span>Admin Panel</span></h1>
+    <nav>
+      <a href="#" class="active" onclick="showPage('dashboard')">📊 Dashboard</a>
+      <a href="#" onclick="showPage('dungeons')">🏰 Dungeons</a>
+      <a href="#" onclick="showPage('anomalies')">⚡ Anomalies</a>
+      <a href="#" onclick="showPage('zone-bonuses')">🗺️ Zone Bonuses</a>
+      <a href="#" onclick="showPage('map-rules')">🚧 Map Rules</a>
+      <a href="#" onclick="showPage('events')">🎉 Events</a>
+      <a href="#" onclick="showPage('guardians')">👾 Guardians</a>
+      <a href="#" onclick="showPage('sql')">🔍 SQL Query</a>
+      <a href="#" onclick="showPage('backup')">💾 Backup</a>
+      <a href="#" onclick="showPage('schema')">📋 Schema</a>
+    </nav>
+    <div class="status"><span class="dot"></span> Connected</div>
+  </div>
+
+  <div class="main">
+    <!-- Dashboard -->
+    <div id="page-dashboard" class="page">
+      <h2>Dashboard</h2>
+      <div class="stats" id="dashboard-stats"></div>
+    </div>
+
+    <!-- Dungeons -->
+    <div id="page-dungeons" class="page hidden">
+      <h2>Dungeons</h2>
+      <div class="toolbar">
+        <input type="text" id="dungeon-search" placeholder="Search dungeons..." oninput="filterDungeons()">
+        <button class="btn btn-primary" onclick="migrateDungeons()">📥 Import from JSON</button>
+      </div>
+      <table><thead><tr>
+        <th>ID</th><th>Name</th><th>Level</th><th>Entrance</th><th>Key Item</th><th>Maps</th><th>Status</th><th>Actions</th>
+      </tr></thead><tbody id="dungeons-body"></tbody></table>
+    </div>
+
+    <!-- Anomalies -->
+    <div id="page-anomalies" class="page hidden">
+      <h2>Temporal Anomalies</h2>
+      <div class="toolbar">
+        <select id="anomaly-status" onchange="loadAnomalies()">
+          <option value="active">Active</option>
+          <option value="closing">Closing</option>
+          <option value="closed">Closed</option>
+        </select>
+        <button class="btn btn-primary" onclick="createAnomaly()">+ New Anomaly</button>
+      </div>
+      <table><thead><tr>
+        <th>ID</th><th>SubArea</th><th>Zaap Map</th><th>Guardian</th><th>Bonus</th><th>Status</th><th>Spawned</th><th>Actions</th>
+      </tr></thead><tbody id="anomalies-body"></tbody></table>
+    </div>
+
+    <!-- Zone Bonuses -->
+    <div id="page-zone-bonuses" class="page hidden">
+      <h2>Zone Bonuses</h2>
+      <div class="toolbar">
+        <input type="text" id="zone-search" placeholder="Filter by sub-area ID...">
+        <button class="btn" onclick="loadZoneBonuses()">Refresh</button>
+      </div>
+      <table><thead><tr>
+        <th>SubArea ID</th><th>Bonus %</th><th>Fights</th><th>Anomaly Eligible</th><th>Last Updated</th><th>Actions</th>
+      </tr></thead><tbody id="zone-bonuses-body"></tbody></table>
+    </div>
+
+    <!-- Map Rules -->
+    <div id="page-map-rules" class="page hidden">
+      <h2>Map Access Rules</h2>
+      <div class="toolbar">
+        <input type="number" id="rule-map-id" placeholder="Map ID...">
+        <button class="btn" onclick="loadMapRules()">Filter</button>
+        <button class="btn btn-primary" onclick="createMapRule()">+ New Rule</button>
+      </div>
+      <table><thead><tr>
+        <th>ID</th><th>Map ID</th><th>Rule Type</th><th>Conditions</th><th>Deny Message</th><th>Redirect</th><th>Priority</th><th>Actions</th>
+      </tr></thead><tbody id="map-rules-body"></tbody></table>
+    </div>
+
+    <!-- Events -->
+    <div id="page-events" class="page hidden">
+      <h2>Map Events</h2>
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="createEvent()">+ New Event</button>
+      </div>
+      <table><thead><tr>
+        <th>ID</th><th>Name</th><th>Display</th><th>Start</th><th>End</th><th>Bonus</th><th>Active</th><th>Actions</th>
+      </tr></thead><tbody id="events-body"></tbody></table>
+    </div>
+
+    <!-- Guardians -->
+    <div id="page-guardians" class="page hidden">
+      <h2>Anomaly Guardians</h2>
+      <table><thead><tr>
+        <th>ID</th><th>Monster ID</th><th>Name</th><th>Level Range</th><th>Spawn Weight</th><th>Time Loop Rate</th><th>Enabled</th><th>Actions</th>
+      </tr></thead><tbody id="guardians-body"></tbody></table>
+    </div>
+
+    <!-- SQL Query -->
+    <div id="page-sql" class="page hidden">
+      <h2>SQL Query</h2>
+      <div class="query-box">
+        <textarea id="sql-input" placeholder="SELECT * FROM dungeons WHERE optimal_level > 100 ORDER BY optimal_level;">SELECT * FROM dungeons WHERE optimal_level > 100 ORDER BY optimal_level;</textarea>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="runQuery()">▶ Run Query</button>
+          <button class="btn" onclick="showQueryPresets()">📋 Presets</button>
+        </div>
+      </div>
+      <div id="query-results"></div>
+    </div>
+
+    <!-- Backup -->
+    <div id="page-backup" class="page hidden">
+      <h2>Backup & Restore</h2>
+      <div class="toolbar">
+        <button class="btn btn-primary" onclick="createBackup()">💾 Create Backup</button>
+      </div>
+      <table><thead><tr>
+        <th>Name</th><th>Size</th><th>Created</th>
+      </tr></thead><tbody id="backups-body"></tbody></table>
+    </div>
+
+    <!-- Schema -->
+    <div id="page-schema" class="page hidden">
+      <h2>Database Schema</h2>
+      <div id="schema-info"></div>
+    </div>
+  </div>
+
+<script>
+// Get token from URL params
+const urlParams = new URLSearchParams(window.location.search)
+const ADMIN_TOKEN = urlParams.get('token') || ''
+const API = 'http://127.0.0.1:8765/admin'
+
+if (!ADMIN_TOKEN) {
+  document.body.innerHTML = '<div style="padding:40px;color:#f85149;font-family:sans-serif"><h1>Access Denied</h1><p>No admin token provided. Access the admin panel from the app logs.</p></div>'
+  throw new Error('No admin token')
+}
+
+// Persist token in sessionStorage for navigation
+sessionStorage.setItem('admin_token', ADMIN_TOKEN)
+const TOKEN = sessionStorage.getItem('admin_token') || ADMIN_TOKEN
+
+// ═══════════════════════════════════════════════════════════════════
+// Navigation
+// ═══════════════════════════════════════════════════════════════════
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'))
+  document.getElementById('page-' + name)?.classList.remove('hidden')
+  document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'))
+  event.target.classList.add('active')
+  
+  const loaders = {
+    'dashboard': loadDashboard,
+    'dungeons': loadDungeons,
+    'anomalies': loadAnomalies,
+    'zone-bonuses': loadZoneBonuses,
+    'map-rules': loadMapRules,
+    'events': loadEvents,      'guardians': loadGuardians,
+      'backup': loadBackups,
+    'schema': loadSchema,
+  }
+  loaders[name]?.()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// API helpers
+// ═══════════════════════════════════════════════════════════════════
+
+async function api(path, opts = {}) {
+  const sep = path.includes('?') ? '&' : '?'
+  const res = await fetch(API + path + sep + 'token=' + TOKEN, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  })
+  return res.json()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Dashboard
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadDashboard() {
+  const data = await api('/dashboard')
+  document.getElementById('dashboard-stats').innerHTML = `
+    <div class="stat-card"><div class="label">Active Dungeons</div><div class="value">${data.dungeons}</div></div>
+    <div class="stat-card"><div class="label">Active Anomalies</div><div class="value">${data.anomalies}</div></div>
+    <div class="stat-card"><div class="label">Map Rules</div><div class="value">${data.map_rules}</div></div>
+    <div class="stat-card"><div class="label">Active Zone Bonuses</div><div class="value">${data.zone_bonuses}</div></div>
+    <div class="stat-card"><div class="label">Active Events</div><div class="value">${data.events}</div></div>
+  `
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Dungeons
+// ═══════════════════════════════════════════════════════════════════
+
+let allDungeons = []
+
+async function loadDungeons() {
+  allDungeons = await api('/dungeons')
+  renderDungeons(allDungeons)
+}
+
+function renderDungeons(list) {
+  document.getElementById('dungeons-body').innerHTML = list.map(d => `
+    <tr>
+      <td>${d.id}</td>
+      <td>${d.name}</td>
+      <td>${d.optimal_level}</td>
+      <td>${d.entrance_map_id}</td>
+      <td>${d.dungeon_key_item_id || '-'}</td>
+      <td>${d.map_count || '-'}</td>
+      <td>${d.is_enabled ? '<span class="badge badge-green">Enabled</span>' : '<span class="badge badge-red">Disabled</span>'}</td>
+      <td>
+        <button class="btn" onclick="toggleDungeon(${d.id}, ${d.is_enabled ? 0 : 1})">${d.is_enabled ? 'Disable' : 'Enable'}</button>
+      </td>
+    </tr>
+  `).join('')
+}
+
+function filterDungeons() {
+  const q = document.getElementById('dungeon-search').value.toLowerCase()
+  renderDungeons(allDungeons.filter(d => d.name.toLowerCase().includes(q) || String(d.id).includes(q)))
+}
+
+async function toggleDungeon(id, enabled) {
+  await api('/dungeons/' + id, { method: 'PUT', body: JSON.stringify({ is_enabled: !!enabled }) })
+  loadDungeons()
+}
+
+async function migrateDungeons() {
+  if (!confirm('Import dungeons from official JSON? This will overwrite existing data.')) return
+  const res = await api('/migrate/json-to-db', { method: 'POST', body: JSON.stringify({ source: 'dungeons' }) })
+  alert(`Migrated ${res.migrated} dungeons`)
+  loadDungeons()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Anomalies
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadAnomalies() {
+  const status = document.getElementById('anomaly-status').value
+  const data = await api('/anomalies?status=' + status)
+  document.getElementById('anomalies-body').innerHTML = data.map(a => `
+    <tr class="${a.status === 'active' ? 'anomaly-active' : ''}">
+      <td>${a.id}</td>
+      <td>${a.sub_area_id}</td>
+      <td>${a.zaap_map_id}</td>
+      <td>${a.guardian_monster_id}</td>
+      <td><span class="badge badge-yellow">${a.bonus_pct}%</span></td>
+      <td><span class="badge badge-blue">${a.status}</span></td>
+      <td>${new Date(a.spawned_at).toLocaleString()}</td>
+      <td>
+        ${a.status === 'active' ? `<button class="btn" onclick="closeAnomaly(${a.id})">Close</button>` : ''}
+        <button class="btn btn-danger" onclick="deleteAnomaly(${a.id})">Delete</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:#8b949e">No anomalies with status "' + status + '"</td></tr>'
+}
+
+async function closeAnomaly(id) {
+  await api('/anomalies/' + id, { method: 'PUT', body: JSON.stringify({ status: 'closing' }) })
+  loadAnomalies()
+}
+
+async function deleteAnomaly(id) {
+  if (!confirm('Delete this anomaly?')) return
+  await api('/anomalies/' + id, { method: 'DELETE' })
+  loadAnomalies()
+}
+
+async function createAnomaly() {
+  const subAreaId = prompt('Sub-Area ID:')
+  const zaapMapId = prompt('Zaap Map ID:')
+  const guardianId = prompt('Guardian Monster ID:')
+  if (!subAreaId || !zaapMapId || !guardianId) return
+  await api('/anomalies', { method: 'POST', body: JSON.stringify({
+    sub_area_id: Number(subAreaId), zaap_map_id: Number(zaapMapId), guardian_monster_id: Number(guardianId)
+  })})
+  loadAnomalies()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Zone Bonuses
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadZoneBonuses() {
+  const data = await api('/zone-bonuses')
+  document.getElementById('zone-bonuses-body').innerHTML = data.map(z => `
+    <tr>
+      <td>${z.sub_area_id}</td>
+      <td><span class="badge ${z.bonus_pct >= 70 ? 'badge-yellow' : z.bonus_pct < 0 ? 'badge-red' : 'badge-green'}">${z.bonus_pct > 0 ? '+' : ''}${z.bonus_pct.toFixed(1)}%</span></td>
+      <td>${z.fight_count}</td>
+      <td>${z.is_anomaly_eligible ? '<span class="badge badge-green">Yes</span>' : 'No'}</td>
+      <td>${new Date(z.last_updated).toLocaleString()}</td>
+      <td><button class="btn" onclick="editZoneBonus(${z.sub_area_id}, ${z.bonus_pct})">Edit</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;color:#8b949e">No active zone bonuses</td></tr>'
+}
+
+async function editZoneBonus(subAreaId, currentBonus) {
+  const newBonus = prompt('New bonus %:', currentBonus)
+  if (newBonus === null) return
+  await api('/zone-bonuses/' + subAreaId, { method: 'PUT', body: JSON.stringify({ bonus_pct: Number(newBonus) }) })
+  loadZoneBonuses()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Map Rules
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadMapRules() {
+  const mapId = document.getElementById('rule-map-id').value
+  const data = await api('/map-rules' + (mapId ? '?map_id=' + mapId : ''))
+  document.getElementById('map-rules-body').innerHTML = data.map(r => `
+    <tr>
+      <td>${r.id}</td>
+      <td>${r.map_id}</td>
+      <td><span class="badge badge-blue">${r.rule_type}</span></td>
+      <td>${[r.min_level && 'min:' + r.min_level, r.max_level && 'max:' + r.max_level, 
+              r.required_quest_id && 'quest:' + r.required_quest_id, 
+              r.event_name && 'event:' + r.event_name].filter(Boolean).join(', ') || '-'}</td>
+      <td>${r.deny_message || '-'}</td>
+      <td>${r.redirect_map_id || '-'}</td>
+      <td>${r.priority}</td>
+      <td><button class="btn btn-danger" onclick="deleteMapRule(${r.id})">Delete</button></td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:#8b949e">No rules found</td></tr>'
+}
+
+async function deleteMapRule(id) {
+  if (!confirm('Delete this rule?')) return
+  await api('/map-rules/' + id, { method: 'DELETE' })
+  loadMapRules()
+}
+
+async function createMapRule() {
+  const mapId = prompt('Map ID:')
+  const ruleType = prompt('Rule type (forbidden/level_required/quest_required/event_only/anomaly_only):')
+  if (!mapId || !ruleType) return
+  const minLevel = prompt('Min level (or empty):')
+  const denyMsg = prompt('Deny message (or empty):')
+  await api('/map-rules', { method: 'POST', body: JSON.stringify({
+    map_id: Number(mapId), rule_type: ruleType,
+    min_level: minLevel ? Number(minLevel) : null,
+    deny_message: denyMsg || null
+  })})
+  loadMapRules()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Events
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadEvents() {
+  const data = await api('/events')
+  document.getElementById('events-body').innerHTML = data.map(e => `
+    <tr>
+      <td>${e.id}</td>
+      <td>${e.event_name}</td>
+      <td>${e.display_name}</td>
+      <td>${new Date(e.start_date).toLocaleDateString()}</td>
+      <td>${new Date(e.end_date).toLocaleDateString()}</td>
+      <td>${e.bonus_pct}%</td>
+      <td>${e.is_active ? '<span class="badge badge-green">Active</span>' : '<span class="badge badge-red">Inactive</span>'}</td>
+      <td>
+        <button class="btn" onclick="toggleEvent(${e.id}, ${e.is_active ? 0 : 1})">${e.is_active ? 'Disable' : 'Enable'}</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="8" style="text-align:center;color:#8b949e">No events</td></tr>'
+}
+
+async function toggleEvent(id, active) {
+  await api('/events/' + id, { method: 'PUT', body: JSON.stringify({ is_active: !!active }) })
+  loadEvents()
+}
+
+async function createEvent() {
+  const name = prompt('Event name (e.g. kwismas):')
+  const display = prompt('Display name:')
+  const start = prompt('Start date (YYYY-MM-DD):')
+  const end = prompt('End date (YYYY-MM-DD):')
+  if (!name || !display || !start || !end) return
+  await api('/events', { method: 'POST', body: JSON.stringify({
+    event_name: name, display_name: display, start_date: start, end_date: end
+  })})
+  loadEvents()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Guardians
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadGuardians() {
+  const data = await api('/guardians')
+  document.getElementById('guardians-body').innerHTML = data.map(g => `
+    <tr>
+      <td>${g.id}</td>
+      <td>${g.monster_id}</td>
+      <td>${g.name}</td>
+      <td>${g.min_level} - ${g.max_level}</td>
+      <td>${g.spawn_weight}</td>
+      <td>${(g.time_loop_drop_rate * 100).toFixed(0)}%</td>
+      <td>${g.is_enabled ? '<span class="badge badge-green">Yes</span>' : '<span class="badge badge-red">No</span>'}</td>
+      <td><button class="btn" onclick="toggleGuardian(${g.id}, ${g.is_enabled ? 0 : 1})">${g.is_enabled ? 'Disable' : 'Enable'}</button></td>
+    </tr>
+  `).join('')
+}
+
+async function toggleGuardian(id, enabled) {
+  await api('/guardians/' + id, { method: 'PUT', body: JSON.stringify({ is_enabled: !!enabled }) })
+  loadGuardians()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// SQL Query
+// ═══════════════════════════════════════════════════════════════════
+
+async function runQuery() {
+  const sql = document.getElementById('sql-input').value
+  const result = await api('/query', { method: 'POST', body: JSON.stringify({ sql }) })
+  
+  if (result.error) {
+    document.getElementById('query-results').innerHTML = `<div style="color:#f85149">Error: ${result.error}</div>`
+    return
+  }
+  
+  if (!result.rows?.length) {
+    document.getElementById('query-results').innerHTML = '<div style="color:#8b949e">No results</div>'
+    return
+  }
+  
+  const cols = Object.keys(result.rows[0])
+  document.getElementById('query-results').innerHTML = `
+    <div style="margin-bottom:8px;color:#8b949e;font-size:12px">${result.count} rows</div>
+    <table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+    <tbody>${result.rows.map(r => `<tr>${cols.map(c => `<td>${r[c] ?? 'NULL'}</td>`).join('')}</tr>`).join('')}</tbody></table>
+  `
+}
+
+function showQueryPresets() {
+  const presets = [
+    { name: 'Dungeons by level', sql: 'SELECT id, name, optimal_level, is_enabled FROM dungeons ORDER BY optimal_level;' },
+    { name: 'Active anomalies', sql: 'SELECT * FROM temporal_anomalies WHERE status = "active";' },
+    { name: 'Zone bonuses > 50%', sql: 'SELECT * FROM zone_bonuses WHERE bonus_pct > 50 ORDER BY bonus_pct DESC;' },
+    { name: 'Map rules for a specific map', sql: 'SELECT * FROM map_access_rules WHERE map_id = 68552706;' },
+    { name: 'All tables with row counts', sql: "SELECT name as table_name, (SELECT COUNT(*) FROM sqlite_master WHERE type='table') as total_tables FROM sqlite_master WHERE type='table' ORDER BY name;" },
+    { name: 'Dungeon stats', sql: 'SELECT COUNT(*) as total, SUM(CASE WHEN is_enabled THEN 1 ELSE 0 END) as enabled, AVG(optimal_level) as avg_level FROM dungeons;' },
+  ]
+  
+  document.getElementById('query-results').innerHTML = `
+    <div style="margin-bottom:16px">
+      <h3 style="margin-bottom:8px;font-size:14px">Query Presets</h3>
+      ${presets.map(p => `
+        <div style="padding:8px;margin-bottom:4px;background:#21262d;border-radius:4px;cursor:pointer" 
+             onclick="document.getElementById('sql-input').value='${p.sql}'">
+          <strong>${p.name}</strong><br>
+          <code style="font-size:11px;color:#8b949e">${p.sql}</code>
+        </div>
+      `).join('')}
+    </div>
+  `
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Backup
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadBackups() {
+  const data = await api('/backups')
+  document.getElementById('backups-body').innerHTML = data.map(b => `
+    <tr>
+      <td>${b.name}</td>
+      <td>${(b.size / 1024).toFixed(1)} KB</td>
+      <td>${new Date(b.created).toLocaleString()}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="3" style="text-align:center;color:#8b949e">No backups yet</td></tr>'
+}
+
+async function createBackup() {
+  const res = await api('/backup', { method: 'POST' })
+  if (res.ok) alert(`Backup created: ${res.path}`)
+  else alert('Backup failed')
+  loadBackups()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Schema
+// ═══════════════════════════════════════════════════════════════════
+
+async function loadSchema() {
+  const data = await api('/schema')
+  document.getElementById('schema-info').innerHTML = Object.entries(data).map(([name, info]) => `
+    <div style="margin-bottom:16px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px">
+      <h3 style="font-size:14px;color:#58a6ff;margin-bottom:8px">${name} <span style="color:#8b949e;font-weight:normal">(${info.rowCount} rows)</span></h3>
+      <div style="font-size:12px;color:#8b949e">${info.columns.join(' · ')}</div>
+    </div>
+  `).join('')
+}
+
+// Init
+loadDashboard()
+</script>
+</body>
+</html>

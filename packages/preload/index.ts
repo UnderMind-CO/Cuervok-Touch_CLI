@@ -1,0 +1,183 @@
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
+import { IPCEvents, GameContext, NativeNotificationPayload, AppUpdateStatus, AuthSession } from '@cuervok/shared'
+
+const cuervokApi = {
+  fetchGameContext: async (): Promise<GameContext> => {
+    const data = await ipcRenderer.invoke(IPCEvents.GET_GAME_CONTEXT)
+    return JSON.parse(data)
+  },
+
+  appReadyToShow: () => {
+    ipcRenderer.send(IPCEvents.APP_READY_TO_SHOW)
+  },
+
+  openExternal: (url: string) => {
+    ipcRenderer.send(IPCEvents.OPEN_EXTERNAL, url)
+  },
+
+  setAudioMute: (value: boolean) => {
+    ipcRenderer.send(IPCEvents.SET_AUDIO_MUTE, value)
+  },
+
+  setSoundOnFocus: (value: boolean) => {
+    ipcRenderer.send(IPCEvents.SET_SOUND_ON_FOCUS, value)
+  },
+
+  minimize: () => {
+    ipcRenderer.send(IPCEvents.WINDOW_MINIMIZE)
+  },
+
+  maximize: () => {
+    ipcRenderer.send(IPCEvents.WINDOW_MAXIMIZE)
+  },
+
+  close: () => {
+    ipcRenderer.send(IPCEvents.WINDOW_CLOSE)
+  },
+
+  getSettings: async (): Promise<string> => {
+    return ipcRenderer.invoke(IPCEvents.GET_SETTINGS)
+  },
+
+  setSettings: (settings: string) => {
+    ipcRenderer.send(IPCEvents.SET_SETTINGS, settings)
+  },
+
+  checkGameInstalled: async (): Promise<boolean> => {
+    return ipcRenderer.invoke(IPCEvents.CHECK_GAME_INSTALLED)
+  },
+
+  downloadGame: async (): Promise<void> => {
+    await ipcRenderer.invoke(IPCEvents.DOWNLOAD_GAME)
+  },
+
+  launchGameWindow: () => {
+    ipcRenderer.send(IPCEvents.OPEN_GAME_WINDOW)
+  },
+
+  onAuthCallback: (cb: (url: string) => void): (() => void) => {
+    const listener = (_: IpcRendererEvent, url: string) => cb(url)
+    ipcRenderer.on(IPCEvents.AUTH_CALLBACK, listener)
+    return () => { ipcRenderer.removeListener(IPCEvents.AUTH_CALLBACK, listener) }
+  },
+
+  onSelectTab: (cb: (index: number) => void): (() => void) => {
+    const listener = (_: IpcRendererEvent, index: number) => cb(index)
+    ipcRenderer.on(IPCEvents.SELECT_TAB, listener)
+    return () => { ipcRenderer.removeListener(IPCEvents.SELECT_TAB, listener) }
+  },
+
+  onDownloadProgress: (cb: (message: string, percent: number) => void): (() => void) => {
+    const listener = (_: IpcRendererEvent, message: string, percent: number) => cb(message, percent)
+    ipcRenderer.on(IPCEvents.DOWNLOAD_PROGRESS, listener)
+    return () => { ipcRenderer.removeListener(IPCEvents.DOWNLOAD_PROGRESS, listener) }
+  },
+
+  saveCharacterImage: (name: string, imageData: string) => {
+    ipcRenderer.send(IPCEvents.SAVE_CHARACTER_IMAGE, name, imageData)
+  },
+
+  getAppUpdateStatus: async (): Promise<AppUpdateStatus> => {
+    return ipcRenderer.invoke(IPCEvents.GET_APP_UPDATE_STATUS)
+  },
+
+  checkAppUpdate: async (): Promise<AppUpdateStatus> => {
+    return ipcRenderer.invoke(IPCEvents.CHECK_APP_UPDATE)
+  },
+
+  installAppUpdate: () => {
+    ipcRenderer.send(IPCEvents.INSTALL_APP_UPDATE)
+  },
+
+  onAppUpdateStatus: (cb: (status: AppUpdateStatus) => void): (() => void) => {
+    const listener = (_: IpcRendererEvent, status: AppUpdateStatus) => cb(status)
+    ipcRenderer.on(IPCEvents.APP_UPDATE_STATUS, listener)
+    return () => { ipcRenderer.removeListener(IPCEvents.APP_UPDATE_STATUS, listener) }
+  },
+
+  showNativeNotification: (payload: NativeNotificationPayload) => {
+    ipcRenderer.send(IPCEvents.SHOW_NATIVE_NOTIFICATION, payload)
+  },
+
+  onNativeNotificationClick: (cb: (tabId?: string) => void): (() => void) => {
+    const listener = (_: IpcRendererEvent, tabId?: string) => cb(tabId)
+    ipcRenderer.on(IPCEvents.NATIVE_NOTIFICATION_CLICK, listener)
+    return () => { ipcRenderer.removeListener(IPCEvents.NATIVE_NOTIFICATION_CLICK, listener) }
+  },
+
+  storeGet: async (key: string): Promise<string | null> => {
+    return ipcRenderer.invoke(IPCEvents.STORE_GET, key)
+  },
+
+  storeSet: (key: string, value: string) => {
+    ipcRenderer.send(IPCEvents.STORE_SET, key, value)
+  },
+
+  storeDelete: (key: string) => {
+    ipcRenderer.send(IPCEvents.STORE_DELETE, key)
+  },
+
+  // Auth
+  login: async (tabId: string, apiKey: string, token: string): Promise<void> => {
+    await ipcRenderer.invoke(IPCEvents.LOGIN, tabId, apiKey, token)
+  },
+
+  // Game login: store auth and navigate back to the game
+  completeGameLogin: async (authData: string): Promise<void> => {
+    await ipcRenderer.invoke('game-login-complete', authData)
+  },
+
+  // Retry loading the login URL (used by fallback page when service comes back)
+  retryLogin: (url: string) => {
+    ipcRenderer.send('retry-login', url)
+  },
+
+  // Check if the web-retro platform is available
+  checkServiceHealth: async (origin: string): Promise<boolean> => {
+    return ipcRenderer.invoke('check-service-health', origin)
+  },
+
+  getAuthSession: async (tabId: string): Promise<AuthSession | null> => {
+    return ipcRenderer.invoke(IPCEvents.GET_AUTH_SESSION, tabId)
+  },
+
+  logout: (tabId: string) => {
+    ipcRenderer.send(IPCEvents.LOGOUT, tabId)
+  },
+
+  // Freeze
+  checkGameFrozen: async (): Promise<{ frozen: boolean; buildVersion?: string; frozenAt?: string }> => {
+    return ipcRenderer.invoke(IPCEvents.CHECK_GAME_FROZEN)
+  },
+
+  unfreezeGame: async (): Promise<void> => {
+    await ipcRenderer.invoke(IPCEvents.UNFREEZE_GAME)
+  },
+
+  redownloadGame: async (): Promise<void> => {
+    await ipcRenderer.invoke(IPCEvents.REDOWNLOAD_GAME)
+  },
+
+  getCharacterImageUrl: (characterName: string): string => {
+    // The local server serves character-images at /character-images/
+    return `http://127.0.0.1:8765/character-images/${encodeURIComponent(characterName)}.png`;
+  },
+
+  // Discord RPC
+  updateDiscordPresence: (state: string) => {
+    ipcRenderer.send(IPCEvents.DISCORD_RPC_UPDATE, state)
+  },
+
+  clearDiscordPresence: () => {
+    ipcRenderer.send(IPCEvents.DISCORD_RPC_CLEAR)
+  },
+
+  logger: {
+    info: (...args: unknown[]) => console.log('[renderer]', ...args),
+    warn: (...args: unknown[]) => console.warn('[renderer]', ...args),
+    error: (...args: unknown[]) => console.error('[renderer]', ...args),
+    debug: (...args: unknown[]) => console.debug('[renderer]', ...args)
+  }
+}
+
+contextBridge.exposeInMainWorld('cuervok', cuervokApi)

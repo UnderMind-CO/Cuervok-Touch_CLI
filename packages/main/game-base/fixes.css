@@ -1,0 +1,498 @@
+.ShortcutBar .drawerContent {
+  min-width: 100% !important;
+}
+
+body, html {
+  background: black;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  background-color: rgba(0,0,0,0);
+  -webkit-border-radius: 100px;
+}
+
+::-webkit-scrollbar:hover {
+  background-color: rgba(0,0,0,0.09);
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  background: rgba(0,0,0,0.5);
+  -webkit-border-radius: 100px;
+  background-clip: padding-box;
+  border: 2px solid rgba(0,0,0,0);
+  min-height: 10px;
+}
+
+::-webkit-scrollbar-thumb:vertical:active {
+  background: rgba(0,0,0,0.61);
+  -webkit-border-radius: 100px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Guild Donation/Boosts tab (custom feature)
+   Matches the Touch dark-stone UI of the other guild tabs.  Buttons reuse
+   the game's OWN .greenButton chrome (border-image btn_empty.png + the
+   pressed/disabled states already shipped in styles-native.css) — we only
+   adjust sizing/typography so they sit right inside the panel.
+   ───────────────────────────────────────────────────────────────────── */
+.guildBoostPanel {
+  padding: 12px 16px;
+  color: #e8dcc0;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-y: auto;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.guildBoostSectionTitle {
+  color: #f2c94c;
+  font-size: 13px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  margin: 10px 0 6px;
+  border-bottom: 1px solid rgba(242, 201, 76, 0.3);
+  padding-bottom: 3px;
+  letter-spacing: 0.3px;
+}
+
+.guildBoostTreasury {
+  background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.25));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+.guildBoostBalances {
+  display: flex;
+  gap: 20px;
+  margin: 4px 0 2px;
+}
+
+.guildBoostBalance {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffe9a8;
+}
+
+.guildBoostBalance.goultines {
+  color: #9fd6ff;
+}
+
+.guildBoostMyWallets {
+  font-size: 11px;
+  color: #b7a98c;
+  margin-top: 3px;
+}
+
+/* Base helper: layout/typography only — the visual skin comes from the
+   game's own .greenButton (btn_empty.png border-image) added in JS. */
+.guildBoostBtn {
+  display: inline-block;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.35);
+}
+
+/* The official chrome draws its own borders — drop custom ones here and
+   keep hover/active to the game's :before / .pressed rules. */
+.guildBoostBtn.greenButton {
+  font-size: 12px;
+  padding: 1px 8px;
+  color: #412926;
+}
+
+.guildBoostBtn.mini {
+  font-size: 11px;
+  padding: 0px 6px;
+  min-width: 64px;
+}
+
+/* Selected currency toggle: official soft glow on the stone button. */
+.guildBoostBtn.mini.on {
+  box-shadow: 0 0 6px rgba(242,201,76,0.65);
+  filter: brightness(1.12);
+}
+
+.guildBoostBtn.donate {
+  margin-top: 8px;
+  min-width: 110px;
+}
+
+/* Disabled/Máx buttons: same chrome, inert. */
+.guildBoostBtn.disabled {
+  opacity: 0.45;
+  cursor: default;
+  filter: grayscale(0.55);
+  pointer-events: none;
+}
+
+.guildBoostPayRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 4px;
+}
+
+.guildBoostPayLabel {
+  color: #b7a98c;
+  font-size: 11px;
+  margin-right: 2px;
+}
+
+.guildBoostBoosts {
+  margin-bottom: 8px;
+}
+
+.guildBoostRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.22);
+}
+
+.guildBoostRow:nth-child(odd) {
+  background: rgba(0,0,0,0.12);
+}
+
+.guildBoostRow.header {
+  background: rgba(0,0,0,0.45);
+  font-weight: bold;
+  color: #f2c94c;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.guildBoostRow .colEffect {
+  flex: 1 1 40%;
+}
+
+.guildBoostRow .colLevel {
+  flex: 1 1 22%;
+}
+
+.guildBoostRow .colPrice {
+  flex: 1 1 22%;
+  text-align: right;
+}
+
+.guildBoostRow .colBuy {
+  flex: 0 0 78px;
+  text-align: right;
+}
+
+.guildBoostName {
+  font-weight: bold;
+  color: #ffe9a8;
+  font-size: 12px;
+}
+
+.guildBoostEffect {
+  font-size: 11px;
+  color: #b7a98c;
+}
+
+.guildBoostLevel {
+  font-size: 12px;
+  font-weight: bold;
+  color: #e8dcc0;
+  margin-bottom: 2px;
+}
+
+.guildBoostBar {
+  height: 7px;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.guildBoostBarFill {
+  height: 100%;
+  background: linear-gradient(180deg, #f2c94c, #b8860b);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.guildBoostPrice {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffe9a8;
+}
+
+.guildBoostPrice.alt {
+  font-size: 10px;
+  color: #9fd6ff;
+  font-weight: normal;
+}
+
+/* Goultines-exclusive tag under the price of combat-changing boosts
+   (PA/PM/Alcance/Invocaciones/% Daños finales): goultines-gold tone to
+   match the currency, distinct from the blue alt-price line. */
+.guildBoostPrice.alt.onlyG {
+  color: #ffd76e;
+}
+
+.guildBoostHint {
+  padding: 10px;
+  color: #b7a98c;
+  font-style: italic;
+  text-align: center;
+}
+
+.guildBoostDonations {
+  margin-top: 4px;
+}
+
+.guildBoostDonationRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px;
+}
+
+.guildBoostDonationName {
+  flex: 1 1 auto;
+  color: #ffe9a8;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guildBoostDonationAmount {
+  flex: 0 0 auto;
+  color: #e8dcc0;
+  font-weight: bold;
+}
+
+.guildBoostDonationWhen {
+  flex: 0 0 auto;
+  color: #8a7d63;
+  font-size: 10px;
+}
+
+.guildBoostModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.guildBoostModal {
+  background: linear-gradient(180deg, #3a3020, #2a2317);
+  border: 2px solid #6b5a36;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.12);
+  padding: 16px 18px;
+  min-width: 280px;
+  max-width: 340px;
+  color: #e8dcc0;
+  font-size: 12px;
+}
+
+.guildBoostModalTitle {
+  color: #f2c94c;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.guildBoostModalCurRow {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.guildBoostModalBalance {
+  text-align: center;
+  color: #b7a98c;
+  margin-bottom: 8px;
+}
+
+.guildBoostModalInput {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  color: #ffe9a8;
+  font-size: 14px;
+  padding: 7px 8px;
+  text-align: center;
+  margin-bottom: 12px;
+  outline: none;
+}
+
+.guildBoostModalInput:focus {
+  border-color: #f2c94c;
+  box-shadow: 0 0 6px rgba(242,201,76,0.4);
+}
+
+.guildBoostModalBtns {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ── Admin panel (custom feature) ─────────────────────────── */
+.adminPanelOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 100000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.adminPanel {
+  width: 560px;
+  max-width: 94vw;
+  max-height: 84vh;
+  display: flex;
+  flex-direction: column;
+  background: #1b1f2b;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  color: #f0ead6;
+  font-family: inherit;
+  overflow: hidden;
+}
+.adminPanelHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #232a3b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.adminPanelTitle { font-weight: bold; font-size: 15px; color: #f2c94c; }
+.adminPanelHeaderInfo { flex: 1; font-size: 12px; color: #b9c2d0; }
+.adminSearchRow {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+}
+.adminQueryInput, .adminTypeSelect, .adminTargetInput {
+  background: #12151f;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #f0ead6;
+  font-size: 13px;
+  padding: 7px 8px;
+  outline: none;
+}
+.adminQueryInput { flex: 1; }
+.adminTypeSelect { max-width: 210px; }
+.adminTargetInput { flex: 1; }
+.adminItemList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 14px 10px;
+  min-height: 120px;
+}
+.adminItemRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.adminItemIcon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.adminItemInfo { flex: 1; min-width: 0; }
+.adminItemName {
+  font-size: 13px;
+  color: #ffe9a8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adminItemMeta { font-size: 11px; color: #8d97a8; }
+.adminItemBtns { display: flex; gap: 6px; }
+.adminBtn {
+  background: #2c3447;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  color: #f0ead6;
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.adminBtn:hover { background: #39445c; }
+.adminBtn.add { background: #2f5d3a; }
+.adminBtn.add:hover { background: #3c7a4b; }
+.adminBtn.debug.on { background: #6b4f16; border-color: #f2c94c; color: #ffe9a8; }
+.adminBtn.close { background: #5a2a2a; }
+.adminBtn.close:hover { background: #7a3838; }
+.adminPager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.adminPagerLabel { flex: 1; text-align: center; font-size: 12px; color: #b9c2d0; }
+.adminPanelFooter {
+  display: flex;
+  gap: 8px;
+  padding: 0 14px 6px;
+}
+.adminHint {
+  padding: 0 14px 10px;
+  font-size: 11px;
+  color: #8d97a8;
+}
+.adminEmpty {
+  padding: 18px 4px;
+  text-align: center;
+  color: #8d97a8;
+  font-size: 13px;
+}
+
+/* ── Shop: keep the top category tabs in one navbar row (DofEmu fix) ──
+   Our catalog has more top categories than the stock layout fits
+   (Home, Packs, Apariencias, Monturas, Objetos, Pase Elite wallet tab,
+   Goultinas wallet tab ≈ 870px vs the stock 710px cap).  With the
+   stock rules the inline tabs wrap to a second line, so the last tabs
+   (Pase Elite / Goultinas) fall below the separator.  Force a single
+   non-wrapping row that uses the space left for the wallet, and scroll
+   horizontally on narrow windows like the official swipeable tab bar. */
+.ShopWindow .row1 {
+  white-space: nowrap;
+}
+.ShopWindow .row1 .topTabsList {
+  max-width: calc(100% - 300px) !important;
+  white-space: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}

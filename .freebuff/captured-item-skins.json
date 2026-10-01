@@ -1,0 +1,80 @@
+[
+  {
+    "gid": 9187,
+    "skin": 1193,
+    "position": 28,
+    "events": 1
+  },
+  {
+    "gid": 15856,
+    "skin": 3213,
+    "position": 6,
+    "events": 1
+  },
+  {
+    "gid": 17856,
+    "skin": 3501,
+    "position": 31,
+    "events": 1
+  },
+  {
+    "gid": 17858,
+    "skin": 3500,
+    "position": 29,
+    "events": 1
+  },
+  {
+    "gid": 17860,
+    "skin": 3499,
+    "position": 28,
+    "events": 1
+  },
+  {
+    "gid": 18563,
+    "skin": 3626,
+    "position": 28,
+    "events": 3
+  },
+  {
+    "gid": 18565,
+    "skin": 3625,
+    "position": 29,
+    "events": 1
+  },
+  {
+    "gid": 18567,
+    "skin": 3624,
+    "position": 31,
+    "events": 2
+  },
+  {
+    "gid": 18706,
+    "skin": 3644,
+    "position": 31,
+    "events": 1
+  },
+  {
+    "gid": 18909,
+    "skin": 3684,
+    "position": 28,
+    "events": 1
+  },
+  {
+    "gid": 18939,
+    "skin": 1101,
+    "position": 28,
+    "events": 1
+  },
+  {
+    "gid": 19685,
+    "skin": 3876,
+    "position": 28,
+    "events": 1
+  },
+  {
+    "gid": 20053,
+    "skin": 3983,
+    "position": 29,
+    "events": 1
+  }
+]

@@ -1,0 +1,6247 @@
+{
+  "_meta": {
+    "version": 1,
+    "generatedAt": "2026-08-23T22:36:25.335Z",
+    "source": "Official Dofus Touch data (Ankama)",
+    "description": "Temporal anomaly zones (Time Bubbles) for the emulator"
+  },
+  "anomalies": [
+    {
+      "id": 816,
+      "name": "Time Bubble - The Village",
+      "sourceSubAreaId": 816,
+      "mapIds": [
+        126881025,
+        127140354,
+        127140352,
+        127140356,
+        126881793,
+        126882049,
+        127141376,
+        127142400,
+        127142402,
+        126879745,
+        126880001,
+        126877697,
+        127142404,
+        126880769,
+        126877953,
+        127141380,
+        127141378,
+        126878977,
+        126878721
+      ],
+      "mapCount": 19,
+      "level": 10,
+      "guardian": {
+        "monsterId": 3682,
+        "name": "Ongnissim",
+        "race": 150,
+        "level": 404,
+        "actionPoints": 12,
+        "movementPoints": 3
+      },
+      "chronomorphs": [
+        {
+          "monsterId": 3682,
+          "name": "Ongnissim",
+          "race": 150,
+          "level": 404
+        }
+      ],
+      "borderMaps": [
+        {
+          "normalMapId": 90440704,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 126882049,
+          "normalPos": [
+            2,
+            0
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90440704,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127140352,
+          "normalPos": [
+            2,
+            0
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90440704,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127141376,
+          "normalPos": [
+            2,
+            0
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90440704,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127141378,
+          "normalPos": [
+            2,
+            0
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90440704,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127142400,
+          "normalPos": [
+            2,
+            0
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90440704,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127142402,
+          "normalPos": [
+            2,
+            0
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90440704,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 126880769,
+          "normalPos": [
+            2,
+            0
+          ],
+          "bubblePos": [
+            1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 90440704,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127140356,
+          "normalPos": [
+            2,
+            0
+          ],
+          "bubblePos": [
+            1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 90439938,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 126880001,
+          "normalPos": [
+            0,
+            -2
+          ],
+          "bubblePos": [
+            0,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90439938,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127141380,
+          "normalPos": [
+            0,
+            -2
+          ],
+          "bubblePos": [
+            0,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90439680,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 126880001,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            0,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90439680,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127141380,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            0,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 90439680,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 126878721,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            -1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 90439680,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 126880769,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 90439680,
+          "normalSubAreaId": 1,
+          "bubbleMapId": 127140356,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 88213784,
+          "normalSubAreaId": 2,
+          "bubbleMapId": 126877953,
+          "normalPos": [
+            -3,
+            -1
+          ],
+          "bubblePos": [
+            -2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88213784,
+          "normalSubAreaId": 2,
+          "bubbleMapId": 127142404,
+          "normalPos": [
+            -3,
+            -1
+          ],
+          "bubblePos": [
+            -2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88213783,
+          "normalSubAreaId": 2,
+          "bubbleMapId": 126877697,
+          "normalPos": [
+            -3,
+            0
+          ],
+          "bubblePos": [
+            -2,
+            0
+          ]
+        },
+        {
+          "normalMapId": 99095045,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126881025,
+          "normalPos": [
+            1,
+            -2
+          ],
+          "bubblePos": [
+            1,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88212759,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126878977,
+          "normalPos": [
+            -1,
+            0
+          ],
+          "bubblePos": [
+            -1,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88212759,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126877697,
+          "normalPos": [
+            -1,
+            0
+          ],
+          "bubblePos": [
+            -2,
+            0
+          ]
+        },
+        {
+          "normalMapId": 88212759,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126879745,
+          "normalPos": [
+            -1,
+            0
+          ],
+          "bubblePos": [
+            0,
+            0
+          ]
+        },
+        {
+          "normalMapId": 88212759,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127140354,
+          "normalPos": [
+            -1,
+            0
+          ],
+          "bubblePos": [
+            0,
+            0
+          ]
+        },
+        {
+          "normalMapId": 0,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126880001,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            0,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 0,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127141380,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            0,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 0,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126878721,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            -1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 0,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126880769,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 0,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127140356,
+          "normalPos": [
+            0,
+            0
+          ],
+          "bubblePos": [
+            1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 88081687,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126881793,
+          "normalPos": [
+            3,
+            0
+          ],
+          "bubblePos": [
+            2,
+            0
+          ]
+        },
+        {
+          "normalMapId": 88081177,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126882049,
+          "normalPos": [
+            2,
+            -2
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081177,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127140352,
+          "normalPos": [
+            2,
+            -2
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081177,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127141376,
+          "normalPos": [
+            2,
+            -2
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081177,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127141378,
+          "normalPos": [
+            2,
+            -2
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081177,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127142400,
+          "normalPos": [
+            2,
+            -2
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081177,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127142402,
+          "normalPos": [
+            2,
+            -2
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88212248,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126879745,
+          "normalPos": [
+            0,
+            -1
+          ],
+          "bubblePos": [
+            0,
+            0
+          ]
+        },
+        {
+          "normalMapId": 88212248,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127140354,
+          "normalPos": [
+            0,
+            -1
+          ],
+          "bubblePos": [
+            0,
+            0
+          ]
+        },
+        {
+          "normalMapId": 88212248,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126878977,
+          "normalPos": [
+            0,
+            -1
+          ],
+          "bubblePos": [
+            -1,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88212248,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126881025,
+          "normalPos": [
+            0,
+            -1
+          ],
+          "bubblePos": [
+            1,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081688,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126882049,
+          "normalPos": [
+            3,
+            -1
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081688,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127140352,
+          "normalPos": [
+            3,
+            -1
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081688,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127141376,
+          "normalPos": [
+            3,
+            -1
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081688,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127141378,
+          "normalPos": [
+            3,
+            -1
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081688,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127142400,
+          "normalPos": [
+            3,
+            -1
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88081688,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127142402,
+          "normalPos": [
+            3,
+            -1
+          ],
+          "bubblePos": [
+            2,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 99092997,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126881025,
+          "normalPos": [
+            1,
+            -2
+          ],
+          "bubblePos": [
+            1,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 88080665,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126881025,
+          "normalPos": [
+            1,
+            -2
+          ],
+          "bubblePos": [
+            1,
+            -1
+          ]
+        },
+        {
+          "normalMapId": 99090945,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126880769,
+          "normalPos": [
+            1,
+            -1
+          ],
+          "bubblePos": [
+            1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 99090945,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 127140356,
+          "normalPos": [
+            1,
+            -1
+          ],
+          "bubblePos": [
+            1,
+            0
+          ]
+        },
+        {
+          "normalMapId": 99090945,
+          "normalSubAreaId": 10,
+          "bubbleMapId": 126880001,
+          "normalPos": [
+            1,
+            -1
+          ],
+          "bubblePos": [
+            0,
+            -1
+          ]
+        }
+      ],
+      "borderSubAreaIds": [
+        1,
+        2,
+        10,
+        32,
+        44,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        93,
+        95,
+        180,
+        182,
+        461,
+        465,
+        466,
+        469,
+        488,
+        502,
+        503,
+        505,
+        506,
+        507,
+        508,
+        509,
+        511,
+        513,
+        532,
+        534,
+        600,
+        601,
+        603,
+        750,
+        775,
+        805,
+        806,
+        840,
+        854,
+        867,
+        877
+      ],
+      "config": {
+        "isActive": false,
+        "bonusPercent": 120,
+        "durationMinutes": 0,
+        "closureCountdownMinutes": 10,
+        "elixirLevel": 0,
+        "spawnWeight": 1
+      }
+    },
+    {
+      "id": 818,
+      "name": "Time Bubble - Frigost",
+      "sourceSubAreaId": 818,
+      "mapIds": [
+        127405056,
+        127404034,
+        128190721,
+        128189952,
+        128190209,
+        128189697,
+        127401988,
+        127403010,
+        127401984,
+        127927042,
+        127405060,
+        127404032,
+        127928066,
+        128450562,
+        127926784,
+        128451584,
+        128450560,
+        128451586,
+        127927808,
+        127401986,
+        127404036,
+        128189440,
+        128190464,
+        127405058
+      ],
+      "mapCount": 24,
+      "level": 0,
+      "guardian": {
+        "monsterId": null,
+        "name": "Frigost Guardian",
+        "race": 150
+      },
+      "chronomorphs": [],
+      "borderMaps": [
+        {
+          "normalMapId": 147727,
+          "normalSubAreaId": 334,
+          "bubbleMapId": 127403010,
+          "normalPos": [
+            -32,
+            -15
+          ],
+          "bubblePos": [
+            -33,
+            -15
+          ]
+        },
+        {
+          "normalMapId": 147727,
+          "normalSubAreaId": 334,
+          "bubbleMapId": 127404034,
+          "normalPos": [
+            -32,
+            -15
+          ],
+          "bubblePos": [
+            -33,
+            -15
+          ]
+        },
+        {
+          "normalMapId": 148238,
+          "normalSubAreaId": 334,
+          "bubbleMapId": 127403010,
+          "normalPos": [
+            -33,
+            -14
+          ],
+          "bubblePos": [
+            -33,
+            -15
+          ]
+        },
+        {
+          "normalMapId": 148238,
+          "normalSubAreaId": 334,
+          "bubbleMapId": 127404034,
+          "normalPos": [
+            -33,
+            -14
+          ],
+          "bubblePos": [
+            -33,
+            -15
+          ]
+        },
+        {
+          "normalMapId": 54172970,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -78,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54536215,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54536215,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451586,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54172458,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54172458,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451586,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54172457,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -77,
+            -41
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54535183,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54535183,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54535185,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54535185,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54534165,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -77,
+            -41
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54536207,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54536207,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54534161,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54534161,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54534173,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -78,
+            -43
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54171435,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -75,
+            -43
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54172459,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -77,
+            -43
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54172459,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -77,
+            -43
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54172460,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -44
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54537239,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54537239,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451586,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54533137,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54533137,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54536217,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -44
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54172971,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -78,
+            -43
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54534159,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54534159,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54171948,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -44
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54535197,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -78,
+            -43
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54536209,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54536209,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54171434,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451586,
+          "normalPos": [
+            -75,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54171945,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451586,
+          "normalPos": [
+            -76,
+            -41
+          ],
+          "bubblePos": [
+            -76,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54171946,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451584,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54171946,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450562,
+          "normalPos": [
+            -76,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54535193,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -44
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54171947,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451586,
+          "normalPos": [
+            -76,
+            -43
+          ],
+          "bubblePos": [
+            -76,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54171947,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -76,
+            -43
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54534169,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -44
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54536221,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -78,
+            -43
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54535191,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54535191,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451586,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54534167,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128450560,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -77,
+            -43
+          ]
+        },
+        {
+          "normalMapId": 54534167,
+          "normalSubAreaId": 601,
+          "bubbleMapId": 128451586,
+          "normalPos": [
+            -77,
+            -42
+          ],
+          "bubblePos": [
+            -76,
+            -42
+          ]
+        },
+        {
+          "normalMapId": 54167856,
+          "normalSubAreaId": 604,
+          "bubbleMapId": 128189952,
+          "normalPos": [
+            -68,
+            -48
+          ],
+          "bubblePos": [
+            -68,
+            -49
+          ]
+        }
+      ],
+      "borderSubAreaIds": [
+        334,
+        601,
+        604,
+        605,
+        610,
+        611,
+        615,
+        795
+      ],
+      "config": {
+        "isActive": false,
+        "bonusPercent": 120,
+        "durationMinutes": 0,
+        "closureCountdownMinutes": 10,
+        "elixirLevel": 0,
+        "spawnWeight": 1
+      }
+    },
+    {
+      "id": 819,
+      "name": "Year 547 - Time Bubble",
+      "sourceSubAreaId": 819,
+      "mapIds": [
+        129238537,
+        129238543,
+        129238529,
+        129238531,
+        129238541,
+        129237507,
+        129238533,
+        129237515,
+        129238539,
+        129237523,
+        129237519,
+        129237521,
+        129237513,
+        129238547,
+        129238545,
+        129237505,
+        129238535,
+        129237509,
+        129237517,
+        129237511
+      ],
+      "mapCount": 20,
+      "level": 0,
+      "guardian": {
+        "monsterId": null,
+        "name": "Year 547 Guardian",
+        "race": 150
+      },
+      "chronomorphs": [],
+      "borderMaps": [
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237505,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237507,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237509,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237511,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237513,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237515,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237517,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237519,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237521,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237523,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238529,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238531,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238533,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238535,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238537,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238539,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238541,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238543,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238545,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238547,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237505,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237507,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237509,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237511,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237513,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237515,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237517,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237519,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237521,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129237523,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238529,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238531,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238533,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238535,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238537,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238539,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238541,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238543,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238545,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 129238547,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        }
+      ],
+      "borderSubAreaIds": [
+        32
+      ],
+      "config": {
+        "isActive": false,
+        "bonusPercent": 120,
+        "durationMinutes": 0,
+        "closureCountdownMinutes": 10,
+        "elixirLevel": 0,
+        "spawnWeight": 1
+      }
+    },
+    {
+      "id": 829,
+      "name": "Time Bubble - Wakfu Era",
+      "sourceSubAreaId": 829,
+      "mapIds": [
+        129499138,
+        129633284,
+        129500160,
+        132646148,
+        129631234,
+        129631232,
+        129501190,
+        129501188,
+        132645128,
+        132645126,
+        132646150,
+        129500162,
+        132646146,
+        129633280,
+        132645122,
+        129632262,
+        129631238,
+        129631240,
+        129631236,
+        132646152,
+        129632260,
+        129500166,
+        132645888,
+        129500164,
+        129633286,
+        132644864,
+        129501186,
+        129632256,
+        129499142
+      ],
+      "mapCount": 29,
+      "level": 0,
+      "guardian": {
+        "monsterId": null,
+        "name": "Wakfu Era Guardian",
+        "race": 150
+      },
+      "chronomorphs": [],
+      "borderMaps": [
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 132645122,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702593,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 132646146,
+          "normalPos": [
+            11,
+            24
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 132645122,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 90702848,
+          "normalSubAreaId": 32,
+          "bubbleMapId": 132646146,
+          "normalPos": [
+            12,
+            25
+          ],
+          "bubblePos": [
+            12,
+            24
+          ]
+        },
+        {
+          "normalMapId": 54167893,
+          "normalSubAreaId": 610,
+          "bubbleMapId": 132644864,
+          "normalPos": [
+            -68,
+            -85
+          ],
+          "bubblePos": [
+            -68,
+            -86
+          ]
+        },
+        {
+          "normalMapId": 54168406,
+          "normalSubAreaId": 610,
+          "bubbleMapId": 132644864,
+          "normalPos": [
+            -69,
+            -86
+          ],
+          "bubblePos": [
+            -68,
+            -86
+          ]
+        },
+        {
+          "normalMapId": 54167895,
+          "normalSubAreaId": 610,
+          "bubbleMapId": 132644864,
+          "normalPos": [
+            -68,
+            -87
+          ],
+          "bubblePos": [
+            -68,
+            -86
+          ]
+        },
+        {
+          "normalMapId": 54167382,
+          "normalSubAreaId": 610,
+          "bubbleMapId": 132644864,
+          "normalPos": [
+            -67,
+            -86
+          ],
+          "bubblePos": [
+            -68,
+            -86
+          ]
+        },
+        {
+          "normalMapId": 120586499,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120586499,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120586499,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646148,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120586499,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646150,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120586499,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646152,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 160565763,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -24,
+            -23
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 160565763,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -24,
+            -23
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 160565763,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646148,
+          "normalPos": [
+            -24,
+            -23
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 160565763,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646150,
+          "normalPos": [
+            -24,
+            -23
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 160565763,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646152,
+          "normalPos": [
+            -24,
+            -23
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120587012,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120587012,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120587012,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646148,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120587012,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646150,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120587012,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646152,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766400,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766400,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766400,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646148,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766400,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646150,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766400,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646152,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121635328,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121635328,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121635328,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646148,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121635328,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646150,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121635328,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646152,
+          "normalPos": [
+            -24,
+            -21
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766402,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766402,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766402,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646148,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766402,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646150,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121766402,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646152,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120718084,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -25,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120718084,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -25,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120718084,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646148,
+          "normalPos": [
+            -25,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120718084,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646150,
+          "normalPos": [
+            -25,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 120718084,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646152,
+          "normalPos": [
+            -25,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121767426,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121767426,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121767426,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646148,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121767426,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646150,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121767426,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132646152,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121767424,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645126,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        },
+        {
+          "normalMapId": 121767424,
+          "normalSubAreaId": 808,
+          "bubbleMapId": 132645128,
+          "normalPos": [
+            -23,
+            -22
+          ],
+          "bubblePos": [
+            -24,
+            -22
+          ]
+        }
+      ],
+      "borderSubAreaIds": [
+        32,
+        610,
+        808,
+        821,
+        876
+      ],
+      "config": {
+        "isActive": false,
+        "bonusPercent": 120,
+        "durationMinutes": 0,
+        "closureCountdownMinutes": 10,
+        "elixirLevel": 0,
+        "spawnWeight": 1
+      }
+    }
+  ],
+  "allTimeBubbleMapIds": [
+    126881025,
+    127140354,
+    127140352,
+    127140356,
+    126881793,
+    126882049,
+    127141376,
+    127142400,
+    127142402,
+    126879745,
+    126880001,
+    126877697,
+    127142404,
+    126880769,
+    126877953,
+    127141380,
+    127141378,
+    126878977,
+    126878721,
+    127405056,
+    127404034,
+    128190721,
+    128189952,
+    128190209,
+    128189697,
+    127401988,
+    127403010,
+    127401984,
+    127927042,
+    127405060,
+    127404032,
+    127928066,
+    128450562,
+    127926784,
+    128451584,
+    128450560,
+    128451586,
+    127927808,
+    127401986,
+    127404036,
+    128189440,
+    128190464,
+    127405058,
+    129238537,
+    129238543,
+    129238529,
+    129238531,
+    129238541,
+    129237507,
+    129238533,
+    129237515,
+    129238539,
+    129237523,
+    129237519,
+    129237521,
+    129237513,
+    129238547,
+    129238545,
+    129237505,
+    129238535,
+    129237509,
+    129237517,
+    129237511,
+    129499138,
+    129633284,
+    129500160,
+    132646148,
+    129631234,
+    129631232,
+    129501190,
+    129501188,
+    132645128,
+    132645126,
+    132646150,
+    129500162,
+    132646146,
+    129633280,
+    132645122,
+    129632262,
+    129631238,
+    129631240,
+    129631236,
+    132646152,
+    129632260,
+    129500166,
+    132645888,
+    129500164,
+    129633286,
+    132644864,
+    129501186,
+    129632256,
+    129499142
+  ],
+  "zoneBonuses": [
+    {
+      "subAreaId": 1,
+      "subAreaName": "Madrestam Harbour",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 2,
+      "subAreaName": "Crackler Mountain",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 3,
+      "subAreaName": "The Ingalsses' Fields",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 4,
+      "subAreaName": "The Amakna Forest",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 5,
+      "subAreaName": "Gobball Corner",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 45,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 6,
+      "subAreaName": "The Cemetery",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 35,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 7,
+      "subAreaName": "The Crypts",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 8,
+      "subAreaName": "The Bwork Camp",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 10,
+      "subAreaName": "The Village",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 11,
+      "subAreaName": "Porco Territory",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 12,
+      "subAreaName": "The Jelly Peninsula",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 55,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 22,
+      "subAreaName": "Edge of the Evil Forest",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 35,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 23,
+      "subAreaName": "The Dreggon Peninsula",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 70,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 25,
+      "subAreaName": "Wabbit Tunnels",
+      "areaId": 1,
+      "areaName": "Wabbit Island",
+      "level": 80,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 27,
+      "subAreaName": "Asse Coast",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 15,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 29,
+      "subAreaName": "Tunnels",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 30,
+      "subAreaName": "Tainela",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 55,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 31,
+      "subAreaName": "The Swamp",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 32,
+      "subAreaName": "Sufokia",
+      "areaId": 5,
+      "areaName": "Sufokia",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 829
+    },
+    {
+      "subAreaId": 33,
+      "subAreaName": "Treechnid Forest",
+      "areaId": 6,
+      "areaName": "Treechnid Forest",
+      "level": 90,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 34,
+      "subAreaName": "Madrestam Prison",
+      "areaId": 3,
+      "areaName": "Madrestam Prison",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 39,
+      "subAreaName": "The Rogues' Den",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 25,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 43,
+      "subAreaName": "Bonta City Walls",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 44,
+      "subAreaName": "Bakers' Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 46,
+      "subAreaName": "Butchers' Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 47,
+      "subAreaName": "Smiths' Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 48,
+      "subAreaName": "Lumberjacks' Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 49,
+      "subAreaName": "Handymen's Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 50,
+      "subAreaName": "Tailors' Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 51,
+      "subAreaName": "Jewellers' Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 54,
+      "subAreaName": "Cania Massif",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 55,
+      "subAreaName": "The Crow's Domain",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 57,
+      "subAreaName": "Sidimote Moors",
+      "areaId": 12,
+      "areaName": "Sidimote Moors",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 61,
+      "subAreaName": "Cemetery of the Tortured",
+      "areaId": 12,
+      "areaName": "Sidimote Moors",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 62,
+      "subAreaName": "Dopple Village",
+      "areaId": 13,
+      "areaName": "Dopple Territory",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 68,
+      "subAreaName": "The Cania Fields",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 69,
+      "subAreaName": "Eltneg Wood",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 90,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 71,
+      "subAreaName": "Gisgoul, the Devastated Village",
+      "areaId": 12,
+      "areaName": "Sidimote Moors",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 73,
+      "subAreaName": "Bonta Sewers",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 74,
+      "subAreaName": "Dopple Training",
+      "areaId": 13,
+      "areaName": "Dopple Territory",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 75,
+      "subAreaName": "Brakmar Sewers",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 76,
+      "subAreaName": "Imp Village",
+      "areaId": 14,
+      "areaName": "Imp Village",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 77,
+      "subAreaName": "The Jellith Dimension",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 78,
+      "subAreaName": "The (Royal) Jellith Dimension",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 82,
+      "subAreaName": "Gobball Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 84,
+      "subAreaName": "Trool Fair",
+      "areaId": 15,
+      "areaName": "Trool Fair",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 93,
+      "subAreaName": "Moon Beach",
+      "areaId": 2,
+      "areaName": "Moon Island",
+      "level": 45,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 94,
+      "subAreaName": "Bworker Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 95,
+      "subAreaName": "Astrub City",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 97,
+      "subAreaName": "Astrub Forest",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 98,
+      "subAreaName": "Astrub Fields",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 99,
+      "subAreaName": "Astrub Sewers",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 20,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 101,
+      "subAreaName": "Tofu Corner",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 102,
+      "subAreaName": "Cemetery of Heroes",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 45,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 103,
+      "subAreaName": "Bandit Territory",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 154,
+      "subAreaName": "Dragon Pig Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 161,
+      "subAreaName": "Cawwot Island",
+      "areaId": 1,
+      "areaName": "Wabbit Island",
+      "level": 45,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 162,
+      "subAreaName": "Gwimace Island",
+      "areaId": 1,
+      "areaName": "Wabbit Island",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 163,
+      "subAreaName": "Gwavestone Island",
+      "areaId": 1,
+      "areaName": "Wabbit Island",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 164,
+      "subAreaName": "Isle of the Crown",
+      "areaId": 1,
+      "areaName": "Wabbit Island",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 165,
+      "subAreaName": "The Deep Moon Jungle",
+      "areaId": 2,
+      "areaName": "Moon Island",
+      "level": 85,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 166,
+      "subAreaName": "The Road to Moon",
+      "areaId": 2,
+      "areaName": "Moon Island",
+      "level": 55,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 167,
+      "subAreaName": "The Pirate Boat",
+      "areaId": 2,
+      "areaName": "Moon Island",
+      "level": 65,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 168,
+      "subAreaName": "Dark Treechnid Forest",
+      "areaId": 6,
+      "areaName": "Treechnid Forest",
+      "level": 135,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 169,
+      "subAreaName": "Edge of the Treechnid Forest",
+      "areaId": 6,
+      "areaName": "Treechnid Forest",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 170,
+      "subAreaName": "Scaraleaf Plain",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 35,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 175,
+      "subAreaName": "Treechnid Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 90,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 178,
+      "subAreaName": "Lousy Pig Plain",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 179,
+      "subAreaName": "Mushd Corner",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 25,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 180,
+      "subAreaName": "Amakna Castle",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 181,
+      "subAreaName": "Amakna Castle Tunnels",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 182,
+      "subAreaName": "Breeder Village",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 201,
+      "subAreaName": "Tofu House",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 209,
+      "subAreaName": "Minotoror Island",
+      "areaId": 30,
+      "areaName": "Minotoror Island",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 210,
+      "subAreaName": "The Labyrinth of the Minotoror",
+      "areaId": 30,
+      "areaName": "Minotoror Island",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 211,
+      "subAreaName": "Lord Crow's Library",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 213,
+      "subAreaName": "Canidae Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 223,
+      "subAreaName": "Koolich Cavern",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 230,
+      "subAreaName": "Primitive Cemetery",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 231,
+      "subAreaName": "Enchanted Lakes",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 80,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 232,
+      "subAreaName": "Nauseating Swamps",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 233,
+      "subAreaName": "Bottomless Swamps",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 234,
+      "subAreaName": "Kaliptus Forest",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 70,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 235,
+      "subAreaName": "Wild Dragoturkey Territory",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 65,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 243,
+      "subAreaName": "Crackler Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 70,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 253,
+      "subAreaName": "Wild Canyon",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 80,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 254,
+      "subAreaName": "Skeunk's Hideout",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 275,
+      "subAreaName": "Agony V'Helley",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 276,
+      "subAreaName": "The Goblin Camp",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 277,
+      "subAreaName": "Bwork Village",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 45,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 278,
+      "subAreaName": "Amakna Castle Gobball Breeding Station",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 279,
+      "subAreaName": "Bonta Pasture",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 280,
+      "subAreaName": "Brakmar City Walls",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 284,
+      "subAreaName": "Bwork Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 297,
+      "subAreaName": "Scaraleaf Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 306,
+      "subAreaName": "Field Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 315,
+      "subAreaName": "Dreggon Village",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 70,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 316,
+      "subAreaName": "Dreggon Tunnels",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 320,
+      "subAreaName": "Kwismas Haven",
+      "areaId": 42,
+      "areaName": "Kwismas Island",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 321,
+      "subAreaName": "Kwismas Dungeon",
+      "areaId": 42,
+      "areaName": "Kwismas Island",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 325,
+      "subAreaName": "Dreggon Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 334,
+      "subAreaName": "Cania Bay",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 818
+    },
+    {
+      "subAreaId": 335,
+      "subAreaName": "Astrub Rocky Inlet",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 35,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 336,
+      "subAreaName": "Sand Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 35,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 337,
+      "subAreaName": "Bonta Rat Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 338,
+      "subAreaName": "Brakmar Rat Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 339,
+      "subAreaName": "Amakna Castle Rat Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 150,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 451,
+      "subAreaName": "Castaway Island",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 25,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 452,
+      "subAreaName": "Sea",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 453,
+      "subAreaName": "Coral Beach",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 454,
+      "subAreaName": "Grassy Plains",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 455,
+      "subAreaName": "Dark Jungle",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 457,
+      "subAreaName": "Bottomless Peat Bog",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 459,
+      "subAreaName": "Kimbo's Canopy",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 460,
+      "subAreaName": "Grotto Hesque",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 461,
+      "subAreaName": "Otomai's Ark",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 70,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 462,
+      "subAreaName": "Floramor's Clearing",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 463,
+      "subAreaName": "The Tynril Lab",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 464,
+      "subAreaName": "Tree Keeholo Trunk",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 150,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 465,
+      "subAreaName": "The Breeder Village",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 466,
+      "subAreaName": "The Coastal Village",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 467,
+      "subAreaName": "Otomai Island Cemetery",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 468,
+      "subAreaName": "Zoth Village",
+      "areaId": 47,
+      "areaName": "The Zoth Village",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 469,
+      "subAreaName": "Canopy Village",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 470,
+      "subAreaName": "Bherb's Gully",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 471,
+      "subAreaName": "Putrid Peat Bog",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 472,
+      "subAreaName": "Tree Keeholo Foliage",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 145,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 473,
+      "subAreaName": "Hidden Lab",
+      "areaId": 46,
+      "areaName": "Otomai Island",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 474,
+      "subAreaName": "Hold of Otomai's Ark",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 65,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 479,
+      "subAreaName": "Kawaii River",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 15,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 480,
+      "subAreaName": "Low Crackler Mountain",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 481,
+      "subAreaName": "Brouce Boulgoure's Clearing",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 35,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 482,
+      "subAreaName": "The Milicluster",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 25,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 485,
+      "subAreaName": "The Countryside",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 35,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 488,
+      "subAreaName": "Library Basement",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 490,
+      "subAreaName": "Sufokian Gulf Shoreline",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 15,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 491,
+      "subAreaName": "Larva Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 492,
+      "subAreaName": "Passage to Brakmar",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 493,
+      "subAreaName": "Blop Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 494,
+      "subAreaName": "Fungus Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 495,
+      "subAreaName": "Fungus Cavern",
+      "areaId": 12,
+      "areaName": "Sidimote Moors",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 500,
+      "subAreaName": "Zoth Village Cemetery",
+      "areaId": 47,
+      "areaName": "The Zoth Village",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 502,
+      "subAreaName": "Lumberjacks' Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 503,
+      "subAreaName": "Butchers' Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 505,
+      "subAreaName": "Bakers' Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 506,
+      "subAreaName": "Jewellers' Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 507,
+      "subAreaName": "Tailors' Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 508,
+      "subAreaName": "Smiths' Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 509,
+      "subAreaName": "Handymen's Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 511,
+      "subAreaName": "City Centre",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 513,
+      "subAreaName": "City Centre",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 516,
+      "subAreaName": "Skeleton Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 517,
+      "subAreaName": "Desecrated Highlands",
+      "areaId": 12,
+      "areaName": "Sidimote Moors",
+      "level": 65,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 522,
+      "subAreaName": "Road to Brakmar",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 90,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 524,
+      "subAreaName": "Rocky Road",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 525,
+      "subAreaName": "Coast Road",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 526,
+      "subAreaName": "Dark Road",
+      "areaId": 12,
+      "areaName": "Sidimote Moors",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 527,
+      "subAreaName": "Scree",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 528,
+      "subAreaName": "Blacksmith Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 530,
+      "subAreaName": "Alchemists' Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 531,
+      "subAreaName": "Alchemists' Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 532,
+      "subAreaName": "Fishermen's Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 533,
+      "subAreaName": "Breeders' Quarter",
+      "areaId": 7,
+      "areaName": "Bonta",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 534,
+      "subAreaName": "Fishermen's Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 535,
+      "subAreaName": "Breeders' Quarter",
+      "areaId": 11,
+      "areaName": "Brakmar",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 537,
+      "subAreaName": "Wa Wabbit's Castle",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 538,
+      "subAreaName": "Wa Wabbit's Warren",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 541,
+      "subAreaName": "Premium house",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 150,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 600,
+      "subAreaName": "Permafrost Port",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 80,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 601,
+      "subAreaName": "Frigost Village",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 818
+    },
+    {
+      "subAreaId": 602,
+      "subAreaName": "The Icefields",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 603,
+      "subAreaName": "The Snowbound Village",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 604,
+      "subAreaName": "The Lonesome Pine Trails",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 130,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 818
+    },
+    {
+      "subAreaId": 605,
+      "subAreaName": "The Petrified Forest",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 818
+    },
+    {
+      "subAreaId": 606,
+      "subAreaName": "The Asparah Gorge",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 608,
+      "subAreaName": "The Fangs of Glass",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 609,
+      "subAreaName": "Alma's Cradle",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 150,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 610,
+      "subAreaName": "The Tears of Ouronigride",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 829
+    },
+    {
+      "subAreaId": 611,
+      "subAreaName": "Mount Scauldron",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 818
+    },
+    {
+      "subAreaId": 615,
+      "subAreaName": "The Frozen Lake",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 818
+    },
+    {
+      "subAreaId": 616,
+      "subAreaName": "Entrance to Harebourg's Castle",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 617,
+      "subAreaName": "Royal Mastogob's Greenhouse",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 618,
+      "subAreaName": "Royal Pingwin's Excavation",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 619,
+      "subAreaName": "The Wreck of the Hesperus",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 150,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 620,
+      "subAreaName": "The Obsidemon's Hypogeum",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 621,
+      "subAreaName": "Snowfoux Den",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 622,
+      "subAreaName": "Snowfoux Caverns",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 623,
+      "subAreaName": "Korriander's Lair",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 624,
+      "subAreaName": "Kolosso's Caverns",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 625,
+      "subAreaName": "The Antinau Sea",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 626,
+      "subAreaName": "The Frozen Grottoes",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 650,
+      "subAreaName": "Sakai Harbour",
+      "areaId": 49,
+      "areaName": "Sakai Island",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 651,
+      "subAreaName": "Sakai Plain",
+      "areaId": 49,
+      "areaName": "Sakai Island",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 652,
+      "subAreaName": "Snowy Forest",
+      "areaId": 49,
+      "areaName": "Sakai Island",
+      "level": 185,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 653,
+      "subAreaName": "Sakai Abandoned Mine",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 700,
+      "subAreaName": "Kanniball Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 702,
+      "subAreaName": "Haunted House",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 40,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 750,
+      "subAreaName": "Goultarminator",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 751,
+      "subAreaName": "GM Prison",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 752,
+      "subAreaName": "Bearbarian Antichamber",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 753,
+      "subAreaName": "Bearbarian Hive",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 755,
+      "subAreaName": "The Kwakwa's Nest",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 756,
+      "subAreaName": "Brumen Tinctorias's LaboRATory",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 70,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 757,
+      "subAreaName": "Kwismas Land",
+      "areaId": 42,
+      "areaName": "Kwismas Island",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 758,
+      "subAreaName": "Kwismas Taiga",
+      "areaId": 42,
+      "areaName": "Kwismas Island",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 759,
+      "subAreaName": "Kwismas Cavern",
+      "areaId": 42,
+      "areaName": "Kwismas Island",
+      "level": 110,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 760,
+      "subAreaName": "Father Kwismas's House",
+      "areaId": 42,
+      "areaName": "Kwismas Island",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 762,
+      "subAreaName": "Vulkania Village",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 763,
+      "subAreaName": "Traktopel Forest",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 764,
+      "subAreaName": "Spartania Forest",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 60,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 765,
+      "subAreaName": "Stratigra Forest",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 766,
+      "subAreaName": "Ponifar Forest",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 767,
+      "subAreaName": "Jeez Crater",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 768,
+      "subAreaName": "Onthea Crater",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 70,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 769,
+      "subAreaName": "Paleozoi Crater",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 770,
+      "subAreaName": "Mountsaleia Crater",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 771,
+      "subAreaName": "Pinki Crater",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 772,
+      "subAreaName": "Vulkania",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 773,
+      "subAreaName": "Otomaisle",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 774,
+      "subAreaName": "Vulkorog",
+      "areaId": 50,
+      "areaName": "Archipelago of Vulkania",
+      "level": 30,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 775,
+      "subAreaName": "Instance Paddock",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 779,
+      "subAreaName": "Underground Porco Territory",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 80,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 780,
+      "subAreaName": "Royal Tofu House",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 781,
+      "subAreaName": "Soft Oak Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 783,
+      "subAreaName": "Lair of the Giant Kralove",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 150,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 784,
+      "subAreaName": "Al Howin's Vegetable Patch",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 785,
+      "subAreaName": "Winter Gardens",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 786,
+      "subAreaName": "Windblast Barricade",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 787,
+      "subAreaName": "Scarlet Tannery",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 788,
+      "subAreaName": "Bleak Legion Bastion",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 789,
+      "subAreaName": "Water Clock Tower",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 790,
+      "subAreaName": "Nileza's Laboratory",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 791,
+      "subAreaName": "Sylargh's Carrier",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 792,
+      "subAreaName": "Klime's Private Suite",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 793,
+      "subAreaName": "Missiz Freezz's Frostforge",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 794,
+      "subAreaName": "Count Harebourg's Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 795,
+      "subAreaName": "Foot of the Water Clock Tower",
+      "areaId": 48,
+      "areaName": "Frigost Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 818
+    },
+    {
+      "subAreaId": 796,
+      "subAreaName": "Royal Rainbow Blop Lair",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 797,
+      "subAreaName": "Alliance Temple",
+      "areaId": 5,
+      "areaName": "Sufokia",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 802,
+      "subAreaName": "Plateau Ribilis",
+      "areaId": 52,
+      "areaName": "Horrib Isle",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 803,
+      "subAreaName": "Bonecurdler Beaches",
+      "areaId": 52,
+      "areaName": "Horrib Isle",
+      "level": 50,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 804,
+      "subAreaName": "Bwork Outpost",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 805,
+      "subAreaName": "Ascension Island",
+      "areaId": 53,
+      "areaName": "Orado Island",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 806,
+      "subAreaName": "Hall of the Valiant",
+      "areaId": 54,
+      "areaName": "Hall of the Valiant",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 807,
+      "subAreaName": "Mysterious Rift",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 808,
+      "subAreaName": "Mount Neselite",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 80,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 829
+    },
+    {
+      "subAreaId": 809,
+      "subAreaName": "Hard-Head Dam",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 90,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 810,
+      "subAreaName": "Shariva's Maelstrom",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 812,
+      "subAreaName": "Orado Bayou",
+      "areaId": 53,
+      "areaName": "Orado Island",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 813,
+      "subAreaName": "Orado Beach",
+      "areaId": 53,
+      "areaName": "Orado Island",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 814,
+      "subAreaName": "City of Orado",
+      "areaId": 53,
+      "areaName": "Orado Island",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 815,
+      "subAreaName": "Temple of the Ascension",
+      "areaId": 53,
+      "areaName": "Orado Island",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 817,
+      "subAreaName": "Scale King's Pyramid",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 821,
+      "subAreaName": "Minerock Plains",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 120,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 829
+    },
+    {
+      "subAreaId": 822,
+      "subAreaName": "Kanig Territory",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 130,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 823,
+      "subAreaName": "Bonta Cemetery",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 150,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 824,
+      "subAreaName": "Kanigrula's Hideout",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 825,
+      "subAreaName": "The Flooded Chapel",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 826,
+      "subAreaName": "Minerock Sanctuary",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 130,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 828,
+      "subAreaName": "Cania Forest",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 70,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 830,
+      "subAreaName": "Feudala",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 831,
+      "subAreaName": "Terrdala",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 832,
+      "subAreaName": "Akwadala",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 833,
+      "subAreaName": "Aerdala",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 834,
+      "subAreaName": "Plantala",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 835,
+      "subAreaName": "Valley of the Lady of the Water",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 170,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 836,
+      "subAreaName": "Tanukouï San's Workshop",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 180,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 837,
+      "subAreaName": "Damadrya's Bamboo Grove",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 838,
+      "subAreaName": "Wind Dojo",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 839,
+      "subAreaName": "Fouxwork Factory",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 190,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 840,
+      "subAreaName": "Pandala Village",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 841,
+      "subAreaName": "Osakwa Harbour",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 842,
+      "subAreaName": "Pandala Bridge",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 160,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 843,
+      "subAreaName": "Popup Izyokaya",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 844,
+      "subAreaName": "Elemental Heart of Pandala",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 845,
+      "subAreaName": "Kanojedo Island",
+      "areaId": 56,
+      "areaName": "Albuera Archipelago",
+      "level": 15,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 846,
+      "subAreaName": "Kanojedo",
+      "areaId": 56,
+      "areaName": "Albuera Archipelago",
+      "level": 15,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 847,
+      "subAreaName": "Astrub Suburbs",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 25,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 848,
+      "subAreaName": "Belladonna's Castle - Solo Dungeon",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 15,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 849,
+      "subAreaName": "Belladonna Island - Solo Area",
+      "areaId": 56,
+      "areaName": "Albuera Archipelago",
+      "level": 12,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 850,
+      "subAreaName": "Albuera Beach - Solo Area",
+      "areaId": 56,
+      "areaName": "Albuera Archipelago",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 851,
+      "subAreaName": "Albuera Village - Solo Area",
+      "areaId": 56,
+      "areaName": "Albuera Archipelago",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 852,
+      "subAreaName": "Albuera Forest - Solo Area",
+      "areaId": 56,
+      "areaName": "Albuera Archipelago",
+      "level": 5,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 853,
+      "subAreaName": "Incarnam",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 10,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 854,
+      "subAreaName": "Astrub City",
+      "areaId": 18,
+      "areaName": "Astrub",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 855,
+      "subAreaName": "Lost Souls' Sanctuary",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 856,
+      "subAreaName": "Nolifis Island - Material Plane",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 857,
+      "subAreaName": "Nolifis Island - Astral Plane",
+      "areaId": 55,
+      "areaName": "Pandala Island",
+      "level": 200,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 858,
+      "subAreaName": "Krtek Mine",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 859,
+      "subAreaName": "Wild Canyon",
+      "areaId": 28,
+      "areaName": "Koalak Mountain",
+      "level": 90,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 860,
+      "subAreaName": "The Evil Forest",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 861,
+      "subAreaName": "Enchanted Edge",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 862,
+      "subAreaName": "Long Slumber's Barrow",
+      "areaId": 57,
+      "areaName": "Dungeons",
+      "level": 140,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 863,
+      "subAreaName": "Dark Vlad's Domain",
+      "areaId": 59,
+      "areaName": "Raids",
+      "level": 300,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 864,
+      "subAreaName": "Amakna Castle Secret Laboratory",
+      "areaId": 0,
+      "areaName": "Amakna",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 865,
+      "subAreaName": "Guild of Hunters",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 1,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 866,
+      "subAreaName": "Putrid Jails",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 867,
+      "subAreaName": "Lost Dimension",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 868,
+      "subAreaName": "Iridescent Caverns",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 869,
+      "subAreaName": "Infernal Foundry",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 870,
+      "subAreaName": "Abandoned Mines",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 871,
+      "subAreaName": "All-Consuming Fears",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 872,
+      "subAreaName": "Mycelial Canopy",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 873,
+      "subAreaName": "Belladonna's Domain",
+      "areaId": 59,
+      "areaName": "Raids",
+      "level": 300,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 874,
+      "subAreaName": "Camp",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 875,
+      "subAreaName": "Entrance to Belladonna's Domain",
+      "areaId": 59,
+      "areaName": "Raids",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    },
+    {
+      "subAreaId": 876,
+      "subAreaName": "Undersmithy Entrance",
+      "areaId": 8,
+      "areaName": "Cania Plains",
+      "level": 100,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 829
+    },
+    {
+      "subAreaId": 877,
+      "subAreaName": "[!] Thèmes tactiques",
+      "areaId": 61,
+      "areaName": "[!] Mode Tactique",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": 816
+    },
+    {
+      "subAreaId": 878,
+      "subAreaName": "Relaxation Area",
+      "areaId": 60,
+      "areaName": "The Labyrinth",
+      "level": 0,
+      "bonusPercent": 0,
+      "fightCount": 0,
+      "isAnomalyEligible": false,
+      "anomalyBubbleId": null
+    }
+  ],
+  "stats": {
+    "totalAnomalies": 4,
+    "totalBubbleMaps": 92,
+    "totalBorderMaps": 190,
+    "totalZonesTracked": 309
+  }
+}

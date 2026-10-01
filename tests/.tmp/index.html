@@ -1,0 +1,177 @@
+<!DOCTYPE HTML>
+<html lang="fr">
+  <head>
+    <script>
+      // Touch fix
+      window.ontouchstart = function(e) {};
+
+      // Init — window.top may be cross-origin, wrap in try/catch
+      try {
+        window.buildVersion = window.top.buildVersion;
+        window.appVersion = window.top.appVersion;
+        window.appInfo = { version: window.top.appVersion };
+      } catch(e) {}
+
+      window._ = {
+        appVersion: window.appVersion || "",
+        buildVersion: window.buildVersion || "",
+        client: "android"
+      };
+
+      window.indexedDB = {};
+      window.IDBDatabase = {};
+      window.IDBTransaction = {};
+      window.IDBCursor = {};
+      window.IDBKeyRange = {};
+
+      var _deepLinkCallbacks = [];
+
+      window.IonicDeeplink = {
+        onDeepLink: function(cb) {
+          _deepLinkCallbacks.push(cb);
+        }
+      };
+
+      window.cordova = {
+        InAppBrowser: {
+          open: function(url, target) {
+            window.open(url, "_system");
+            return null;
+          }
+        },
+        plugins: {
+          browsertab: {
+            isAvailable: function(cb) {
+              cb(true);
+            },
+            openUrl: function(url, success, error) {
+              window.open(url, "_system");
+              if (success) success();
+            },
+            close: function() {}
+          },
+          isemulator: {
+            assess: function(fct) {
+              fct(false);
+            }
+          },
+          Keyboard: {
+            close: function() {},
+            disableScroll: function() {},
+            show: function() {},
+            hideKeyboardAccessoryBar: function() {}
+          },
+          notification: {
+            local: false
+          },
+          pushNotification: {
+            onDeviceReady: function() {},
+            setUserId: function() {},
+            registerDevice: function() {}
+          }
+        }
+      };
+
+      window.$appSchemeLinkCalled = function(payload) {
+        if (!payload) return;
+        var qs = payload.indexOf("?") !== -1 ? payload.split("?")[1] : payload;
+        for (var i = 0; i < _deepLinkCallbacks.length; i++) {
+          _deepLinkCallbacks[i]({ queryString: qs });
+        }
+      };
+
+      var _isMac = false;
+      try { _isMac = window.top.platform === "darwin"; } catch(e) {}
+
+      if (_isMac) {
+        (function() {
+          window.requestAnimationFrame = function(callback) {
+            var self = requestAnimationFrame;
+            self.queue.push(callback);
+            if (!self.timeout) {
+              self.timeout = setTimeout(function() {
+                var queue = self.queue;
+                self.queue = [];
+                self.timeout = null;
+                queue.forEach(function(q) {
+                  q();
+                });
+              }, 16);
+            }
+          };
+          requestAnimationFrame.queue = [];
+          requestAnimationFrame.timeout = null;
+        })();
+      }
+
+      window.initDofus = function(cb) {
+        var head = document.getElementsByTagName("head")[0];
+
+        var scriptScript = document.createElement("script");
+        scriptScript.addEventListener("load", function() {
+          var fixesScript = document.createElement("script");
+          fixesScript.src = "fixes.js";
+          fixesScript.addEventListener("load", function() {
+            if (cb) cb();
+          });
+          head.appendChild(fixesScript);
+        });
+        scriptScript.addEventListener("error", function() {
+          try { window.parent.postMessage({type: 'cuervok:init-error', error: 'script.js failed to load'}, '*'); } catch(e) {}
+        });
+        scriptScript.src = "build/script.js";
+        head.appendChild(scriptScript);
+      };
+
+      // ─── NOTE: "Need the config" fix ────────────────────────────
+      // The real game index.html is at GAME_PATH (CDN download, not this file).
+      // The fix is applied in processGame() in game-window.ts, which patches
+      // the live index.html on every game load: it wraps window.initDofus()
+      // to wait for window.Config before proceeding.
+      //
+      // This file (game-base/index.html) is only used as a build source for
+      // dist/game-base/ and is NOT served to the player.  The live game
+      // loads from the Ankama CDN download stored in userData/game/.
+    </script>
+
+    <script>$_configBoot_v4=true;
+    (function () {
+      var _bootStarted = false;
+      function _boot() {
+        if (_bootStarted) return;
+        _bootStarted = true;
+        if (window.initDofus) window.initDofus();
+      }
+      function _tryBoot() { if (window.Config) _boot(); }
+      function _useFallback() {
+        if (!window.Config) {
+          // dataUrl MUST point at the emulator (/api): 127.0.0.1:8765/data has
+          // no route and makes staticContent fail with 404 ("No es/en dictionary").
+          window.Config = { language: 'es', assetsUrl: 'http://127.0.0.1:8765/assets/', dataUrl: 'http://localhost:3000/api' };
+        }
+        clearInterval(_p);
+        _boot();
+      }
+      if (window.Config) { _boot(); return; }
+      var _p = setInterval(_tryBoot, 50), _tries = 0;
+      function _fetchConfig() {
+        fetch('http://localhost:3000/config.json?lang=es', { signal: AbortSignal.timeout(4e3) })
+          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(function (c) { if (c) { window.Config = c; clearInterval(_p); _boot(); } })
+          .catch(function (e) {
+            _tries++;
+            if (_tries < 15) setTimeout(_fetchConfig, 2e3);
+            else { console.warn('Config fetch failed, using fallback config:', e && e.message); _useFallback(); }
+          });
+      }
+      _fetchConfig();
+    })();
+    </script>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="build/styles-native.css" />
+    <link rel="stylesheet" href="fixes.css" />
+  </head>
+  <body>
+  </body>
+  <script src="keymaster2.js"></script>
+</html>

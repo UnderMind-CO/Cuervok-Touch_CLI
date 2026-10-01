@@ -1,0 +1,109 @@
+{
+  "name": "cuervok",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cuervok - Dofus Touch desktop client",
+  "main": "dist/main/index.cjs",
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "dev": "node scripts/watch.mjs",
+    "build": "node scripts/build.mjs",
+    "dist": "node scripts/bump-version.mjs && npm run build && electron-builder",
+    "release": "npm run build && electron-builder --publish always",
+    "realse": "pnpm run release",
+    "typecheck": "tsc --noEmit",
+    "build:shockwave": "cmd /c scripts\build-shockwave.cmd",
+    "almanax:preload": "node scripts/preload-almanax.mjs --langs es,en,fr --validate --gen-index --check-recurrence --delay 120",
+    "almanax:offerings": "node scripts/preload-almanax.mjs --gen-offerings --delay 120",
+    "almanax:patch-dialog": "node scripts/preload-almanax.mjs --patch-npcmessages",
+    "mobile:import-assets": "node scripts/import-mobile-assets.mjs --no-repo --userdata",
+    "mobile:seed-cache": "node scripts/seed-asset-cache.mjs --link",
+    "capture:assets": "node scripts/capture-game-assets.mjs"
+  },
+  "build": {
+    "appId": "com.cuervok.app",
+    "productName": "Cuervok",
+    "icon": "resources/icon.png",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "angine67",
+        "repo": "Cuervok"
+      }
+    ],
+    "mac": {
+      "icon": "resources/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.games",
+      "protocols": [
+        {
+          "name": "Cuervok Auth",
+          "schemes": [
+            "dofustouch",
+            "touch",
+            "com.ankama.dofustouch"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "icon": "resources/icon.ico",
+      "target": "nsis"
+    },
+    "linux": {
+      "icon": "resources/icon.png",
+      "target": "AppImage"
+    },
+    "files": [
+      "dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "asset-overrides",
+        "to": "asset-overrides"
+      }
+    ],
+    "directories": {
+      "output": "release"
+    }
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.12",
+    "@sentry/electron": "^7.16.0",
+    "better-sqlite3": "^13.0.3",
+    "discord-rpc": "^4.0.1",
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.8.3",
+    "get-port": "^5.1.1",
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.6.0",
+    "electron": "^43.2.0",
+    "electron-builder": "^22.14.13",
+    "javascript-obfuscator": "^5.5.0",
+    "lucide-react": "^0.577.0",
+    "postcss": "^8.5.8",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.11.0",
+    "tailwindcss": "^4.2.1",
+    "typescript": "~5.8.0",
+    "vite": "^6.0.0",
+    "vite-plugin-javascript-obfuscator": "^3.1.0",
+    "zustand": "^5.0.12"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "esbuild"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+node_modules
+dist
+release
+.env
+*.tsbuildinfo
+*.mp4
+*.exe
+
+# Overrides del editor (items custom) y caché móvil importada — se sirven desde
+# userData en runtime, no deben empaquetarse en builds (2.1 GB con el caché móvil).
+asset-overrides/*
+!asset-overrides/.gitkeep
