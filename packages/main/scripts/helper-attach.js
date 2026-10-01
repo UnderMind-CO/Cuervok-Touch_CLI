@@ -40,6 +40,37 @@ var attach = function () {
     var auth = window.$_authManager
     var account = (auth && auth.account) || (gui && gui.account) || window.$_haapiAccount
 
+    // ─── HAAPI refresh-token placeholder ──────────────────────────
+    // The game's key manager only considers a key usable when BOTH the key
+    // AND a refresh token are present: getHaapiKey() -> getHaapiKeyFromStorage()
+    // returns null and WIPES HAAPI_KEY from localStorage when
+    // HAAPI_REFRESH_TOKEN is empty.  Emulator sessions carry no refresh token,
+    // so the key was destroyed on the first read and the character-switch
+    // relogin (goBackToSelectionOf -> reloginWithHaapiKey) failed with
+    // reasonNOKEY, which the client shows as the generic "servers under
+    // maintenance" popup.  The server ignores refresh tokens entirely, so a
+    // constant placeholder keeps the key alive and usable.
+    var HAAPI_REFRESH_PLACEHOLDER = 'dofemu-local'
+
+    // ─── Stored-key reuse cap: 24h ───────────────────────────────
+    // The game's key manager stamps HAAPI_KEY_TIMEOUT = now + 10 DAYS on
+    // every save, and our own re-prime loop renewed it every 2 seconds — so
+    // a stored key was reusable forever.  Security cap: a stored key may
+    // only be reused (character-switch relogin) during the 24h window that
+    // opens when it is PRIMED.  The window is stamped in
+    // HAAPI_KEY_VALID_UNTIL and is NEVER extended: past it the key is
+    // purged, all recovery/fallback paths refuse it, and the user must
+    // re-authenticate (the server enforces the same lifetime on
+    // ApiKeyExpirationDate).
+    var HAAPI_KEY_MAX_AGE_MS = 24 * 60 * 60 * 1000
+    var haapiKeyValidUntil = function () {
+      try {
+        if (!window.localStorage) return 0
+        var v = Number(window.localStorage.getItem('HAAPI_KEY_VALID_UNTIL'))
+        return v > Date.now() ? v : 0
+      } catch (e) { return 0 }
+    }
+
     // ─── Ensure the game's internal logger object has an error() method ──
     // Some game builds call l.error() during disconnect/shutdown paths and
     // crash the renderer when l.error is undefined.  This is a defensive,
@@ -108,7 +139,13 @@ var attach = function () {
     if (mgr) {
       if (!window.$_setHaapiKey && typeof mgr.setHaapiKey === 'function') {
         window.$_setHaapiKey = function (apiKey, refreshKey, options) {
-          try { mgr.setHaapiKey(apiKey, refreshKey || '', options) } catch (err) { console.error('DofEmu setHaapiKey failed:', err) }
+          try {
+            var o = options || {}
+            var vu = Date.now() + HAAPI_KEY_MAX_AGE_MS
+            if (o.timeout && o.timeout < vu) vu = o.timeout
+            if (window.localStorage) window.localStorage.setItem('HAAPI_KEY_VALID_UNTIL', String(vu))
+            mgr.setHaapiKey(apiKey, refreshKey || HAAPI_REFRESH_PLACEHOLDER, Object.assign({}, o, { timeout: vu }))
+          } catch (err) { console.error('DofEmu setHaapiKey failed:', err) }
         }
         if (window.parent && window.parent !== window) window.parent.$_setHaapiKey = window.$_setHaapiKey
       }
@@ -132,13 +169,35 @@ var attach = function () {
         var originalGetHaapiKey = mgr.getHaapiKey.bind(mgr)
         mgr.getHaapiKey = function () {
           try {
+            // Read the stored key BEFORE the game's getter runs: with an
+            // empty refresh token it wipes HAAPI_KEY (and its timeout) from
+            // localStorage, so a fallback read after the call is empty too.
+            var storedKey = window.localStorage && typeof window.localStorage.getItem === 'function'
+              ? window.localStorage.getItem('HAAPI_KEY')
+              : null
+            // Heal the storage entry so the original getter accepts it (key
+            // and refresh token must both be non-empty).
+            if (storedKey && window.localStorage && !window.localStorage.getItem('HAAPI_REFRESH_TOKEN')) {
+              window.localStorage.setItem('HAAPI_REFRESH_TOKEN', HAAPI_REFRESH_PLACEHOLDER)
+            }
+            // Clamp the game's 10-day timeout down to the 24h window.  Only
+            // ever shortens: an expired stamp is left alone so the key dies
+            // (the legacy no-stamp entry is stamped once, 24h from now).
+            if (storedKey && window.localStorage) {
+              var vu = Number(window.localStorage.getItem('HAAPI_KEY_VALID_UNTIL')) || 0
+              if (vu <= 0) {
+                vu = Date.now() + HAAPI_KEY_MAX_AGE_MS
+                window.localStorage.setItem('HAAPI_KEY_VALID_UNTIL', String(vu))
+              }
+              var to = Number(window.localStorage.getItem('HAAPI_KEY_TIMEOUT')) || 0
+              if (to > vu) window.localStorage.setItem('HAAPI_KEY_TIMEOUT', String(vu))
+            }
             var keyData = originalGetHaapiKey()
             if (keyData && keyData.key) return keyData
-            var fallbackApiKey = window.$_pendingApiKeyHeader || (window.parent && window.parent.$_pendingApiKeyHeader)
-            if (!fallbackApiKey && window.localStorage && typeof window.localStorage.getItem === 'function') {
-              fallbackApiKey = window.localStorage.getItem('HAAPI_KEY')
-            }
-            return fallbackApiKey ? { key: fallbackApiKey, refreshToken: '' } : keyData
+            // Respect the cap: past the window the key stays dead.
+            if (!haapiKeyValidUntil()) return keyData
+            var fallbackApiKey = window.$_pendingApiKeyHeader || (window.parent && window.parent.$_pendingApiKeyHeader) || storedKey
+            return fallbackApiKey ? { key: fallbackApiKey, refreshToken: HAAPI_REFRESH_PLACEHOLDER } : keyData
           } catch (err) {
             console.error('DofEmu getHaapiKey api-key patch failed:', err)
             return null
@@ -156,12 +215,16 @@ var attach = function () {
           if (localMgr && typeof localMgr.getHaapiKey === 'function' && o.apiKey) {
             restoreGet = localMgr.getHaapiKey.bind(localMgr)
             localMgr.getHaapiKey = function () {
-              return { key: o.apiKey, refreshToken: o.refreshKey || '' }
+              return { key: o.apiKey, refreshToken: o.refreshKey || HAAPI_REFRESH_PLACEHOLDER }
             }
           }
           if (localMgr) {
             if (o.accountId && localMgr.setHaapiAccountId) localMgr.setHaapiAccountId(o.accountId, { save: o.save !== false })
-            if (o.apiKey && localMgr.setHaapiKey) localMgr.setHaapiKey(o.apiKey, o.refreshKey || '', { save: o.save !== false })
+            if (o.apiKey && localMgr.setHaapiKey) {
+              var vu = Date.now() + HAAPI_KEY_MAX_AGE_MS
+              if (window.localStorage) window.localStorage.setItem('HAAPI_KEY_VALID_UNTIL', String(vu))
+              localMgr.setHaapiKey(o.apiKey, o.refreshKey || HAAPI_REFRESH_PLACEHOLDER, { save: o.save !== false, timeout: vu })
+            }
           }
           if (o.certificateId) window.$_authCertId = o.certificateId
           if (o.certificateHash) window.$_authCertHash = o.certificateHash
@@ -200,8 +263,9 @@ var attach = function () {
           if (existingKey && existingKey.key) {
             return _origLoginWithHaapiKey(opts, cb)
           }
-          // No key in manager — check localStorage
-          if (window.localStorage) {
+          // No key in manager — check localStorage (only within the 24h
+          // reuse window; past it the stored key is dead on purpose)
+          if (window.localStorage && haapiKeyValidUntil()) {
             var storedKey = window.localStorage.getItem('HAAPI_KEY')
             var storedRefresh = window.localStorage.getItem('HAAPI_REFRESH_TOKEN')
             var storedAccountId = window.localStorage.getItem('HAAPI_ACCOUNTID')
@@ -209,7 +273,7 @@ var attach = function () {
               console.debug('[DofEmu] loginWithHaapiKey: no key in manager, using localStorage fallback')
               // Prime the key into the manager
               if (keyManager) {
-                if (typeof keyManager.setHaapiKey === 'function') keyManager.setHaapiKey(storedKey, storedRefresh || '', { save: true })
+                if (typeof keyManager.setHaapiKey === 'function') keyManager.setHaapiKey(storedKey, storedRefresh || HAAPI_REFRESH_PLACEHOLDER, { save: true, timeout: haapiKeyValidUntil() })
                 if (storedAccountId && typeof keyManager.setHaapiAccountId === 'function') keyManager.setHaapiAccountId(Number(storedAccountId), { save: true })
               }
               // Also try the direct login path if we have a token
@@ -248,11 +312,15 @@ var attach = function () {
           var km = (haapiModule.getHaapiKeyManager ? haapiModule.getHaapiKeyManager() : null) || keyManager
           if (km) {
             if (accountId && km.setHaapiAccountId) km.setHaapiAccountId(accountId, { save: true })
-            if (apiKey && km.setHaapiKey) km.setHaapiKey(apiKey, refreshKey || '', { save: true })
+            if (apiKey && km.setHaapiKey) km.setHaapiKey(apiKey, refreshKey || HAAPI_REFRESH_PLACEHOLDER, { save: true, timeout: Date.now() + HAAPI_KEY_MAX_AGE_MS })
           }
           if (window.localStorage) {
+            // Fresh priming opens a NEW 24h reuse window (security cap).
+            var validUntil = Date.now() + HAAPI_KEY_MAX_AGE_MS
+            window.localStorage.setItem('HAAPI_KEY_VALID_UNTIL', String(validUntil))
+            window.localStorage.setItem('HAAPI_KEY_TIMEOUT', String(validUntil))
             window.localStorage.setItem('HAAPI_KEY', apiKey || '')
-            window.localStorage.setItem('HAAPI_REFRESH_TOKEN', refreshKey || '')
+            window.localStorage.setItem('HAAPI_REFRESH_TOKEN', refreshKey || HAAPI_REFRESH_PLACEHOLDER)
             // Also save the current token for character-switch re-auth
             // (loginWithHaapiKey override reads this to drive direct login)
             var currentToken = window.dofus && window.dofus._token ? window.dofus._token : ''
@@ -382,12 +450,34 @@ var attach = function () {
     // check localStorage for a saved API key and re-prime it into the fresh
     // key manager so identification() succeeds automatically.
     if (mgr && window.localStorage) {
+      var now = Date.now()
+      var vu = Number(window.localStorage.getItem('HAAPI_KEY_VALID_UNTIL')) || 0
       var storedKey = window.localStorage.getItem('HAAPI_KEY')
       var storedRefresh = window.localStorage.getItem('HAAPI_REFRESH_TOKEN')
       var storedAccountId = window.localStorage.getItem('HAAPI_ACCOUNTID')
+      if (storedKey && (!vu || vu <= now)) {
+        // Past the 24h cap: purge the stored key.  The game's getter would
+        // discard it anyway, and no recovery path may resurrect it.
+        try {
+          window.localStorage.removeItem('HAAPI_KEY')
+          window.localStorage.removeItem('HAAPI_REFRESH_TOKEN')
+          window.localStorage.removeItem('HAAPI_KEY_TIMEOUT')
+        } catch (e) {}
+        storedKey = null
+      }
+      if (!storedKey && mgr.haapiKey && vu > now) {
+        // Storage entry was wiped by the empty-refresh-token bug (see
+        // getHaapiKeyFromStorage).  The manager keeps the key in memory, so
+        // re-store it — but ONLY while the 24h window from priming is open,
+        // and never re-extending it.  Logout paths call resetHaapiKey() (no
+        // options), which clears the in-memory key too, so this never
+        // resurrects a logged-out key.
+        storedKey = mgr.haapiKey
+        storedRefresh = mgr.haapiRefreshToken || ''
+      }
       if (storedKey && typeof mgr.setHaapiKey === 'function') {
         try {
-          mgr.setHaapiKey(storedKey, storedRefresh || '', { save: true })
+          mgr.setHaapiKey(storedKey, storedRefresh || HAAPI_REFRESH_PLACEHOLDER, { save: true, timeout: vu })
           if (storedAccountId && typeof mgr.setHaapiAccountId === 'function') {
             mgr.setHaapiAccountId(Number(storedAccountId), { save: true })
           }

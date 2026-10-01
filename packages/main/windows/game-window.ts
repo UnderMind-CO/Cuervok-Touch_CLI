@@ -685,10 +685,24 @@ _fetchConfig()})();
       }
     }
 
-    if (!build.includes('$_deExposeLoginAndCert_v2')) {
-      build = build.replace(/\s*$/, '') + '\n' + getHelperSnippet()
+    // Helper snippet version: bump whenever packages/main/scripts/helper-attach.js
+    // changes.  The snippet is embedded into the served script.js, so a plain
+    // "already embedded?" check would keep serving a stale helper forever —
+    // the version mark lets a later launch strip the old block and re-embed
+    // the updated one.
+    const HELPER_VERSION = '3'
+    const helperVersionMark = `$_dofEmuHelperVersion=${HELPER_VERSION}`
+    if (!build.includes(helperVersionMark)) {
+      // Strip a previously embedded helper block: it is always appended at EOF
+      // as a `;(function () {` IIFE whose first statements carry the init marker.
+      const markerIdx = build.indexOf('$_deExposeLoginAndCert_v2')
+      if (markerIdx !== -1) {
+        const blockStart = build.lastIndexOf(';(function () {', markerIdx)
+        if (blockStart !== -1) build = build.slice(0, blockStart).replace(/\s*$/, '') + '\n'
+      }
+      build = build.replace(/\s*$/, '') + '\n' + getHelperSnippet() + `\nwindow.${helperVersionMark};`
       changed = true
-      logger.info('Patched: helper snippet appended')
+      logger.info(`Patched: helper snippet v${HELPER_VERSION} embedded`)
     }
 
     if (changed) {

@@ -389,7 +389,13 @@ for (var id in events) {
   // the key itself (the game's own getTextFailover behavior prints the key).
   function T(key, fallback) {
     try {
-      if (window.$_i18nModule && typeof window.$_i18nModule.getText === 'function') {
+      // Gate on hasText FIRST: getText on a missing key triggers the
+      // game's getTextFailover console error ("no failover getText was
+      // found for <key>") — hasText answers silently.  When the i18n
+      // module has no hasText, keep the legacy direct-getText behavior.
+      var hasFn = !!(window.$_i18nModule && typeof window.$_i18nModule.hasText === 'function');
+      if (window.$_i18nModule && typeof window.$_i18nModule.getText === 'function' &&
+          (!hasFn || TExists(key))) {
         var out = window.$_i18nModule.getText(key);
         // The game's own failover prints "<lang>[?<key>]" (chaseText mode
         // prints "<lang>[<key>]") — treat both as "missing" so our Spanish
@@ -478,7 +484,10 @@ for (var id in events) {
   // ── Localized strings (official keys with Spanish fallback) ──────────
   function STR() {
     return {
-      tabLabel:      T('ui.social.guildBoosts', 'Donación / Boosts'),
+      // LITERAL label (user rule): the official ui.social.guildBoosts key
+      // resolves to "Personalización" in the bundle dictionaries — the tab
+      // must keep its "Boost Guild" identity in every language.
+      tabLabel:      'Boost Guild',
       treasury:      T('ui.social.guildTreasury', 'Tesorería'),
       yourFunds:     T('ui.social.guildYourFunds', 'Tus fondos'),
       donate:        T('ui.social.guildDonate', 'Donar'),
@@ -538,6 +547,98 @@ for (var id in events) {
     requestPanel();
   }
 
+  // ── Recaudadores (custom collector section of the Boost Guild tab) ──
+
+  function renderCollectors(msg) {
+    if (!content || !content.rootElement) return;
+    var s = STR();
+    var old = content.rootElement.querySelector('.guildBoostCollectors');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+
+    var sec = el('div', 'guildBoostCollectors');
+    sec.appendChild(el('div', 'guildBoostSectionTitle',
+      T('ui.social.taxCollector', 'Recaudadores')));
+
+    var count = msg.taxCollectorsCount || 0;
+    var max = msg.taxCollectorsMax || 1;
+    var manage = !!msg.canManageCollectors;
+
+    var info = el('div', 'guildBoostCollectorInfo');
+    info.appendChild(el('span', 'guildBoostCollectorCount',
+      T('ui.social.taxCollectorCount', 'Recaudadores') + ': ' + count + ' / ' + max));
+    sec.appendChild(info);
+
+    // Roster rows (idle / placed / fighting) — localized name ids resolve
+    // client-side like the official roster tab.
+    var rows = msg.taxCollectors || [];
+    for (var i = 0; i < rows.length; i++) {
+      var c = rows[i];
+      var row = el('div', 'guildBoostCollectorRow');
+      var stateTxt;
+      // State labels are literals: the official dictionaries carry no keys
+      // for them (the native UI uses icons) and invented keys trigger the
+      // game's getTextFailover console error.
+      if (c.mapId === 0) stateTxt = s.available;
+      else if (c.fightState === 1) stateTxt = '¡Bajo ataque!';
+      else if (c.fightState === 2) stateTxt = 'En combate';
+      else stateTxt = 'Colocado';
+      row.appendChild(el('span', 'guildBoostCollectorName',
+        '#' + c.firstNameId + ' · #' + c.lastNameId));
+      row.appendChild(el('span', 'guildBoostCollectorState', stateTxt));
+      if (manage && c.mapId !== 0 && c.fightState === 0) {
+        var recallBtn = el('div', 'guildBoostBtn mini', s.cancel);
+        recallBtn.addEventListener('click', function (cid) {
+          return function () {
+            send('TaxCollectorRecallRequestMessage', { taxCollectorId: cid });
+          };
+        }(c.id));
+        row.appendChild(recallBtn);
+      }
+      sec.appendChild(row);
+    }
+
+    // Action buttons (official rights enforced server-side).
+    var actions = el('div', 'guildBoostCollectorActions');
+
+    var hireBtn = el('div', 'guildBoostBtn' + (manage && count < max ? '' : ' disabled'),
+      'Contratar' +
+      ' (' + fmt(msg.hireCostKamas || 0) + ' ' + KAMA_UNIT() + ')');
+    hireBtn.addEventListener('click', function () {
+      if (!manage || count >= max) return;
+      send('TaxCollectorHireRequestMessage', { requestId: ++requestSeq });
+    });
+    actions.appendChild(hireBtn);
+
+    var placeLabel = 'Colocar aquí';
+    if (msg.currentMapCollectorId > 0) {
+      placeLabel += ' ✓';
+    } else if ((msg.currentMapCooldownSeconds || 0) > 0) {
+      var mins = Math.ceil(msg.currentMapCooldownSeconds / 60);
+      placeLabel += ' (' + mins + ' min)';
+    }
+    var placeBtn = el('div', 'guildBoostBtn' +
+      (manage && !(msg.currentMapCollectorId > 0) && !(msg.currentMapCooldownSeconds > 0) ? '' : ' disabled'),
+      placeLabel);
+    placeBtn.addEventListener('click', function () {
+      if (!manage || msg.currentMapCollectorId > 0 || msg.currentMapCooldownSeconds > 0) return;
+      send('TaxCollectorPlaceRequestMessage', {});
+    });
+    actions.appendChild(placeBtn);
+
+    sec.appendChild(actions);
+    root_hintInsertBefore(sec);
+  }
+
+  // Inserts the collectors section before the donations block (or appends
+  // when the panel has not rendered it yet).
+  function root_hintInsertBefore(node) {
+    if (!content || !content.rootElement) return;
+    var root = content.rootElement;
+    var anchor = root.querySelector('.guildBoostDonations');
+    if (anchor && anchor.parentNode === root) root.insertBefore(node, anchor);
+    else root.appendChild(node);
+  }
+
   // ── Renderers ────────────────────────────────────────────────────────
 
   function renderPanel(msg) {
@@ -559,7 +660,7 @@ for (var id in events) {
     treasury.appendChild(el('div', 'guildBoostMyWallets',
       s.yourFunds + ' — ' + s.kamas + ': ' + fmt(msg.myKamas) + ' · ' + s.goultines + ': ' + fmt(msg.myGoultines)));
 
-    var donateBtn = el('div', 'guildBoostBtn greenButton donate', s.donate);
+    var donateBtn = el('div', 'guildBoostBtn donate', s.donate);
     donateBtn.addEventListener('click', function () { openDonateModal(msg); });
     treasury.appendChild(donateBtn);
     root.appendChild(treasury);
@@ -567,8 +668,8 @@ for (var id in events) {
     // Currency toggle for purchases
     var payRow = el('div', 'guildBoostPayRow');
     payRow.appendChild(el('span', 'guildBoostPayLabel', s.payWith));
-    var kBtn = el('div', 'guildBoostBtn greenButton mini' + (payCurrency === CURRENCY_KAMAS ? ' on' : ''), s.kamas);
-    var gBtn = el('div', 'guildBoostBtn greenButton mini' + (payCurrency === CURRENCY_GOULTINES ? ' on' : ''), s.goultines);
+    var kBtn = el('div', 'guildBoostBtn mini' + (payCurrency === CURRENCY_KAMAS ? ' on' : ''), s.kamas);
+    var gBtn = el('div', 'guildBoostBtn mini' + (payCurrency === CURRENCY_GOULTINES ? ' on' : ''), s.goultines);
     kBtn.addEventListener('click', function () {
       payCurrency = CURRENCY_KAMAS;
       if (lastMsg) renderPanel(lastMsg);
@@ -606,7 +707,10 @@ for (var id in events) {
       row.appendChild(effectCol);
 
       var lvl = el('div', 'colLevel');
-      lvl.appendChild(el('div', 'guildBoostLevel', b.current + ' / ' + b.max));
+      // Level column shows CURRENCY POINTS (current×perLevel / max×perLevel):
+      // vitality buys +5 per purchase, so the bar tracks the actual bonus.
+      var per = Math.max(1, b.perLevel || 1);
+      lvl.appendChild(el('div', 'guildBoostLevel', (b.current * per) + ' / ' + (b.max * per)));
       var bar = el('div', 'guildBoostBar');
       var fill = el('div', 'guildBoostBarFill');
       fill.style.width = Math.min(100, Math.round((b.current / b.max) * 100)) + '%';
@@ -637,7 +741,7 @@ for (var id in events) {
       var buyCol = el('div', 'colBuy');
       var canBuy = msg.canManage && !b.maxed;
       if (canBuy) {
-        var buyBtn = el('div', 'guildBoostBtn greenButton buy', s.buy);
+        var buyBtn = el('div', 'guildBoostBtn buy', s.buy);
         buyBtn.addEventListener('click', function (id, forcedCurrency) {
           return function () {
             send('GuildBoostPurchaseRequestMessage', { boostId: id, currency: forcedCurrency, requestId: ++requestSeq });
@@ -645,7 +749,7 @@ for (var id in events) {
         }(b.boostId, b.goultinesOnly ? CURRENCY_GOULTINES : payCurrency));
         buyCol.appendChild(buyBtn);
       } else {
-        buyCol.appendChild(el('div', 'guildBoostBtn greenButton buy disabled', b.maxed ? s.max : '—'));
+        buyCol.appendChild(el('div', 'guildBoostBtn buy disabled', b.maxed ? s.max : '—'));
       }
       row.appendChild(buyCol);
 
@@ -673,6 +777,9 @@ for (var id in events) {
       don.appendChild(dRow);
     }
     root.appendChild(don);
+
+    // Collector management section (custom, below the donations block).
+    try { renderCollectors(msg); } catch (err) { console.error('guild boost collectors', err); }
   }
 
   // ── Donation modal ───────────────────────────────────────────────────
@@ -688,11 +795,11 @@ for (var id in events) {
 
     var cur = CURRENCY_KAMAS;
     var curRow = el('div', 'guildBoostModalCurRow');
-    var kBtn = el('div', 'guildBoostBtn greenButton mini on', s.kamas);
-    var gBtn = el('div', 'guildBoostBtn greenButton mini', s.goultines);
+    var kBtn = el('div', 'guildBoostBtn mini on', s.kamas);
+    var gBtn = el('div', 'guildBoostBtn mini', s.goultines);
     function refreshCur() {
-      kBtn.className = 'guildBoostBtn greenButton mini' + (cur === CURRENCY_KAMAS ? ' on' : '');
-      gBtn.className = 'guildBoostBtn greenButton mini' + (cur === CURRENCY_GOULTINES ? ' on' : '');
+      kBtn.className = 'guildBoostBtn mini' + (cur === CURRENCY_KAMAS ? ' on' : '');
+      gBtn.className = 'guildBoostBtn mini' + (cur === CURRENCY_GOULTINES ? ' on' : '');
       balanceTxt.textContent = s.available + ': ' +
         (cur === CURRENCY_KAMAS ? fmt(msg.myKamas) + ' ' + s.kamas : fmt(msg.myGoultines) + ' ' + s.goultines);
     }
@@ -713,9 +820,9 @@ for (var id in events) {
     box.appendChild(input);
 
     var btnRow = el('div', 'guildBoostModalBtns');
-    var cancel = el('div', 'guildBoostBtn greenButton mini', s.cancel);
+    var cancel = el('div', 'guildBoostBtn mini', s.cancel);
     cancel.addEventListener('click', closeDonateModal);
-    var confirm = el('div', 'guildBoostBtn greenButton mini confirm', s.confirm);
+    var confirm = el('div', 'guildBoostBtn mini confirm', s.confirm);
     confirm.addEventListener('click', function () {
       var amount = parseInt(input.value, 10);
       if (!amount || amount <= 0) return;
