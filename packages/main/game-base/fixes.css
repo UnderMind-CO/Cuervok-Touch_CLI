@@ -596,3 +596,230 @@ body, html {
   overflow-x: auto !important;
   overflow-y: hidden !important;
 }
+
+
+/* ─── Gift codes panel (shop tab) — native skin, green/olive shop tone ─── */
+@keyframes giftFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes giftSlideIn {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes giftPop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.18); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes giftShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes giftGlow {
+  0%, 100% { box-shadow: 0 0 4px rgba(141,182,83,0.4); }
+  50%      { box-shadow: 0 0 12px rgba(141,182,83,0.85); }
+}
+.giftCodeContent {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #2b2926;
+  z-index: 30;
+  animation: giftFadeIn 0.25s ease both;
+}
+.giftCodePanel {
+  position: absolute;
+  inset: 12px;
+  overflow-y: auto;
+  color: #e8dcc0;
+  font-size: 13px;
+  animation: giftSlideIn 0.3s ease both;
+}
+.giftCodeHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, rgba(141,182,83,0.22) 0%, rgba(43,41,38,0.0) 70%);
+  border: 1px solid rgba(141,182,83,0.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.giftCodeIcon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='13' width='24' height='15' rx='2' fill='%238db653'/%3E%3Crect x='2.5' y='9' width='27' height='5' rx='2' fill='%23a8cf6d'/%3E%3Cpath d='M16 9c-4.5 0-7-2-7-4.2S12.5 1.5 16 6c3.5-4.5 7-3.4 7-1.2S20.5 9 16 9z' fill='%23f2c94c'/%3E%3Crect x='14.4' y='9' width='3.2' height='19' fill='%23f2c94c'/%3E%3C/svg%3E");
+  animation: giftFadeIn 0.4s ease both;
+}
+.giftCodeHeaderText { flex: 1 1 auto; }
+.giftCodeTitle {
+  color: #8db653;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+  margin: 0 0 2px;
+  letter-spacing: 0.5px;
+}
+.giftCodeSubtitle {
+  color: #b3ab97;
+  font-size: 11.5px;
+  font-style: italic;
+  margin: 0;
+}
+/* Pending-gifts badge on the Goultines tab */
+.topTabsList .goultineCategory { position: relative; }
+.giftCodeBadge {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  min-width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: linear-gradient(#e05a4e, #b23a30);
+  border: 1px solid #7e2721;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 14px;
+  text-align: center;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.7);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  z-index: 5;
+  pointer-events: none;
+  animation: giftPop 0.3s ease both;
+}
+.giftCodeBadge.bump { animation: giftPop 0.3s ease both; }
+.giftCodeRowInput {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  margin-bottom: 8px;
+}
+.giftCodeInput {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid #9c8b73;
+  border-radius: 4px;
+  color: #fff2d8;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  padding: 7px 10px;
+  outline: none;
+  text-transform: uppercase;
+}
+.giftCodeInput:focus { border-color: #c9b691; box-shadow: 0 0 6px rgba(201,182,145,0.4); }
+.giftCodeInput.shake { border-color: #d9534f; animation: giftShake 0.4s ease; }
+.giftCodeValidate,
+.giftCodeBtn {
+  display: inline-block;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #412926;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  border: 1px solid #9c8b73;
+  border-radius: 4px;
+  background-color: #d7c9b8;
+  min-width: 74px;
+  padding: 7px 12px;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+.giftCodeValidate:hover,
+.giftCodeBtn:hover { background-color: #e6dac9; }
+.giftCodeValidate:not(.busy):hover {
+  background: linear-gradient(#e8e0d2, #d0c2ae);
+  animation: giftGlow 1.2s ease-in-out infinite;
+}
+.giftCodeValidate:active,
+.giftCodeBtn:active { background-color: #c4b49e; }
+.giftCodeValidate.busy,
+.giftCodeBtn.busy { opacity: 0.6; cursor: default; }
+.giftCodeFeedback {
+  min-height: 18px;
+  margin: 2px 0 8px;
+  font-size: 12px;
+  color: #c8bda4;
+}
+.giftCodeFeedback.ok { color: #9fd35f; }
+.giftCodeFeedback.ok.pop { animation: giftPop 0.35s ease both; }
+.giftCodeFeedback.err { color: #e88; }
+.giftCodeFeedback.err.pop { animation: giftShake 0.4s ease; }
+.giftCodeSectionTitle {
+  color: #f2c94c;
+  font-size: 13px;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  margin: 12px 0 6px;
+  border-bottom: 1px solid rgba(242, 201, 76, 0.3);
+  padding-bottom: 3px;
+}
+.giftCodeListWrap { min-height: 60px; }
+.giftCodeList {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.giftCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(156,139,115,0.35);
+  border-radius: 6px;
+  padding: 8px 6px;
+  animation: giftSlideIn 0.25s ease both;
+}
+.giftCard:hover {
+  background: rgba(141,182,83,0.12);
+  border-color: rgba(141,182,83,0.7);
+}
+.giftCardIcon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.giftCardIcon .giftCardIconImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+}
+.giftCardIcon.fallback {
+  color: #a99f8a;
+  font-size: 11px;
+  font-weight: bold;
+}
+.giftCardName {
+  color: #f4e9cf;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.25;
+  min-height: 2.5em;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.giftCard .giftCodeBtn { min-width: 0; width: 100%; padding: 4px 6px; font-size: 11px; }
+.giftCodeEmpty { color: #a99f8a; font-style: italic; padding: 8px 2px; }

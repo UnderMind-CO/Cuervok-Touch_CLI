@@ -147,6 +147,16 @@ export class Application {
     // never has to hard-code the emulator port.
     const DOFEMU_BASE = process.env.DOFEMU_BASE || 'http://localhost:3000'
 
+    // ─── Client attestation for credential-minting haapi calls ──
+    // The emulator's Auth server only mints credentials (CreateApiKey,
+    // CreateToken, guest accounts) for requests carrying this header.  It is
+    // stamped HERE — every haapi call from the renderer, the login page and
+    // the game iframe flows through this proxy — so raw curl/script calls
+    // that hit the emulator directly are rejected with 403.  Keep in sync
+    // with ClientAttestation.ExpectedValue in the TouchEmu.Server.Auth
+    // (Controller/ClientAttestation.cs).
+    const CLIENT_ATTESTATION = 'cqk_v1_6d2f8ab3c9174e5a'
+
     honoApp.get('/api/haapi/Ankama/v5/Cms/Items/Get', async (c) => {
       // CMS news data is owned by the emulator, not by the client build.
       // If the packaged client still ships its own data/news.json, ignore it
@@ -158,9 +168,16 @@ export class Application {
       const targetPath = c.req.path
       const targetUrl = `${DOFEMU_BASE}${targetPath}${new URL(c.req.url).search}`
       try {
+        // Ask the upstream for an IDENTITY body: undici decodes any
+        // Content-Encoding transparently, so forwarding the upstream's
+        // encoding headers downstream would describe a compression that no
+        // longer exists and every decoding client (renderer fetch, game
+        // iframe) would die with "incorrect header check".
+        const fwdHeaders: Record<string, string> = { ...Object.fromEntries(c.req.raw.headers) }
+        fwdHeaders['Accept-Encoding'] = 'identity'
         const init: RequestInit = {
           method: c.req.method,
-          headers: { ...Object.fromEntries(c.req.raw.headers) },
+          headers: fwdHeaders,
         }
         if (c.req.method !== 'GET' && c.req.method !== 'HEAD') {
           init.body = c.req.raw.body
@@ -168,6 +185,13 @@ export class Application {
         const resp = await fetch(targetUrl, init)
         const respHeaders: Record<string, string> = {}
         resp.headers.forEach((v, k) => { respHeaders[k] = v })
+        // The body below is already DECODED (undici unwrapped any encoding):
+        // drop the upstream's encoding/length headers or clients will try to
+        // gunzip plain JSON.
+        delete respHeaders['content-encoding']
+        delete respHeaders['Content-Encoding']
+        delete respHeaders['content-length']
+        delete respHeaders['Content-Length']
 
         // Forum/CMS news is server-owned by the emulator. Tag responses so the
         // client knows to ignore any local data/news.json and always refresh from
@@ -193,16 +217,40 @@ export class Application {
       const targetPath = c.req.path // e.g. /api/haapi/Ankama/v5/Api/CreateApiKey
       const targetUrl = `${DOFEMU_BASE}${targetPath}${new URL(c.req.url).search}`
       try {
+        // Forward the caller's headers, then stamp the attestation.  Drop
+        // any incoming X-Cuervok-Client FIRST (case-insensitively): the
+        // Fetch Headers object lowercases keys, so a naive spread could
+        // leave BOTH 'x-cuervok-client' and 'X-Cuervok-Client' — the Auth
+        // merges them into one comma-separated value and rejects it.
+        const fwdHeaders: Record<string, string> = { ...Object.fromEntries(c.req.raw.headers) }
+        for (const key of Object.keys(fwdHeaders)) {
+          if (key.toLowerCase() === 'x-cuervok-client') delete fwdHeaders[key]
+        }
+        // Identity upstream: see the CMS proxy above — undici decodes
+        // Content-Encoding, so the forwarded encoding headers would lie.
+        fwdHeaders['Accept-Encoding'] = 'identity'
+        fwdHeaders['X-Cuervok-Client'] = CLIENT_ATTESTATION
         const init: RequestInit = {
           method: c.req.method,
-          headers: { ...Object.fromEntries(c.req.raw.headers) },
+          headers: fwdHeaders,
         }
         if (c.req.method !== 'GET' && c.req.method !== 'HEAD') {
-          init.body = c.req.raw.body
+          // Buffer the body: a ReadableStream body would require
+          // `duplex: 'half'` in undici's fetch, and without it every POST
+          // (CreateApiKey login, RefreshApiKey…) died with a connection
+          // error before reaching the emulator.  These bodies are tiny.
+          init.body = await c.req.raw.arrayBuffer()
         }
         const resp = await fetch(targetUrl, init)
         const respHeaders: Record<string, string> = {}
         resp.headers.forEach((v, k) => { respHeaders[k] = v })
+        // The streamed body is already DECODED by undici — the upstream's
+        // encoding/length headers no longer describe it. Strip them or every
+        // decoding client dies with "incorrect header check".
+        delete respHeaders['content-encoding']
+        delete respHeaders['Content-Encoding']
+        delete respHeaders['content-length']
+        delete respHeaders['Content-Length']
 
         // Forum/CMS news is server-owned by the emulator. Tag responses so the
         // client knows to ignore any local data/news.json and always refresh from

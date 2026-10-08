@@ -1,3 +1,5 @@
+// Must run before anything reads CUV_SERVER_URL / DOFEMU_BASE / CUERVOK_EMU_ROOT
+import './dotenv'
 import { app, nativeImage } from 'electron'
 import path from 'path'
 import { APP_SCHEME_PROTOCOLS } from '@cuervok/shared'

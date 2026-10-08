@@ -737,33 +737,63 @@ export function GameScreen() {
 
   /**
    * Serve the launcher "SEGUIR COMO" auto-login: the game's native launcher
-   * (ContinueForm) intercepts continuePlay and asks us for a session. We reply
-   * with the active session for that tab when present; otherwise we try the
-   * most recently used saved account (fast apiKey path, then full re-auth).
+   * (ContinueForm) intercepts continuePlay and asks us for a session. Always
+   * renew through the matching saved account instead of reusing the cached
+   * session: tokens are single-use server-side and the apiKey expires after
+   * 24h, so a session held open (or persisted) past that is refused by the
+   * server — the game drops with "Disconnect during login". Fast path mints
+   * a fresh token from the cached apiKey (CreateToken); when the apiKey has
+   * expired, fall back to a full re-auth with the stored password. Without
+   * any saved account we return the active session as-is (best effort).
    */
   const resolveLauncherSession = useCallback(async (tabId: string) => {
     const active = useAuthStore.getState().sessions[tabId]
-    if (active?.token && active.status === 'authenticated') return active
-
     const accounts = useSavedAccountsStore.getState().list
-    if (!accounts.length) return null
-    const account = [...accounts].sort((a, b) => b.lastUsedAt.localeCompare(a.lastUsedAt))[0]
-    try {
-      const session = await useAuthStore.getState().loginWithApiKey(tabId, account)
-      useSavedAccountsStore.getState().updateCache(account.id, session.apiKey, session.token)
-      return session
-    } catch {
+
+    // Prefer the saved account matching the active session; otherwise the
+    // most recently used one.
+    const account =
+      (active?.username
+        ? accounts.find((a) => a.username.toLowerCase() === active.username.toLowerCase())
+        : undefined) ??
+      [...accounts].sort((a, b) => b.lastUsedAt.localeCompare(a.lastUsedAt))[0] ??
+      null
+
+    if (account) {
       try {
-        const session = await useAuthStore.getState().login(tabId, {
-          username: account.username,
-          password: account.password
-        })
+        const session = await useAuthStore.getState().loginWithApiKey(tabId, account)
+        window.cuervok.logger.info('[launcher-login] renewed via cached apiKey', { tabId, username: account.username })
         useSavedAccountsStore.getState().updateCache(account.id, session.apiKey, session.token)
+        useSavedAccountsStore.getState().touchLastUsed(account.id)
         return session
-      } catch {
-        return null
+      } catch (fastErr) {
+        window.cuervok.logger.warn('[launcher-login] cached apiKey renewal failed — full re-auth', {
+          tabId,
+          username: account.username,
+          error: fastErr instanceof Error ? fastErr.message : String(fastErr)
+        })
+        try {
+          const session = await useAuthStore.getState().login(tabId, {
+            username: account.username,
+            password: account.password
+          })
+          window.cuervok.logger.info('[launcher-login] renewed via full re-auth', { tabId, username: account.username })
+          useSavedAccountsStore.getState().updateCache(account.id, session.apiKey, session.token)
+          useSavedAccountsStore.getState().touchLastUsed(account.id)
+          return session
+        } catch (authErr) {
+          window.cuervok.logger.error('[launcher-login] full re-auth failed', {
+            tabId,
+            username: account.username,
+            error: authErr instanceof Error ? authErr.message : String(authErr)
+          })
+          return null
+        }
       }
     }
+
+    if (active?.token && active.status === 'authenticated') return active
+    return null
   }, [])
 
   useEffect(() => {
@@ -783,6 +813,12 @@ export function GameScreen() {
       if (!tabId) tabId = useGameTabStore.getState().activeTabId
 
       const session = tabId ? await resolveLauncherSession(tabId) : null
+      window.cuervok.logger.info('[launcher-login] request answered', {
+        tabId,
+        renewed: !!session,
+        username: session?.username || null,
+        token: session ? String(session.token).slice(0, 8) + '…' : null
+      })
       const reply = session
         ? {
             username: session.username,

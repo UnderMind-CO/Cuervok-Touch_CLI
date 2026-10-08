@@ -52,7 +52,18 @@ export default defineConfig({
   },
   server: {
     host: '127.0.0.1',
-    port: 5173
+    port: 5173,
+    // The renderer fetches /api/* relatively (login, token renewal,
+    // overrides bridge…).  Proxy to the client's local server (hono), which
+    // stamps the client attestation and forwards to the emulator's Auth.
+    // Without this the dev server would 404 every /api call and neither the
+    // login nor the automatic token renewal could ever work in dev.
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8765',
+        changeOrigin: false
+      }
+    }
   },
   css: {
     postcss: {

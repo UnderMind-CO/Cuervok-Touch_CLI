@@ -690,7 +690,7 @@ _fetchConfig()})();
     // "already embedded?" check would keep serving a stale helper forever —
     // the version mark lets a later launch strip the old block and re-embed
     // the updated one.
-    const HELPER_VERSION = '3'
+    const HELPER_VERSION = '6'
     const helperVersionMark = `$_dofEmuHelperVersion=${HELPER_VERSION}`
     if (!build.includes(helperVersionMark)) {
       // Strip a previously embedded helper block: it is always appended at EOF
@@ -714,7 +714,19 @@ _fetchConfig()})();
   private _setupRequestInterceptors() {
     // --- Server mode: redirect HTTP traffic ---
     // Set CUV_SERVER_URL env var to use VPS (e.g. https://yourdomain.com)
-    const AUTH_BASE = process.env.CUV_SERVER_URL || 'http://localhost:3000'
+    // AUTH_BASE is the EMULATOR'S Auth server (HAAPI/MegaShop/data routes it
+    // serves live under /api/*) — that is DOFEMU_BASE. CUV_SERVER_URL is the
+    // web PLATFORM, which has no /api/mega or /api/haapi routes: pointing
+    // this at it made every interceptor redirect land on a Next.js 404 page
+    // ("Unexpected token '<'" in the shop). Kept as fallback for installs
+    // that only set CUV_SERVER_URL.
+    const AUTH_BASE = process.env.DOFEMU_BASE || process.env.CUV_SERVER_URL || 'http://localhost:3000'
+
+    // Client attestation secret stamped on every emulator-bound request
+    // (see the onBeforeSendHeaders listener below). Must match
+    // ClientAttestation.ExpectedValue in TouchEmu.Server.Auth and
+    // CLIENT_ATTESTATION in packages/main/application.ts.
+    const CLIENT_ATTESTATION = 'cqk_v1_6d2f8ab3c9174e5a'
 
     this._win.webContents.session.webRequest.onBeforeRequest(
       {
@@ -903,7 +915,14 @@ _fetchConfig()})();
     )
 
     this._win.webContents.session.webRequest.onBeforeSendHeaders(
-      { urls: ['https://*.ankama.com/*', 'https://*.ankama-games.com/*', 'http://localhost:*/*'] },
+      {
+        urls: [
+          'https://*.ankama.com/*',
+          'https://*.ankama-games.com/*',
+          'http://localhost:*/*',
+          'http://127.0.0.1:*/*'
+        ]
+      },
       (details, callback) => {
         const requestHeaders = { ...(details.requestHeaders ?? {}) }
         // Never touch WebSocket upgrade handshakes: stripping Sec-WebSocket-Key
@@ -917,6 +936,19 @@ _fetchConfig()})();
           delete requestHeaders['Referer']
           for (const key of Object.keys(requestHeaders)) {
             if (key.startsWith('Sec-')) delete requestHeaders[key]
+          }
+          // Stamp the client attestation on emulator-bound HTTP requests.
+          // The game iframe talks to the emulator's Auth server directly
+          // (http://localhost:3000/api/haapi/..., bypassing the main-process
+          // proxy), and the Auth server only mints credentials
+          // (CreateApiKey / CreateToken / guest accounts) for requests
+          // carrying this header — raw curl/script calls are rejected with
+          // 403. Stamped here at the network layer, so only requests that
+          // actually originate from this client carry it. Mirrored in
+          // packages/main/application.ts for the proxy path; keep in sync
+          // with ClientAttestation.ExpectedValue (TouchEmu.Server.Auth).
+          if (details.url.startsWith(AUTH_BASE)) {
+            requestHeaders['X-Cuervok-Client'] = CLIENT_ATTESTATION
           }
         }
         callback({ requestHeaders } as BeforeSendResponse)

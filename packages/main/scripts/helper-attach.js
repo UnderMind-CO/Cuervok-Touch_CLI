@@ -276,8 +276,48 @@ var attach = function () {
                 if (typeof keyManager.setHaapiKey === 'function') keyManager.setHaapiKey(storedKey, storedRefresh || HAAPI_REFRESH_PLACEHOLDER, { save: true, timeout: haapiKeyValidUntil() })
                 if (storedAccountId && typeof keyManager.setHaapiAccountId === 'function') keyManager.setHaapiAccountId(Number(storedAccountId), { save: true })
               }
-              // Also try the direct login path if we have a token
+              // Also try the direct login path if we have a token.  The
+              // stored token is usually stale by now (tokens are single-use
+              // server-side and the apiKey dies after 24h): a refused direct
+              // login makes the game reload the page and loop.  Ask the
+              // parent for a RENEWED session first (it re-authenticates
+              // through the saved account); only fall back to the stored
+              // token when the parent cannot renew.
               var storedToken = window.localStorage.getItem('HAAPI_TOKEN')
+              if (typeof window.$_requestRenewedSession === 'function') {
+                window.$_requestRenewedSession(function (renewed) {
+                  var token = (renewed && renewed.token) || storedToken
+                  if (renewed && renewed.token) {
+                    console.info('[DofEmu] Renewal: fresh session from parent, token ' + String(renewed.token).substring(0, 8) + '…')
+                  } else {
+                    console.warn('[DofEmu] Renewal: parent returned no fresh session — using stored token' + (storedToken ? ' (may be stale)' : ' (none)'))
+                  }
+                  if (token && typeof window.$_finishDirectLogin === 'function') {
+                    try {
+                      if (typeof window.$_primeHaapiKey === 'function') {
+                        window.$_primeHaapiKey(
+                          (renewed && renewed.apiKey) || storedKey,
+                          (renewed && renewed.refreshToken) || storedRefresh || '',
+                          renewed && renewed.accountId ? renewed.accountId : (storedAccountId ? Number(storedAccountId) : null)
+                        )
+                      }
+                      window.$_finishDirectLogin({
+                        token: token,
+                        loginName: (renewed && renewed.username) || '',
+                        account: (renewed && renewed.username) || '',
+                        forcedAccount: ''
+                      })
+                      if (typeof cb === 'function') cb(null)
+                      return
+                    } catch (e) {
+                      console.error('[DofEmu] Direct login fallback failed:', e)
+                    }
+                  }
+                  // Fallback: retry the original with the primed key
+                  return _origLoginWithHaapiKey(opts, cb)
+                })
+                return
+              }
               if (storedToken && typeof window.$_finishDirectLogin === 'function') {
                 try {
                   if (typeof window.$_primeHaapiKey === 'function') {
@@ -358,6 +398,15 @@ var attach = function () {
             if (err) {
               window.dofus.disconnect()
               console.error('Direct login failed', err)
+              // Ticket refused (stale cached token — the server answers
+              // AuthenticationTicketRefusedMessage and the game drops with
+              // "Disconnect during login").  With a saved account the parent
+              // can mint a fresh token: ask it for a renewed session and
+              // retry the direct login once before showing the manual form.
+              if (!options || !options.$_retried) {
+                window.$_renewAndRetryDirectLogin(options)
+                return
+              }
               window.gui.loginScreen.displayAppropriateForm()
               return
             }
@@ -381,6 +430,79 @@ var attach = function () {
           console.error('finishDirectLogin failed:', err)
           window.gui.loginScreen.displayAppropriateForm()
         }
+      }
+
+      // ─── Session renewal channel (parent = GameScreen) ───────────
+      // The parent renews sessions through the saved account (fast apiKey
+      // path, then full re-auth with the stored password) when it answers a
+      // launcher-login request.  Ask it over that existing channel and get
+      // a fresh { token, apiKey, accountId, username } back — or null when
+      // it cannot renew (no saved account / renewal failed / timeout).
+      window.$_requestRenewedSession = function (done) {
+        var settled = false
+        var onSessionMsg = function (e) {
+          var d = e && e.data
+          if (!d || d.type !== 'cuervok:launcher-login-response' || settled) return
+          settled = true
+          window.removeEventListener('message', onSessionMsg)
+          if (typeof done === 'function') done(d.session || null)
+        }
+        window.addEventListener('message', onSessionMsg)
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+              type: 'cuervok:launcher-login-request',
+              gameId: window.$game_id || ''
+            }, '*')
+            setTimeout(function () {
+              if (settled) return
+              settled = true
+              window.removeEventListener('message', onSessionMsg)
+              if (typeof done === 'function') done(null)
+            }, 5000)
+          } else if (typeof done === 'function') {
+            done(null)
+          }
+        } catch (e) {
+          if (typeof done === 'function') done(null)
+        }
+      }
+
+      // ─── Automatic token renewal on direct-login refusal ─────────
+      // Safety net for direct logins that still ran with a stale token:
+      // ask the parent for a fresh session and retry the direct login once
+      // before falling back to the manual login form.
+      window.$_renewAndRetryDirectLogin = function (originalOptions) {
+        console.warn('[DofEmu] Renewal: direct login refused — requesting renewed session from parent')
+        window.$_requestRenewedSession(function (session) {
+          if (!session || !session.token || session.token === (originalOptions && originalOptions.token)) {
+            // Parent could not renew (no saved account / renewal failed) or
+            // handed back the same stale token — manual login form it is.
+            console.warn('[DofEmu] Renewal: no fresh session from parent — showing login form')
+            try { window.gui.loginScreen.displayAppropriateForm() } catch (e) {}
+            return
+          }
+          console.info('[DofEmu] Renewal: fresh session received — retrying direct login')
+          // Let the refused socket fully close before re-logging in.
+          setTimeout(function () {
+            try {
+              if (typeof window.$_primeHaapiKey === 'function') {
+                window.$_primeHaapiKey(session.apiKey, session.refreshToken || '', session.accountId)
+              }
+              window.$_finishDirectLogin({
+                token: session.token,
+                loginName: session.username || (originalOptions && originalOptions.loginName) || '',
+                account: session.username || (originalOptions && originalOptions.account) || '',
+                forcedAccount: '',
+                $_retried: true
+              })
+              return
+            } catch (e2) {
+              console.error('Direct login renewal retry failed:', e2)
+              try { window.gui.loginScreen.displayAppropriateForm() } catch (e3) {}
+            }
+          }, 600)
+        })
       }
     }
 
@@ -518,6 +640,22 @@ var attach = function () {
         try {
           var url = typeof input === 'string' ? input : input && input.url ? input.url.toString() : ''
 
+          // ─── Same-origin HAAPI rewrite ─────────────────────────
+          // The game fetches https://haapi.{ankama.com,localhost}/json/…
+          // and Electron rewrites those cross-origin at the network layer.
+          // A redirected preflight violates the fetch spec (redirect mode
+          // "error"), so every preflighted HAAPI call (they all carry the
+          // custom APIKEY header) died with "Failed to fetch" — CORS on the
+          // emulator never even got a chance.  Rewrite to the SAME-ORIGIN
+          // proxy path instead: no CORS, no preflight, no redirect — and
+          // the client's local proxy stamps the attestation header on the
+          // way to the emulator's Auth server.
+          var isHaapiV5 = url && url.indexOf('/json/Ankama/v5/') !== -1
+          if (isHaapiV5 && /^https:\/\/(haapi\.ankama\.com|haapi\.localhost|sessionserver\.ankama\.com)\//.test(url)) {
+            input = url.replace(/^https:\/\/[^/]+\/json\//, '/api/haapi/')
+            url = input
+          }
+
           // ─── Sentry IPC: silently swallow ───
           // The game's embedded Sentry SDK attempts to fetch from
           // sentry-ipc://scope/sentry_key which is a custom protocol
@@ -565,7 +703,7 @@ var attach = function () {
         }
         return originalFetch.call(this, input, init).then(function(response) {
           try {
-            if (url.indexOf('/json/Ankama/v5/') !== -1) {
+            if (isHaapiV5) {
               if (url.indexOf('/CreateApiKey') !== -1) {
                 response.clone().json().then(function(data) {
                   window.$_nativeAuthCapture = window.$_nativeAuthCapture || {}

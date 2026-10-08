@@ -86,11 +86,16 @@ export const useSavedAccountsStore = create<SavedAccountsState>()((set, get) => 
           return { list: [account, ...s.list] }
         }
         const next = [...s.list]
-        // Merge: keep cached fields if the new account doesn't provide them
+        // Merge: keep cached fields if the new account doesn't provide them.
+        // Also preserve the stored password/accountId when the update doesn't
+        // carry them — the native in-game login capture saves password: '' and
+        // must never wipe the stored credentials the auto-renewal relies on.
         const prev = next[idx]
         next[idx] = {
           ...prev,
           ...account,
+          password: account.password || prev.password,
+          accountId: account.accountId ?? prev.accountId,
           cachedApiKey: account.cachedApiKey ?? prev.cachedApiKey,
           cachedToken: account.cachedToken ?? prev.cachedToken,
           cachedAt: account.cachedAt ?? prev.cachedAt,

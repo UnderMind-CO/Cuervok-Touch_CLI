@@ -387,1234 +387,421 @@ for (var id in events) {
   // client language (es/en/fr/...) exactly like the native tabs.  Labels
   // missing from the official dictionaries fall back to Spanish, then to
   // the key itself (the game's own getTextFailover behavior prints the key).
-  function T(key, fallback) {
+  // ── i18n: idioma del cliente (Config.language / dofus.lang) ──
+  var LANG = (function () {
+    var l = 'en';
     try {
-      // Gate on hasText FIRST: getText on a missing key triggers the
-      // game's getTextFailover console error ("no failover getText was
-      // found for <key>") — hasText answers silently.  When the i18n
-      // module has no hasText, keep the legacy direct-getText behavior.
-      var hasFn = !!(window.$_i18nModule && typeof window.$_i18nModule.hasText === 'function');
-      if (window.$_i18nModule && typeof window.$_i18nModule.getText === 'function' &&
-          (!hasFn || TExists(key))) {
-        var out = window.$_i18nModule.getText(key);
-        // The game's own failover prints "<lang>[?<key>]" (chaseText mode
-        // prints "<lang>[<key>]") — treat both as "missing" so our Spanish
-        // fallback kicks in instead of showing debug keys.
-        if (out && out.indexOf('[?') !== 0 && /^[a-z]{2,3}\[/.exec(out) === null) return out;
-      }
-    } catch (err) { /* dictionary not ready — fall through */ }
-    return fallback !== undefined ? fallback : key;
-  }
-  function TExists(key) {
-    try {
-      return Boolean(window.$_i18nModule && typeof window.$_i18nModule.hasText === 'function' && window.$_i18nModule.hasText(key));
-    } catch (err) { return false; }
-  }
-  // Official short level suffix ("lvl"); graceful fallback.
-  function LVL() { return TExists('ui.common.short.level') ? T('ui.common.short.level') : 'lvl'; }
-  // Official kamas short unit ("K") / goultines label from the dictionaries.
-  function KAMA_UNIT() { return TExists('ui.common.short.kama') ? T('ui.common.short.kama') : 'K'; }
-  function GOULTINE_UNIT() { return TExists('ui.common.goultines') ? T('ui.common.goultines') : 'Goultines'; }
-  // Locale-aware number grouping via the game's own formatter
-  // (ui.common.numberSeparator — matches the language).
-  function fmt(n) {
-    n = Math.round(Number(n) || 0);
-    try {
-      if (window.$_i18nModule && typeof window.$_i18nModule.getText === 'function' &&
-          TExists('ui.common.numberSeparator')) {
-        var sep = T('ui.common.numberSeparator');
-        return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, sep);
-      }
-    } catch (err) { /* fall through */ }
-    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  }
+      var dl = window.dofus && window.dofus.lang;
+      if (typeof dl === 'string' && dl) l = dl;
+      else if (window.Config && window.Config.language) l = window.Config.language;
+    } catch (err) { /* default */ }
+    l = String(l).toLowerCase();
+    if (l.indexOf('es') === 0) return 'es';
+    if (l.indexOf('fr') === 0) return 'fr';
+    if (l.indexOf('pt') === 0) return 'pt';
+    return 'en';
+  })();
 
-  // ── Boost label localization (server statKey → official i18n keys) ───
-  // The server sends statKey + perLevel; the row renders in the player's
-  // language using the SAME keys the official characteristics UI uses.
-  // AP/MP use the official abbreviations ui.common.ap / ui.common.mp.
-  var STAT_KEYS = {
-    actionPoints:              { name: function () { return T('ui.common.ap', 'PA'); },                        pct: false },
-    movementPoints:            { name: function () { return T('ui.common.mp', 'PM'); },                        pct: false },
-    range:                     { name: function () { return T('ui.common.range', 'Alcance'); },                 pct: false },
-    summonableCreaturesBoost:  { name: function () { return T('ui.common.summonableCreatures', 'Invocaciones'); }, pct: false },
-    permanentDamagePercent:    { name: function () { return T('ui.stats.damagesBonusPercent', 'Daños finales'); }, pct: true  },
-    vitality:                  { name: function () { return T('ui.stats.vitality', 'Vitalidad'); },             pct: false },
-    agility:                   { name: function () { return T('ui.stats.agility', 'Agilidad'); },               pct: false },
-    chance:                    { name: function () { return T('ui.stats.chance', 'Suerte'); },                  pct: false },
-    strength:                  { name: function () { return T('ui.stats.strength', 'Fuerza'); },                pct: false },
-    intelligence:              { name: function () { return T('ui.stats.intelligence', 'Inteligencia'); },      pct: false },
-    wisdom:                    { name: function () { return T('ui.stats.wisdom', 'Sabiduría'); },               pct: false },
-    prospecting:               { name: function () { return T('ui.stats.prospection', 'Prospección'); },        pct: false }
+  var I18N = {
+    en: {
+      title:     'GIFT CODES & SUBSCRIPTIONS',
+      subtitle:  'Redeem your codes and claim your pending gifts',
+      inputHint: 'Enter your code (XXXX-XXXX-XXXX)',
+      validate:  'VALIDATE',
+      busy:      'Validating…',
+      waiting:   'PENDING GIFTS LIST',
+      use:       'USE',
+      empty:     'You have no pending gifts.',
+      loading:   'Loading…',
+      delivered: 'Gift delivered! Check your inventory.',
+      redeemed:  'Code redeemed! The gift is in the pending list.',
+      errors: {
+        INVALID:          'Invalid code.',
+        INACTIVE:         'This code is disabled.',
+        NOT_STARTED:      'This code is not available yet.',
+        EXPIRED:          'This code has expired.',
+        NO_USES:          'No uses left for this code.',
+        ALREADY_REDEEMED: 'You already redeemed this code with this character.',
+        PLAYER_LIMIT:     'You reached the per-player redemption limit of this code.',
+        DB:               'Temporary server error. Please try again.'
+      },
+      goultines: 'Goultines'
+    },
+    es: {
+      title:     'CÓDIGOS DE REGALO Y SUSCRIPCIONES',
+      subtitle:  'Canjea tus códigos y reclama tus regalos en espera',
+      inputHint: 'Introduce tu código (XXXX-XXXX-XXXX)',
+      validate:  'VALIDAR',
+      busy:      'Validando…',
+      waiting:   'LISTA DE REGALOS EN ESPERA',
+      use:       'USAR',
+      empty:     'No tienes regalos en espera.',
+      loading:   'Cargando…',
+      delivered: '¡Regalo entregado! Revisa tu inventario.',
+      redeemed:  '¡Código canjeado! El regalo está en la lista de espera.',
+      errors: {
+        INVALID:          'Código no válido.',
+        INACTIVE:         'Este código está desactivado.',
+        NOT_STARTED:      'Este código aún no está disponible.',
+        EXPIRED:          'Este código ha expirado.',
+        NO_USES:          'No quedan usos disponibles para este código.',
+        ALREADY_REDEEMED: 'Ya canjeaste este código con este personaje.',
+        PLAYER_LIMIT:     'Ya alcanzaste el límite de canjes de este código por jugador.',
+        DB:               'Error temporal del servidor. Inténtalo de nuevo.'
+      },
+      goultines: 'Goultinas'
+    },
+    fr: {
+      title:     'CODES CADEAUX ET ABONNEMENTS',
+      subtitle:  'Échangez vos codes et réclamez vos cadeaux en attente',
+      inputHint: 'Entrez votre code (XXXX-XXXX-XXXX)',
+      validate:  'VALIDER',
+      busy:      'Validation…',
+      waiting:   'LISTE DES CADEAUX EN ATTENTE',
+      use:       'UTILISER',
+      empty:     'Vous n’avez aucun cadeau en attente.',
+      loading:   'Chargement…',
+      delivered: 'Cadeau livré ! Vérifiez votre inventaire.',
+      redeemed:  'Code échangé ! Le cadeau est dans la liste d’attente.',
+      errors: {
+        INVALID:          'Code invalide.',
+        INACTIVE:         'Ce code est désactivé.',
+        NOT_STARTED:      'Ce code n’est pas encore disponible.',
+        EXPIRED:          'Ce code a expiré.',
+        NO_USES:          'Plus d’utilisations disponibles pour ce code.',
+        ALREADY_REDEEMED: 'Vous avez déjà échangé ce code avec ce personnage.',
+        PLAYER_LIMIT:     'Vous avez atteint la limite d’échanges de ce code par joueur.',
+        DB:               'Erreur temporaire du serveur. Réessayez.'
+      },
+      goultines: 'Goultines'
+    },
+    pt: {
+      title:     'CÓDIGOS DE PRESENTE E ASSINATURAS',
+      subtitle:  'Resgate seus códigos e reivindique seus presentes pendentes',
+      inputHint: 'Digite seu código (XXXX-XXXX-XXXX)',
+      validate:  'VALIDAR',
+      busy:      'Validando…',
+      waiting:   'LISTA DE PRESENTES PENDENTES',
+      use:       'USAR',
+      empty:     'Você não tem presentes pendentes.',
+      loading:   'Carregando…',
+      delivered: 'Presente entregue! Verifique seu inventário.',
+      redeemed:  'Código resgatado! O presente está na lista de espera.',
+      errors: {
+        INVALID:          'Código inválido.',
+        INACTIVE:         'Este código está desativado.',
+        NOT_STARTED:      'Este código ainda não está disponível.',
+        EXPIRED:          'Este código expirou.',
+        NO_USES:          'Não há mais usos disponíveis para este código.',
+        ALREADY_REDEEMED: 'Você já resgatou este código com este personagem.',
+        PLAYER_LIMIT:     'Você atingiu o limite de resgates deste código por jogador.',
+        DB:               'Erro temporário do servidor. Tente novamente.'
+      },
+      goultines: 'Goultines'
+    }
   };
-  // Localized "<perLevel>x <Stat>" line for a boost row (Spanish fallback =
-  // the server's own label/effect when the key or statKey is unknown).
-  function boostName(b) {
-    var def = b && b.statKey && STAT_KEYS[b.statKey];
-    if (!def) return b.label || '';
-    var per = Math.max(1, b.perLevel || 1);
-    return per + ' ' + def.name();
-  }
-  function boostEffect(b) {
-    var def = b && b.statKey && STAT_KEYS[b.statKey];
-    if (!def) return b.effect || '';
-    var per = Math.max(1, b.perLevel || 1);
-    return '+' + per + (def.pct ? '%' : '') + ' ' + def.name();
+
+  function txt() { return I18N[LANG] || I18N.en; }
+
+  // ── helpers base del panel (DOM + canal de red) ──
+  // el(): constructor DOM minimalista usado por todo el bloque gift.
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text != null) node.textContent = text;
+    return node;
   }
 
-  function el(tag, cls, text) {
-    var d = document.createElement(tag);
-    if (cls) d.className = cls;
-    if (text !== undefined) d.textContent = text;
-    return d;
-  }
-
+  // send(): canal del cliente inyectado hacia el servidor de juego.
+  // dofus.sendMessage(type, data) produce en el wire
+  // {"call":"sendMessage","data":{"type":type,"data":data}}, que es
+  // la ruta InterceptFrame del despachador (clases tipadas por nombre).
   function send(type, data) {
     try {
-      if (window.dofus && typeof window.dofus.sendMessage === 'function') {
-        window.dofus.sendMessage(type, data || {});
+      window.dofus.sendMessage(type, data || {});
+    } catch (err) {
+      try { console.error('[giftCodes] send(' + type + ') failed', err); } catch (_) {}
+    }
+  }
+
+  var api = { onRedeemError: function () {} };
+
+  function giftName(g) {
+    if (g.kind === 'GOULTINES') return g.goultines + ' ' + (txt().goultines || 'Goultines');
+    return (g.quantity && g.quantity > 1 ? g.quantity + '× ' : '') + (g.name || ('item ' + g.itemGid));
+  }
+
+  // ── Icono del regalo con los assets OFICIALES del juego ──
+  // Rutas (en orden de prueba): 1) /shopimg/{iconId}.png — la MISMA que el
+  // shop usa para los tiles de artículos (sirve image/png, probada dentro
+  // del juego); 2) /assets/gfx/items/{iconId}.png — la ruta del bundle
+  // (getIconUri → ITEM_DIR + iconId + '.png'); 3) goultine.png para la
+  // moneda.  Si todas fallan, placeholder discreto + log con las URLs
+  // para diagnóstico en la consola del juego.
+  function assetsBase() {
+    var a = (window.Config && window.Config.assetsUrl) || '../assets/';
+    return String(a).replace(/\/+$/, '');
+  }
+  function iconCandidates(g) {
+    var base = assetsBase();
+    if (g.kind === 'GOULTINES') return [base + '/gfx/items/goultine.png'];
+    if (!g.iconId) return [];
+    return [base + '/shopimg/' + g.iconId + '.png', base + '/gfx/items/' + g.iconId + '.png'];
+  }
+  function buildGiftIcon(g) {
+    var box = el('div', 'giftCardIcon');
+    var urls = iconCandidates(g);
+    if (!urls.length) {
+      box.classList.add('fallback');
+      box.textContent = g.kind === 'GOULTINES' ? 'G' : '#' + (g.itemGid || '?');
+      return box;
+    }
+    var idx = 0;
+    var img = document.createElement('img');
+    img.className = 'giftCardIconImg';
+    img.alt = '';
+    img.addEventListener('error', function () {
+      idx++;
+      if (idx < urls.length) { img.src = urls[idx]; return; }
+      try { img.parentNode && img.parentNode.removeChild(img); } catch (e) {}
+      box.classList.add('fallback');
+      box.textContent = g.kind === 'GOULTINES' ? 'G' : '#' + (g.itemGid || '?');
+      try { console.error('[giftCodes] icono no disponible: ' + urls.join(' | ')); } catch (e) {}
+    });
+    img.src = urls[0];
+    box.appendChild(img);
+    return box;
+  }
+
+  // Badge with the number of pending gifts on the Goultines shop tab
+  function updateBadge(count) {
+    try {
+      var tab = document.querySelector('.topTabsList .goultineCategory');
+      if (!tab) return;
+      var badge = tab.querySelector('.giftCodeBadge');
+      if (!count || count < 1) {
+        if (badge && badge.parentNode) badge.parentNode.removeChild(badge);
+        return;
+      }
+      if (!badge) {
+        badge = el('div', 'giftCodeBadge', String(count));
+        tab.appendChild(badge);
+      } else {
+        var changed = badge.textContent !== String(count);
+        badge.textContent = String(count);
+        if (changed) {
+          badge.classList.remove('bump');
+          void badge.offsetWidth; // restart animation
+          badge.classList.add('bump');
+        }
       }
     } catch (err) { /* ignore */ }
   }
 
-  function requestPanel() {
-    send('GuildGetInformationsMessage', { infoType: INFO_BOOSTS_PANEL });
-  }
-
-  // ── Localized strings (official keys with Spanish fallback) ──────────
-  function STR() {
-    return {
-      // LITERAL label (user rule): the official ui.social.guildBoosts key
-      // resolves to "Personalización" in the bundle dictionaries — the tab
-      // must keep its "Boost Guild" identity in every language.
-      tabLabel:      'Boost Guild',
-      treasury:      T('ui.social.guildTreasury', 'Tesorería'),
-      yourFunds:     T('ui.social.guildYourFunds', 'Tus fondos'),
-      donate:        T('ui.social.guildDonate', 'Donar'),
-      donateTo:      T('ui.social.guildDonateTo', 'Donar al gremio'),
-      payWith:       T('ui.social.guildPayWith', 'Pagar con:'),
-      boosts:        T('ui.social.guildBoostsPanel', 'Boosts del gremio'),
-      effect:        T('ui.common.effect', 'Efecto'),
-      level:         T('ui.common.level', 'Nivel'),
-      price:         T('ui.common.price', 'Precio'),
-      buy:           T('ui.common.buy', 'Comprar'),
-      max:           T('ui.common.max', 'Máx'),
-      cancel:        T('ui.common.cancel', 'Cancelar'),
-      confirm:       T('ui.common.confirm', 'Confirmar'),
-      amount:        T('ui.common.quantity', 'Cantidad'),
-      available:     T('ui.common.available', 'Disponible'),
-      lastDonations: T('ui.social.guildLastDonations', 'Últimos donativos'),
-      noDonations:   T('ui.social.guildNoDonations', 'Todavía no hay donativos.'),
-      noBoostData:   T('ui.social.guildNoBoosts', 'Sin datos de boosts.'),
-      loading:       T('ui.common.loading', 'Cargando…'),
-      kamas:         T('ui.common.kamas', 'Kamas'),
-      goultines:     GOULTINE_UNIT()
-    };
-  }
-  // "Goultines-only" tag for combat-changing boosts (PA/PM/range/summons/%
-  // final damage): official kamas-currency key when the dictionaries carry
-  // one, Spanish fallback otherwise.
-  function ONLY_G() {
-    return TExists('ui.common.onlyGoultines') ? T('ui.common.onlyGoultines') : 'Solo Goultines';
-  }
-  function hookGuildWindow() {
-    if (hookDone || !window.$_guildBoostWindowClass) return;
-    var Cls = window.$_guildBoostWindowClass;
-    if (!Cls || !Cls.prototype) return;
-    hookDone = true;
-
-    var orig = Cls.prototype._setupDom;
-    Cls.prototype._setupDom = function () {
-      orig.call(this);
-      try { addBoostTab(this); } catch (err) { console.error('guild boost tab', err); }
-    };
-  }
-
-  function addBoostTab(guildWin) {
-    if (!guildWin || !guildWin.tabs || guildWin.$_boostTabAdded) return;
-    guildWin.$_boostTabAdded = true;
-
-    content = guildWin.createChild('div', { className: 'guildBoostPanel' });
-    guildWin.tabs.addTab(STR().tabLabel, content, TAB_ID);
-
-    content.on('open', function () {
-      requestPanel();
-      if (lastMsg) renderPanel(lastMsg);
-    });
-
-    // Initial placeholder
-    content.rootElement.appendChild(el('div', 'guildBoostHint', STR().loading));
-    requestPanel();
-  }
-
-  // ── Recaudadores (custom collector section of the Boost Guild tab) ──
-
-  function renderCollectors(msg) {
-    if (!content || !content.rootElement) return;
-    var s = STR();
-    var old = content.rootElement.querySelector('.guildBoostCollectors');
+  function renderGifts(container, gifts) {
+    var n = (gifts && gifts.length) || 0;
+    updateBadge(n);
+    var old = container.querySelector('.giftCodeList');
     if (old && old.parentNode) old.parentNode.removeChild(old);
-
-    var sec = el('div', 'guildBoostCollectors');
-    sec.appendChild(el('div', 'guildBoostSectionTitle',
-      T('ui.social.taxCollector', 'Recaudadores')));
-
-    var count = msg.taxCollectorsCount || 0;
-    var max = msg.taxCollectorsMax || 1;
-    var manage = !!msg.canManageCollectors;
-
-    var info = el('div', 'guildBoostCollectorInfo');
-    info.appendChild(el('span', 'guildBoostCollectorCount',
-      T('ui.social.taxCollectorCount', 'Recaudadores') + ': ' + count + ' / ' + max));
-    sec.appendChild(info);
-
-    // Roster rows (idle / placed / fighting) — localized name ids resolve
-    // client-side like the official roster tab.
-    var rows = msg.taxCollectors || [];
-    for (var i = 0; i < rows.length; i++) {
-      var c = rows[i];
-      var row = el('div', 'guildBoostCollectorRow');
-      var stateTxt;
-      // State labels are literals: the official dictionaries carry no keys
-      // for them (the native UI uses icons) and invented keys trigger the
-      // game's getTextFailover console error.
-      if (c.mapId === 0) stateTxt = s.available;
-      else if (c.fightState === 1) stateTxt = '¡Bajo ataque!';
-      else if (c.fightState === 2) stateTxt = 'En combate';
-      else stateTxt = 'Colocado';
-      row.appendChild(el('span', 'guildBoostCollectorName',
-        '#' + c.firstNameId + ' · #' + c.lastNameId));
-      row.appendChild(el('span', 'guildBoostCollectorState', stateTxt));
-      if (manage && c.mapId !== 0 && c.fightState === 0) {
-        var recallBtn = el('div', 'guildBoostBtn mini', s.cancel);
-        recallBtn.addEventListener('click', function (cid) {
-          return function () {
-            send('TaxCollectorRecallRequestMessage', { taxCollectorId: cid });
-          };
-        }(c.id));
-        row.appendChild(recallBtn);
-      }
-      sec.appendChild(row);
+    var list = el('div', 'giftCodeList');
+    var t = txt();
+    if (!gifts || !gifts.length) {
+      list.appendChild(el('div', 'giftCodeEmpty', t.empty));
     }
-
-    // Action buttons (official rights enforced server-side).
-    var actions = el('div', 'guildBoostCollectorActions');
-
-    var hireBtn = el('div', 'guildBoostBtn' + (manage && count < max ? '' : ' disabled'),
-      'Contratar' +
-      ' (' + fmt(msg.hireCostKamas || 0) + ' ' + KAMA_UNIT() + ')');
-    hireBtn.addEventListener('click', function () {
-      if (!manage || count >= max) return;
-      send('TaxCollectorHireRequestMessage', { requestId: ++requestSeq });
-    });
-    actions.appendChild(hireBtn);
-
-    var placeLabel = 'Colocar aquí';
-    if (msg.currentMapCollectorId > 0) {
-      placeLabel += ' ✓';
-    } else if ((msg.currentMapCooldownSeconds || 0) > 0) {
-      var mins = Math.ceil(msg.currentMapCooldownSeconds / 60);
-      placeLabel += ' (' + mins + ' min)';
+    for (var i = 0; gifts && i < gifts.length; i++) {
+      (function (g) {
+        var card = el('div', 'giftCard');
+        card.appendChild(buildGiftIcon(g));
+        card.appendChild(el('div', 'giftCardName', giftName(g)));
+        var btn = el('div', 'giftCodeBtn', t.use);
+        btn.addEventListener('click', function () {
+          if (card.$_claiming) return;
+          card.$_claiming = true;
+          btn.classList.add('busy');
+          send('giftClaim', { grantId: g.grantId });
+        });
+        card.appendChild(btn);
+        list.appendChild(card);
+      })(gifts[i]);
     }
-    var placeBtn = el('div', 'guildBoostBtn' +
-      (manage && !(msg.currentMapCollectorId > 0) && !(msg.currentMapCooldownSeconds > 0) ? '' : ' disabled'),
-      placeLabel);
-    placeBtn.addEventListener('click', function () {
-      if (!manage || msg.currentMapCollectorId > 0 || msg.currentMapCooldownSeconds > 0) return;
-      send('TaxCollectorPlaceRequestMessage', {});
-    });
-    actions.appendChild(placeBtn);
-
-    sec.appendChild(actions);
-    root_hintInsertBefore(sec);
+    container.appendChild(list);
   }
 
-  // Inserts the collectors section before the donations block (or appends
-  // when the panel has not rendered it yet).
-  function root_hintInsertBefore(node) {
-    if (!content || !content.rootElement) return;
-    var root = content.rootElement;
-    var anchor = root.querySelector('.guildBoostDonations');
-    if (anchor && anchor.parentNode === root) root.insertBefore(node, anchor);
-    else root.appendChild(node);
-  }
+  // Build the panel DOM into a plain container (the overlay that covers
+  // the Goultines grid).  All results come from server messages through
+  // the api closures below.
+  function buildPanelInto(root) {
+    if (!root || root.$_giftBuilt) return;
+    root.$_giftBuilt = true;
+    var t = txt();
 
-  // ── Renderers ────────────────────────────────────────────────────────
+    var panel = el('div', 'giftCodePanel');
+    root.appendChild(panel);
+    api.panel = panel;
 
-  function renderPanel(msg) {
-    lastMsg = msg;
-    if (!content || !content.rootElement) return;
-    var s = STR();
-    var root = content.rootElement;
-    root.innerHTML = '';
+    var header = el('div', 'giftCodeHeader');
+    header.appendChild(el('div', 'giftCodeIcon'));
+    var headTxt = el('div', 'giftCodeHeaderText');
+    headTxt.appendChild(el('div', 'giftCodeTitle', t.title));
+    headTxt.appendChild(el('div', 'giftCodeSubtitle', t.subtitle));
+    header.appendChild(headTxt);
+    panel.appendChild(header);
 
-    // Treasury header + donation button (official greenButton chrome)
-    var treasury = el('div', 'guildBoostTreasury');
-    treasury.appendChild(el('div', 'guildBoostSectionTitle', s.treasury));
-
-    var balances = el('div', 'guildBoostBalances');
-    balances.appendChild(el('div', 'guildBoostBalance', s.kamas + ': ' + fmt(msg.treasuryKamas)));
-    balances.appendChild(el('div', 'guildBoostBalance goultines', s.goultines + ': ' + fmt(msg.treasuryGoultines)));
-    treasury.appendChild(balances);
-
-    treasury.appendChild(el('div', 'guildBoostMyWallets',
-      s.yourFunds + ' — ' + s.kamas + ': ' + fmt(msg.myKamas) + ' · ' + s.goultines + ': ' + fmt(msg.myGoultines)));
-
-    var donateBtn = el('div', 'guildBoostBtn donate', s.donate);
-    donateBtn.addEventListener('click', function () { openDonateModal(msg); });
-    treasury.appendChild(donateBtn);
-    root.appendChild(treasury);
-
-    // Currency toggle for purchases
-    var payRow = el('div', 'guildBoostPayRow');
-    payRow.appendChild(el('span', 'guildBoostPayLabel', s.payWith));
-    var kBtn = el('div', 'guildBoostBtn mini' + (payCurrency === CURRENCY_KAMAS ? ' on' : ''), s.kamas);
-    var gBtn = el('div', 'guildBoostBtn mini' + (payCurrency === CURRENCY_GOULTINES ? ' on' : ''), s.goultines);
-    kBtn.addEventListener('click', function () {
-      payCurrency = CURRENCY_KAMAS;
-      if (lastMsg) renderPanel(lastMsg);
-    });
-    gBtn.addEventListener('click', function () {
-      payCurrency = CURRENCY_GOULTINES;
-      if (lastMsg) renderPanel(lastMsg);
-    });
-    payRow.appendChild(kBtn);
-    payRow.appendChild(gBtn);
-    root.appendChild(payRow);
-
-    // Boosts table
-    var boosts = el('div', 'guildBoostBoosts');
-    boosts.appendChild(el('div', 'guildBoostSectionTitle', s.boosts));
-
-    var header = el('div', 'guildBoostRow header');
-    header.appendChild(el('div', 'colEffect', s.effect));
-    header.appendChild(el('div', 'colLevel', s.level));
-    header.appendChild(el('div', 'colPrice', s.price));
-    header.appendChild(el('div', 'colBuy', ''));
-    boosts.appendChild(header);
-
-    var boostsArr = msg.boosts || [];
-    if (!boostsArr.length) {
-      boosts.appendChild(el('div', 'guildBoostHint', s.noBoostData));
-    }
-    for (var i = 0; i < boostsArr.length; i++) {
-      var b = boostsArr[i];
-      var row = el('div', 'guildBoostRow');
-
-      var effectCol = el('div', 'colEffect');
-      effectCol.appendChild(el('div', 'guildBoostName', boostName(b)));
-      effectCol.appendChild(el('div', 'guildBoostEffect', boostEffect(b)));
-      row.appendChild(effectCol);
-
-      var lvl = el('div', 'colLevel');
-      // Level column shows CURRENCY POINTS (current×perLevel / max×perLevel):
-      // vitality buys +5 per purchase, so the bar tracks the actual bonus.
-      var per = Math.max(1, b.perLevel || 1);
-      lvl.appendChild(el('div', 'guildBoostLevel', (b.current * per) + ' / ' + (b.max * per)));
-      var bar = el('div', 'guildBoostBar');
-      var fill = el('div', 'guildBoostBarFill');
-      fill.style.width = Math.min(100, Math.round((b.current / b.max) * 100)) + '%';
-      bar.appendChild(fill);
-      lvl.appendChild(bar);
-      row.appendChild(lvl);
-
-      var priceCol = el('div', 'colPrice');
-      var gPrice = fmt(b.goultinesPrice) + ' G';
-      if (b.goultinesOnly) {
-        // Goultines-exclusive boost (server-enforced): the row shows the
-        // goultines price plus the localized "only goultines" tag — never a
-        // kamas price, regardless of the pay-with toggle.
-        priceCol.appendChild(el('div', 'guildBoostPrice', gPrice));
-        priceCol.appendChild(el('div', 'guildBoostPrice alt onlyG', ONLY_G()));
-      } else {
-        var kPrice = fmt(b.kamasPrice) + ' ' + KAMA_UNIT();
-        if (payCurrency === CURRENCY_KAMAS) {
-          priceCol.appendChild(el('div', 'guildBoostPrice', kPrice));
-          priceCol.appendChild(el('div', 'guildBoostPrice alt', gPrice));
-        } else {
-          priceCol.appendChild(el('div', 'guildBoostPrice', gPrice));
-          priceCol.appendChild(el('div', 'guildBoostPrice alt', kPrice));
-        }
-      }
-      row.appendChild(priceCol);
-
-      var buyCol = el('div', 'colBuy');
-      var canBuy = msg.canManage && !b.maxed;
-      if (canBuy) {
-        var buyBtn = el('div', 'guildBoostBtn buy', s.buy);
-        buyBtn.addEventListener('click', function (id, forcedCurrency) {
-          return function () {
-            send('GuildBoostPurchaseRequestMessage', { boostId: id, currency: forcedCurrency, requestId: ++requestSeq });
-          };
-        }(b.boostId, b.goultinesOnly ? CURRENCY_GOULTINES : payCurrency));
-        buyCol.appendChild(buyBtn);
-      } else {
-        buyCol.appendChild(el('div', 'guildBoostBtn buy disabled', b.maxed ? s.max : '—'));
-      }
-      row.appendChild(buyCol);
-
-      boosts.appendChild(row);
-    }
-    root.appendChild(boosts);
-
-    // Recent donations
-    var don = el('div', 'guildBoostDonations');
-    don.appendChild(el('div', 'guildBoostSectionTitle', s.lastDonations));
-    var donArr = msg.donations || [];
-    if (!donArr.length) {
-      don.appendChild(el('div', 'guildBoostHint', s.noDonations));
-    }
-    for (var j = 0; j < donArr.length; j++) {
-      var d = donArr[j];
-      var dRow = el('div', 'guildBoostDonationRow');
-      var when = d.timestamp ? new Date(d.timestamp * 1000) : null;
-      var whenTxt = when ? when.toLocaleDateString(undefined) + ' ' +
-        when.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : '';
-      dRow.appendChild(el('span', 'guildBoostDonationName', d.characterName));
-      dRow.appendChild(el('span', 'guildBoostDonationAmount',
-        fmt(d.amount) + (d.currency === CURRENCY_GOULTINES ? ' G' : ' ' + KAMA_UNIT())));
-      dRow.appendChild(el('span', 'guildBoostDonationWhen', whenTxt));
-      don.appendChild(dRow);
-    }
-    root.appendChild(don);
-
-    // Collector management section (custom, below the donations block).
-    try { renderCollectors(msg); } catch (err) { console.error('guild boost collectors', err); }
-  }
-
-  // ── Donation modal ───────────────────────────────────────────────────
-
-  function openDonateModal(msg) {
-    closeDonateModal();
-    var s = STR();
-
-    var overlay = el('div', 'guildBoostModalOverlay');
-    var box = el('div', 'guildBoostModal');
-
-    box.appendChild(el('div', 'guildBoostModalTitle', s.donateTo));
-
-    var cur = CURRENCY_KAMAS;
-    var curRow = el('div', 'guildBoostModalCurRow');
-    var kBtn = el('div', 'guildBoostBtn mini on', s.kamas);
-    var gBtn = el('div', 'guildBoostBtn mini', s.goultines);
-    function refreshCur() {
-      kBtn.className = 'guildBoostBtn mini' + (cur === CURRENCY_KAMAS ? ' on' : '');
-      gBtn.className = 'guildBoostBtn mini' + (cur === CURRENCY_GOULTINES ? ' on' : '');
-      balanceTxt.textContent = s.available + ': ' +
-        (cur === CURRENCY_KAMAS ? fmt(msg.myKamas) + ' ' + s.kamas : fmt(msg.myGoultines) + ' ' + s.goultines);
-    }
-    kBtn.addEventListener('click', function () { cur = CURRENCY_KAMAS; refreshCur(); });
-    gBtn.addEventListener('click', function () { cur = CURRENCY_GOULTINES; refreshCur(); });
-    curRow.appendChild(kBtn);
-    curRow.appendChild(gBtn);
-    box.appendChild(curRow);
-
-    var balanceTxt = el('div', 'guildBoostModalBalance');
-    box.appendChild(balanceTxt);
-
+    var row = el('div', 'giftCodeRowInput');
     var input = document.createElement('input');
-    input.type = 'number';
-    input.min = '1';
-    input.placeholder = s.amount;
-    input.className = 'guildBoostModalInput';
-    box.appendChild(input);
-
-    var btnRow = el('div', 'guildBoostModalBtns');
-    var cancel = el('div', 'guildBoostBtn mini', s.cancel);
-    cancel.addEventListener('click', closeDonateModal);
-    var confirm = el('div', 'guildBoostBtn mini confirm', s.confirm);
-    confirm.addEventListener('click', function () {
-      var amount = parseInt(input.value, 10);
-      if (!amount || amount <= 0) return;
-      send('GuildDonationRequestMessage', { currency: cur, amount: amount, requestId: ++requestSeq });
-      closeDonateModal();
+    input.type = 'text';
+    input.className = 'giftCodeInput';
+    input.maxLength = 32;
+    input.placeholder = t.inputHint;
+    input.spellcheck = false;
+    row.appendChild(input);
+    var validate = el('div', 'giftCodeValidate', t.validate);
+    validate.addEventListener('click', function () {
+      if (validate.$_busy) return;
+      var code = (input.value || '').trim();
+      if (!code) { input.classList.add('shake'); setTimeout(function () { input.classList.remove('shake'); }, 400); return; }
+      validate.$_busy = true;
+      validate.classList.add('busy');
+      validate.textContent = t.busy;
+      send('giftCodeRedeem', { code: code });
     });
-    btnRow.appendChild(cancel);
-    btnRow.appendChild(confirm);
-    box.appendChild(btnRow);
+    row.appendChild(validate);
+    panel.appendChild(row);
 
-    overlay.appendChild(box);
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) closeDonateModal(); });
-    document.body.appendChild(overlay);
-    refreshCur();
-    setTimeout(function () { input.focus(); }, 50);
-  }
+    var feedback = el('div', 'giftCodeFeedback', '');
+    panel.appendChild(feedback);
 
-  function closeDonateModal() {
-    var o = document.querySelector('.guildBoostModalOverlay');
-    if (o && o.parentNode) o.parentNode.removeChild(o);
-  }
+    panel.appendChild(el('div', 'giftCodeSectionTitle', t.waiting));
+    var listWrap = el('div', 'giftCodeListWrap');
+    listWrap.appendChild(el('div', 'giftCodeEmpty', t.loading));
+    panel.appendChild(listWrap);
 
-  // ── Boot: hook + live updates ────────────────────────────────────────
+    input.addEventListener('keydown', function (ev) {
+      if (ev && ev.key === 'Enter' && validate) validate.click();
+    });
 
-  function listenLive() {
-    try {
-      if (window.dofus && window.dofus.connectionManager) {
-        if (!window.$_guildBoostListening) {
-          window.$_guildBoostListening = true;
-          window.dofus.connectionManager.on('GuildBoostPanelMessage', function (msg) {
-            renderPanel(msg);
-          });
-        }
-      }
-    } catch (err) { /* ignore */ }
-  }
-
-  hookGuildWindow();
-  listenLive();
-  var bootTimer = setInterval(function () {
-    hookGuildWindow();
-    listenLive();
-    if (hookDone) clearInterval(bootTimer);
-  }, 1000);
-})();
-
-// ─────────────────────────────────────────────────────────────────────
-// Admin panel + debug mode (custom feature, admins only)
-//
-// The server gates every admin message on the account role (>= 2), so the
-// panel is inert for non-admins even if this code runs for everyone.
-//  • !paneadm  → server sends AdminPanelOpenMessage → the panel opens.
-//  • The panel browses the item catalog (AdminItemSearchRequestMessage),
-//    grants items (AdminGrantItemMessage) and toggles debug mode
-//    (AdminDebugModeMessage).
-//  • Debug mode: DOUBLE TAPPING the same map cell within ~400ms teleports
-//    the character there (AdminDebugTeleportMessage) instead of walking.
-//    We intercept the outgoing GameMapMovementRequestMessage — the last
-//    keyMovement encodes the destination as cellId | (direction << 12),
-//    so cellId = last & 4095, no bundle patching or coordinate math.
-//    A single tap always passes through untouched (normal walking keeps
-//    working with debug ON); only the second tap on the same cell within
-//    the double-tap window is converted into a teleport.
-// ─────────────────────────────────────────────────────────────────────
-;(function () {
-  if (window.$_adminPanelInjected) return;
-  window.$_adminPanelInjected = true;
-
-  var debugOn = false;
-  var isAdmin = false;
-  var types = [];       // AdminItemTypeInfo[]
-  var lastItems = [];   // AdminItemInfo[] (current page)
-  var total = 0;
-  var page = 0;
-  var query = '';
-  var typeId = 0;
-  var active = false;
-  var panelRoot = null;
-  var lastTapCell = -1; // double-tap detection state
-  var lastTapTime = 0;
-  var DOUBLE_TAP_MS = 400;
-
-  function send(type, data) {
-    try {
-      if (window.dofus && typeof window.dofus.sendMessage === 'function') {
-        window.dofus.sendMessage(type, data || {});
-      }
-    } catch (err) { /* ignore */ }
-  }
-
-  function el(tag, cls, text) {
-    var d = document.createElement(tag);
-    if (cls) d.className = cls;
-    if (text !== undefined) d.textContent = text;
-    return d;
-  }
-
-  function inFight() {
-    try {
-      var fm = window.gui && window.gui.fightManager;
-      return !!(fm && typeof fm.isInFight === 'function' && fm.isInFight());
-    } catch (e) { return false; }
-  }
-
-  // ── Debug teleport: DOUBLE TAP on the same cell = instant teleport ──
-  // The bundle re-sends GameMapMovementRequestMessage when the tapped cell
-  // changes (and even when re-tapping the destination while walking: it
-  // cancels the current walk, then re-paths).  So a double tap on the SAME
-  // cell produces two requests to that cell within ~400ms: the first passes
-  // through (the character walks normally), the second becomes a teleport.
-  function hookSendMessage() {
-    if (window.$_adminSendHooked) return;
-    var dofus = window.dofus;
-    if (!dofus || typeof dofus.sendMessage !== 'function') return;
-    var orig = dofus.sendMessage.bind(dofus);
-    dofus.sendMessage = function (type, data) {
-      try {
-        if (debugOn && isAdmin && type === 'GameMapMovementRequestMessage' &&
-            data && data.keyMovements && data.keyMovements.length && !inFight()) {
-          var last = data.keyMovements[data.keyMovements.length - 1];
-          var cellId = Number(last) & 4095; // cellId | (direction << 12)
-          var now = Date.now();
-          if (cellId === lastTapCell && now - lastTapTime < DOUBLE_TAP_MS) {
-            lastTapCell = -1; // consume the double tap
-            send('AdminDebugTeleportMessage', { cellId: cellId });
-            return; // swallow this walk — teleport instead
-          }
-          lastTapCell = cellId;
-          lastTapTime = now;
-        }
-      } catch (err) { /* fall through to the normal send */ }
-      return orig(type, data);
+    api.onRedeemError = function (reason) {
+      if (validate) { validate.$_busy = false; validate.classList.remove('busy'); validate.textContent = t.validate; }
+      feedback.textContent = t.errors[reason] || (t.errors.DB + ' (' + reason + ')');
+      feedback.className = 'giftCodeFeedback err';
+      feedback.classList.remove('pop'); void feedback.offsetWidth;
+      feedback.classList.add('pop');
     };
-    window.$_adminSendHooked = true;
+    api.resetValidate = function () {
+      if (validate) { validate.$_busy = false; validate.classList.remove('busy'); validate.textContent = t.validate; }
+    };
+    api.refresh = function () { send('giftPendingList', {}); };
+    api.renderList = function (gifts) { renderGifts(listWrap, gifts); };
+    api.delivered = function () {
+      feedback.textContent = t.delivered;
+      feedback.className = 'giftCodeFeedback ok';
+      feedback.classList.remove('pop'); void feedback.offsetWidth;
+      feedback.classList.add('pop');
+    };
+    api.redeemed = function () {
+      feedback.textContent = t.redeemed;
+      feedback.className = 'giftCodeFeedback ok';
+      feedback.classList.remove('pop'); void feedback.offsetWidth;
+      feedback.classList.add('pop');
+    };
   }
 
-  // ── Panel UI ────────────────────────────────────────────────────────
 
-  function openPanel(msg) {
-    if (!panelRoot) buildPanel();
-    active = true;
-    var header = panelRoot.querySelector('.adminPanelHeaderInfo');
-    if (header) {
-      header.textContent = (msg.characterName || '?') +
-        ' · ' + fmt((msg && msg.kamas) || 0) + ' kamas';
+  // ── Overlay que SUSTITUYE el contenido del tab de Goultinas (556) ──
+  // Verdad DOM pura (clases reales del bundle): el tab de la categoría 556
+  // se crea como ["tab","goultineCategory"] dentro de .topTabsList, y el
+  // área de contenido es la hermana .row2 (viewContainer) donde la rejilla
+  // de packs renderiza como .itemsListView._556.  El overlay se muestra
+  // SOLO cuando esa vista está activa y en pantalla.
+  // La vista de la categoria Goultinas (556) es UNICA en el shop: el
+  // bundle RENOMBRA el mismo elemento .itemsListView a "_"+categoryId al
+  // abrir cada categoria (setClassNames(["itemsListView","_"+e])).  Funciona
+  // igual en el flujo mega (catalog-pages).  Trigger: existe
+  // .itemsListView._556 VISIBLE -> el overlay cubre su contenedor (.row2);
+  // en cualquier otro estado (otra categoria, tienda cerrada), oculto.
+  var overlay = null;            // DOM overlay sobre la vista de packs
+  var overlayWasVisible = false; // anti-spam de refresh (solo en transicion)
+
+  function syncOverlay() {
+    var view = null;
+    var views = document.querySelectorAll('.itemsListView');
+    for (var i = 0; i < views.length; i++) {
+      if ((' ' + views[i].className + ' ').indexOf('_556') !== -1) { view = views[i]; break; }
     }
-    refreshTypeSelect();
-    panelRoot.style.display = 'block';
-    search();
-  }
-
-  function closePanel() {
-    active = false;
-    if (panelRoot) panelRoot.style.display = 'none';
-  }
-
-  function fmt(n) {
-    n = Math.round(Number(n) || 0);
-    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  }
-
-  function refreshTypeSelect() {
-    var sel = panelRoot.querySelector('.adminTypeSelect');
-    if (!sel) return;
-    var prev = sel.value;
-    sel.innerHTML = '';
-    sel.appendChild(el('option', '', 'Todos los tipos'));
-    for (var i = 0; i < types.length; i++) {
-      var t = types[i];
-      var o = el('option', '', (t.nameId || 'Tipo ' + t.id) + ' (' + t.id + ')');
-      o.value = String(t.id);
-      sel.appendChild(o);
-    }
-    if (prev) sel.value = prev;
-  }
-
-  function search() {
-    var qEl = panelRoot.querySelector('.adminQueryInput');
-    var tEl = panelRoot.querySelector('.adminTypeSelect');
-    query = qEl ? qEl.value : '';
-    typeId = tEl ? parseInt(tEl.value, 10) || 0 : 0;
-    page = 0;
-    send('AdminItemSearchRequestMessage', { query: query, typeId: typeId, page: 0 });
-  }
-
-  function goPage(delta) {
-    var next = page + delta;
-    if (next < 0) next = 0;
-    if (total && next * 50 >= total && next > 0) next = Math.max(0, Math.ceil(total / 50) - 1);
-    page = next;
-    send('AdminItemSearchRequestMessage', { query: query, typeId: typeId, page: page });
-  }
-
-  function renderResults() {
-    var list = panelRoot.querySelector('.adminItemList');
-    if (!list) return;
-    list.innerHTML = '';
-    var target = targetName();
-
-    if (!lastItems.length) {
-      list.appendChild(el('div', 'adminEmpty', 'Sin resultados.'));
-    }
-    function assetUrl(route) {
-      try {
-        return (window.Config && window.Config.assetsUrl || 'http://127.0.0.1:8765/assets/') + route;
-      } catch (e) { return ''; }
-    }
-
-    function typeName(typeId) {
-      for (var i = 0; i < types.length; i++) {
-        if (String(types[i].id) === String(typeId)) return types[i].nameId || ('Tipo ' + typeId);
+    var active = false, vc = null;
+    if (view) {
+      var st = window.getComputedStyle(view);
+      if (st.display !== 'none' && st.visibility !== 'hidden' && view.offsetWidth > 0) {
+        active = true;
+        vc = view.parentNode;
       }
-      return 'Tipo ' + typeId;
     }
-
-    for (var i = 0; i < lastItems.length; i++) {
-      var it = lastItems[i];
-      var row = el('div', 'adminItemRow');
-
-      // Item icon (gfx/items/{iconId}.png — same route the game uses for
-      // inventory icons) so admins can recognise the item at a glance.
-      var icon = document.createElement('img');
-      icon.className = 'adminItemIcon';
-      icon.src = assetUrl('gfx/items/' + (it.iconId || 0) + '.png');
-      icon.alt = it.nameId || ('Item ' + it.id);
-      row.appendChild(icon);
-
-      var info = el('div', 'adminItemInfo');
-      var name = el('div', 'adminItemName', it.nameId || ('Item ' + it.id));
-      var meta = el('div', 'adminItemMeta', '#' + it.id + ' · ' + typeName(it.typeId) + ' · nivel ' + it.level);
-      info.appendChild(name);
-      info.appendChild(meta);
-      row.appendChild(info);
-
-      var btns = el('div', 'adminItemBtns');
-      var add1 = el('div', 'adminBtn add', '+1');
-      add1.addEventListener('click', (function (gid) {
-        return function () { grant(gid, 1); };
-      })(it.id));
-      var add10 = el('div', 'adminBtn add', '+10');
-      add10.addEventListener('click', (function (gid) {
-        return function () { grant(gid, 10); };
-      })(it.id));
-      btns.appendChild(add1);
-      btns.appendChild(add10);
-      row.appendChild(btns);
-      list.appendChild(row);
+    if (!vc) {
+      if (overlay && overlay.parentNode) overlay.style.display = 'none';
+      // CRÍTICO: resetear la marca.  Si queda en true al volver al tab,
+      // active === overlayWasVisible y el overlay JAMÁS se vuelve a mostrar
+      // ("cargó una sola vez").
+      overlayWasVisible = false;
+      if (overlay && !overlay.isConnected) overlay = null;
+      return;
     }
-
-    var pager = panelRoot.querySelector('.adminPager');
-    if (pager) {
-      pager.innerHTML = '';
-      var prevBtn = el('div', 'adminBtn', '‹ Anterior');
-      prevBtn.addEventListener('click', function () { goPage(-1); });
-      var label = el('div', 'adminPagerLabel', 'Página ' + (page + 1) + ' / ' + Math.max(1, Math.ceil(total / 50)) + ' (' + total + ')');
-      var nextBtn = el('div', 'adminBtn', 'Siguiente ›');
-      nextBtn.addEventListener('click', function () { goPage(1); });
-      pager.appendChild(prevBtn);
-      pager.appendChild(label);
-      pager.appendChild(nextBtn);
+    try {
+      var pos = window.getComputedStyle(vc).position;
+      if (pos !== 'absolute' && pos !== 'fixed' && pos !== 'relative') vc.style.position = 'relative';
+    } catch (err) { /* keep defaults */ }
+    if (!overlay || overlay.parentNode !== vc) {
+      if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      overlay = el('div', 'giftCodeContent');
+      overlay.style.display = 'none';
+      vc.appendChild(overlay);
+      overlayWasVisible = false;
+    }
+    if (active === overlayWasVisible) return;
+    overlayWasVisible = active;
+    overlay.style.display = active ? 'block' : 'none';
+    if (active) {
+      buildPanelInto(overlay);
+      api.refresh();
     }
   }
 
-  function targetName() {
-    var t = panelRoot.querySelector('.adminTargetInput');
-    return t ? t.value.trim() : '';
-  }
-
-  function grant(gid, qty) {
-    send('AdminGrantItemMessage', { gid: gid, quantity: qty, targetName: targetName() });
-  }
-
-  function toggleDebug() {
-    debugOn = !debugOn;
-    var b = panelRoot.querySelector('.adminBtn.debug');
-    if (b) {
-      b.className = 'adminBtn debug' + (debugOn ? ' on' : '');
-      b.textContent = 'Modo debug: ' + (debugOn ? 'ON' : 'OFF');
-    }
-    send('AdminDebugModeMessage', { enabled: debugOn });
-  }
-
-  function buildPanel() {
-    panelRoot = el('div', 'adminPanelOverlay');
-    var box = el('div', 'adminPanel');
-
-    var header = el('div', 'adminPanelHeader');
-    var title = el('div', 'adminPanelTitle', 'Panel Admin');
-    var info = el('div', 'adminPanelHeaderInfo', '');
-    var close = el('div', 'adminBtn close', '✕');
-    close.addEventListener('click', closePanel);
-    header.appendChild(title);
-    header.appendChild(info);
-    header.appendChild(close);
-    box.appendChild(header);
-
-    // Search row
-    var searchRow = el('div', 'adminSearchRow');
-    var qInput = el('input', 'adminQueryInput');
-    qInput.type = 'text';
-    qInput.placeholder = 'Buscar item por nombre o id…';
-    qInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); });
-    var typeSel = el('select', 'adminTypeSelect');
-    typeSel.addEventListener('change', search);
-    var searchBtn = el('div', 'adminBtn', 'Buscar');
-    searchBtn.addEventListener('click', search);
-    searchRow.appendChild(qInput);
-    searchRow.appendChild(typeSel);
-    searchRow.appendChild(searchBtn);
-    box.appendChild(searchRow);
-
-    // Results
-    var list = el('div', 'adminItemList');
-    box.appendChild(list);
-
-    // Pager
-    var pager = el('div', 'adminPager');
-    box.appendChild(pager);
-
-    // Footer: target + quantity + debug
-    var footer = el('div', 'adminPanelFooter');
-    var targetInput = el('input', 'adminTargetInput');
-    targetInput.type = 'text';
-    targetInput.placeholder = 'Personaje destino (vacío = tú)';
-    var debugBtn = el('div', 'adminBtn debug', 'Modo debug: OFF');
-    debugBtn.addEventListener('click', toggleDebug);
-    var hint = el('div', 'adminHint', 'Debug ON: toca el mapa para teletransportarte a esa celda.');
-    footer.appendChild(targetInput);
-    footer.appendChild(debugBtn);
-    box.appendChild(footer);
-    box.appendChild(hint);
-
-    panelRoot.appendChild(box);
-    panelRoot.addEventListener('click', function (e) { if (e.target === panelRoot) closePanel(); });
-    document.body.appendChild(panelRoot);
-  }
-
-  // ── Boot ────────────────────────────────────────────────────────────
-
-  function listenLive() {
-    try {
-      var cm = window.dofus && window.dofus.connectionManager;
-      if (!cm || window.$_adminLive) return;
-      window.$_adminLive = true;
-      cm.on('AdminPanelOpenMessage', function (msg) {
-        isAdmin = !!(msg && msg.role >= 2);
-        // Sync the local toggle with the server's truth (e.g. after a
-        // reconnect the server-side DebugMode resets to false).
-        debugOn = !!(msg && msg.debugMode);
-        lastTapCell = -1;
-        types = (msg && msg.itemTypes) || [];
-        openPanel(msg);
-      });
-      cm.on('disconnect', function () {
-        // Never leave debug teleport armed across sessions/characters: a
-        // normal user on this window must never get taps swallowed.
-        debugOn = false;
-        isAdmin = false;
-        lastTapCell = -1;
-        closePanel();
-      });
-      cm.on('AdminItemListMessage', function (msg) {
-        lastItems = (msg && msg.items) || [];
-        total = (msg && msg.total) || 0;
-        page = (msg && msg.page) || 0;
-        renderResults();
-      });
-    } catch (err) { /* ignore */ }
-  }
-
-  var bootTimer = setInterval(function () {
-    hookSendMessage();
-    listenLive();
-    if (window.$_adminSendHooked && window.$_adminLive) clearInterval(bootTimer);
-  }, 1000);
-})();
-
-// ─────────────────────────────────────────────────────────────────────
-// AUDIO PROBE (temporary diagnostic): reports the real audio state from
-// inside the game page so we can see why there is no sound.
-// ─────────────────────────────────────────────────────────────────────
-;(function () {
-  if (window.$_audioProbeRan) return;
-  window.$_audioProbeRan = true;
-
-  function reportNow(tag) {
-    var r = { tag: tag, ts: new Date().toISOString(), ua: String(navigator.userAgent).slice(0, 120) };
-    try { r.visibility = document.visibilityState; } catch (e) {}
-    try { r.hasFocus = document.hasFocus(); } catch (e) {}
-    try { r.cordova = !!window.cordova; r.wizAssets = !!window.wizAssets; } catch (e) {}
-    try {
-      var AC = window.AudioContext || window.webkitAudioContext;
-      r.hasAudioContext = !!AC;
-      if (AC) {
-        var ac = new AC();
-        r.acState = ac.state;
-        try {
-          ac.resume().then(function () { r.acStateAfterResume = ac.state; }).catch(function (err) { r.acResumeErr = String(err); });
-        } catch (e) { r.acResumeErr = String(e); }
-        setTimeout(function () { try { r.acStateLater = ac.state; ac.close(); } catch (e) {} }, 1500);
-      }
-    } catch (e) { r.acErr = String(e); }
-    try {
-      var m91 = window.singletons && window.singletons(91);
-      if (m91) {
-        r.audioPath = m91.settings && m91.settings.audioPath;
-        r.globalMuted = m91.muted;
-        r.acEngineState = m91.audioContext ? m91.audioContext.state : null;
-        r.channels = {};
-        if (m91.channels) {
-          for (var ch in m91.channels) {
-            var c = m91.channels[ch];
-            r.channels[ch] = { volume: c.volume, muted: !!c.muted, loop: !!c.loopSound };
-          }
-        }
-      } else {
-        r.singletons91 = 'missing';
-      }
-    } catch (e) { r.engineErr = String(e); }
-    return r;
-  }
-
-  function send(r) {
-    try {
-      fetch('http://127.0.0.1:8765/overrides/audioprobe.json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(r)
-      }).catch(function () {});
-    } catch (e) {}
-    try { console.log('[AUDIOPROBE] ' + JSON.stringify(r)); } catch (e) {}
-  }
-
-  send(reportNow('boot'));
-
-  // Play the login music directly, outside the engine's WebAudio graph.
-  try {
-    var a = new Audio('http://127.0.0.1:8765/assets/audio/20000.mp3');
-    a.preload = 'auto';
-    var evs = {};
-    ['loadstart', 'loadedmetadata', 'canplay', 'canplaythrough', 'playing', 'pause', 'ended', 'stalled', 'waiting', 'suspend', 'abort'].forEach(function (ev) {
-      a.addEventListener(ev, function () { evs[ev] = true; });
-    });
-    var played = false;
-    try {
-      var p = a.play();
-      if (p && p.then) {
-        p.then(function () { evs.playResolved = true; }).catch(function (e) { evs.playRejected = String(e); });
-      } else { evs.playReturned = typeof p; }
-    } catch (e) { evs.playThrow = String(e); }
-    setTimeout(function () {
-      var r = reportNow('play');
-      r.play = evs;
-      r.final = {
-        readyState: a.readyState,
-        networkState: a.networkState,
-        paused: a.paused,
-        currentTime: a.currentTime,
-        duration: isNaN(a.duration) ? null : a.duration,
-        volume: a.volume,
-        muted: a.muted,
-        error: a.error ? a.error.code + ' ' + a.error.message : null
-      };
-      send(r);
-    }, 4000);
-  } catch (e) {
-    try { send(reportNow('playthrow')); } catch (e2) {}
-  }
-
-  window.$_audioProbe = function () { send(reportNow('manual')); };
-})();
-
-// ─────────────────────────────────────────────────────────────────────
-// Goultine packs: show a real price instead of "Gratis" (DofEmu patch)
-//
-// The goultine packs carry a Goultine price (= pack amount) so the tile
-// renders "1 200" + GOU icon instead of the "Gratis" button.  The stock
-// client, however, gates every GOU purchase on the wallet balance
-// (purchaseArticleOnAnkama -> openNotEnoughHardCurrencyPopup) and
-// disables the shopConfirm buy button when the balance is below the
-// price.  The emulator has no real-money IAP, so the packs are claimable
-// for free (the game server credits the Goultines without spending a
-// balance): these hooks bypass that client-side balance gate for
-// goultine packs only.  Non-goultine articles keep the official
-// balance-gated flow untouched.
-// ─────────────────────────────────────────────────────────────────────
-;(function () {
-  if (window.$_goultineShopPatched) return;
-  window.$_goultineShopPatched = true;
-
-  function isGoultinePack(article) {
-    try {
-      var raw = article && (article._megaShopRawArticle || article);
-      var refs = raw && raw.references;
-      return !!(refs && refs[0] && refs[0].type === 'GOULTINE');
-    } catch (err) { return false; }
-  }
-
-  // Skip the client-side "not enough Goultines" gate (module 859,
-  // purchaseArticleOnAnkama) for goultine packs.
-  function patchPurchaseGate() {
-    try {
-      var shop = window.singletons && window.singletons(859);
-      if (!shop || !shop.purchaseArticleOnAnkama || shop.$_goultineGatePatched) return;
-      shop.$_goultineGatePatched = true;
-      var orig = shop.purchaseArticleOnAnkama.bind(shop);
-      shop.purchaseArticleOnAnkama = function (article, currency) {
-        try {
-          if (isGoultinePack(article) && currency === 'GOU') {
-            var inv = window.gui && window.gui.playerData && window.gui.playerData.inventory;
-            if (inv) {
-              var saved = inv.goultines;
-              // Temporarily make the wallet look rich enough to pass the
-              // balance gate; the confirm window renders synchronously.
-              inv.goultines = Number.MAX_SAFE_INTEGER;
-              var ret = orig(article, currency);
-              setTimeout(function () {
-                // Only restore if the wallet hasn't been refreshed with the
-                // server balance since (it sends moneyGoultinesAmountSuccess
-                // after the purchase credits the Goultines).
-                if (inv.goultines === Number.MAX_SAFE_INTEGER) inv.goultines = saved;
-              }, 2000);
-              return ret;
-            }
-          }
-        } catch (err) { /* fall through to the original */ }
-        return orig(article, currency);
-      };
-    } catch (err) { /* never break the game for a patch failure */ }
-  }
-
-  // Keep the shopConfirm buy button enabled for goultine packs (the stock
-  // update() disables it when the wallet balance is below the price).
-  function patchConfirmButton() {
-    try {
-      var wm = window.singletons && window.singletons(52);
-      if (!wm || !wm.getWindow) return;
-      var sc = wm.getWindow('shopConfirm');
-      if (!sc || typeof sc.update !== 'function' || sc.$_goultineConfirmPatched) return;
-      sc.$_goultineConfirmPatched = true;
-      var orig = sc.update.bind(sc);
-      sc.update = function () {
-        orig();
-        try {
-          var p = this.params && this.params.article;
-          if (isGoultinePack(p) && this.buyBtn && typeof this.buyBtn.enable === 'function') {
-            this.buyBtn.enable();
-          }
-        } catch (err) { /* ignore */ }
-      };
-    } catch (err) { /* ignore */ }
-  }
-
-  patchPurchaseGate();
-  patchConfirmButton();
-  var tries = 0;
-  var iv = setInterval(function () {
-    patchPurchaseGate();
-    patchConfirmButton();
-    if (++tries > 120) clearInterval(iv);
-  }, 1000);
-})();
-
-
-// ────────────────────────────────────────────────────────────────────────
-//  House properties: populate currentMapHouses from HousePropertiesMessage
-//
-//  The stock client only populates currentMapHouses from RealEstatePropertiesMessage.
-//  If that message fails to parse or arrives too late, getHousePropertiesById()
-//  returns undefined and the buy dialog crashes on i._name.
-//  This patch ensures every HousePropertiesMessage also updates currentMapHouses.
-// ────────────────────────────────────────────────────────────────────────
-;(function () {
-  if (window.$_housePropPatch) return;
-  window.$_housePropPatch = true;
-
-  function install() {
+  function hookMessages() {
+    if (window.$_giftMsgsHooked) return;
     var cm = window.dofus && window.dofus.connectionManager;
-    if (!cm || cm.$_housePropInstalled) return false;
-    cm.$_housePropInstalled = true;
+    if (!cm || typeof cm.on !== 'function') return;
+    window.$_giftMsgsHooked = true;
 
-    cm.on('HousePropertiesMessage', function (msg) {
-      try {
-        var props = msg && msg.properties;
-        if (!props || !props.houseId) return;
-        var pos = window.gui && window.gui.playerData && window.gui.playerData.position;
-        if (!pos || !pos.currentMapHouses) return;
-        // Store house in currentMapHouses so getHousePropertiesById works
-        pos.currentMapHouses[props.houseId] = props;
-        console.log('[HouseFix] Updated currentMapHouses for houseId=' + props.houseId + ' name=' + (props._name || props.ownerName || '?'));
-      } catch (err) { console.error('[HouseFix] Error:', err); }
+    cm.on('giftCodeRedeemSuccess', function () {
+      api.resetValidate && api.resetValidate();
+      api.redeemed && api.redeemed();
+      api.refresh();
     });
-
-    // Also patch getHousePropertiesById to handle missing houses gracefully
-    // by returning a synthetic object instead of undefined
-    var posModule = window.gui && window.gui.playerData && window.gui.playerData.position;
-    if (posModule && typeof posModule.getHousePropertiesById === 'function' && !posModule.$_origGetHouse) {
-      posModule.$_origGetHouse = posModule.getHousePropertiesById.bind(posModule);
-      posModule.getHousePropertiesById = function (id) {
-        var result = posModule.$_origGetHouse(id);
-        if (result) return result;
-        // If not found, return a minimal house info object to prevent crash
-        console.warn('[HouseFix] getHousePropertiesById(' + id + ') returned undefined, creating fallback');
-        return { houseId: id, _name: 'Casa #' + id, ownerName: '', modelId: 0, isOnSale: true, isClosed: false, status: 0, doorsOnMap: [] };
-      };
-    }
-
-    return true;
-  }
-
-  var tries = 0;
-  var iv = setInterval(function () {
-    if (install() || ++tries > 180) clearInterval(iv);
-  }, 1000);
-})();
-
-// ────────────────────────────────────────────────────────────────────────
-//  Timeline diagnostics (DofEmu patch)
-//
-//  Logs the fight timeline's turn events (GameFightTurnStart with the
-//  remaining timer, and the turn-end events) so fight-timeline bugs can be
-//  diagnosed from game-console.log.  The value that matters is `remaining`:
-//  if it is garbage (<= 0) the client's clock (serverUtcTimeLag) or the
-//  server's endTime is wrong; if the TurnStart lines are missing, the turn
-//  messages never reach the client.  Safe to remove once confirmed.
-// ────────────────────────────────────────────────────────────────────────
-(function () {
-  if (window.__dofEmuTimelineDiag) return;
-  window.__dofEmuTimelineDiag = true;
-
-  function install() {
-    try {
-      var gui = window.gui;
-      if (!gui || !gui.fightManager || !gui.timeline) return false;
-      var fm = gui.fightManager;
-      if (fm.__timelineDiagInstalled) return true;
-      fm.__timelineDiagInstalled = true;
-
-      fm.on("GameFightTurnStart", function (id, endTime) {
-        try {
-          var remaining = Math.max(0, endTime - Date.now());
-          console.log("[TIMELINE] TurnStart id=" + id + " endTime=" + endTime + " remaining=" + remaining + "ms");
-        } catch (e) {}
-      });
-      fm.on("gameFightTurnEnd", function (id) {
-        try { console.log("[TIMELINE] TurnEnd event id=" + id); } catch (e) {}
-      });
-      fm.on("GameFightTurnReadyRequestMessage", function (e) {
-        try { console.log("[TIMELINE] ReadyRequest id=" + (e && e.id)); } catch (err) {}
-      });
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  var tries = 0;
-  var iv = setInterval(function () {
-    if (install() || ++tries > 180) clearInterval(iv);
-  }, 1000);
-})();
-
-
-// ── MISSING_ID dummy-record healer (fight-end drops spinner) ────────
-// The game's static-data loader persists {MISSING_ID:true, id:X} dummies in
-// its IndexedDB "DataCache" whenever a requested id is missing from the
-// served table, and then treats any stored record as "present" forever.
-// The fight-end window's drops cell is born with class "spinner" and only
-// releases it after building every item icon — building an icon from a
-// dummy throws inside the getItems callback, so the cell (and the whole
-// rewards window) spins forever even though the items ARE in the inventory.
-// Healer: at every boot, open the same DB the game will use (lang +
-// "DataCache", remembered in localStorage), scan every object store, DELETE
-// every dummy record, and only then hand the DB to the game. Never blocks
-// boot: all failures are swallowed after one console.warn.
-;(function () {
-  if (window.$_missingIdHealer) return;
-  window.$_missingIdHealer = true;
-
-  var DB_SUFFIX = "DataCache";
-  var DUMMY_FLAG = "MISSING_ID";
-
-  function resolveLang() {
-    try {
-      var c = window.Config || {};
-      if (c.language) return String(c.language).toLowerCase();
-    } catch (_) {}
-    return "es";
-  }
-
-  function healDb(name) {
-    return new Promise(function (resolve) {
-      var req;
-      try { req = indexedDB.open(name); } catch (_) { return resolve(false); }
-      var timedOut = false;
-      var to = setTimeout(function () { timedOut = true; resolve(false); }, 10000);
-      req.onupgradeneeded = function (ev) {
-        // DB did not exist yet: our versionless open CREATED it (empty, at
-        // v1) — if we left it behind, the game's own open() would NOT fire
-        // its onupgradeneeded and it would boot storeless. Delete it so the
-        // game creates its schema itself (it happens ms before login-time
-        // data loads, so no realistic race).
-        try { ev.target.result.close(); } catch (_) {}
-        try {
-          var del = indexedDB.deleteDatabase(name);
-          del.onerror = function () {};
-          del.onblocked = function () {};
-        } catch (_) {}
-        clearTimeout(to);
-        resolve(true);
-      };
-      req.onerror = function () { clearTimeout(to); resolve(false); };
-      req.onblocked = function () { clearTimeout(to); resolve(false); };
-      req.onsuccess = function () {
-        if (timedOut) return;
-        clearTimeout(to);
-        var opened = req.result;
-        var version = opened.version;
-        var stores = Array.prototype.slice.call(opened.objectStoreNames || []);
-        try { opened.close(); } catch (_) {}
-        if (!stores.length) return resolve(true);
-        var reopen;
-        try { reopen = indexedDB.open(name, version); } catch (_) { return resolve(false); }
-        reopen.onerror = function () { resolve(false); };
-        reopen.onblocked = function () { resolve(false); };
-        reopen.onsuccess = function () {
-          var idb = reopen.result;
-          var pending = stores.length;
-          if (!pending) { try { idb.close(); } catch (_) {} return resolve(true); }
-          var done = function () {
-            if (--pending) return;
-            try { idb.close(); } catch (_) {}
-            setTimeout(function () { resolve(true); }, 50);
-          };
-          var _loop = function (s) {
-            var tx, store;
-            try {
-              tx = idb.transaction(s, "readwrite");
-              store = tx.objectStore(s);
-            } catch (_) { return done(); }
-            var cleaned = 0;
-            var finished = false;
-            var onFinish = function () {
-              if (finished) return;
-              finished = true;
-              if (cleaned > 0) {
-                try { console.info("[DofEmu][MISSING_ID healer] " + s + ": removed " + cleaned + " dummy record(s)"); } catch (_) {}
-              }
-              done();
-            };
-            tx.oncomplete = onFinish;
-            tx.onerror = onFinish;
-            tx.onabort = onFinish;
-            var cursorReq;
-            try { cursorReq = store.openCursor(); } catch (_) { return done(); }
-            cursorReq.onerror = function () {};
-            cursorReq.onsuccess = function () {
-              if (finished) return;
-              var cursor = cursorReq.result;
-              if (!cursor) return;
-              var v = cursor.value;
-              if (v && v[DUMMY_FLAG] === true) {
-                cleaned++;
-                try { cursor.delete(); } catch (_) {}
-              }
-              cursor.continue();
-            };
-          };
-          for (var i = 0; i < stores.length; i++) _loop(stores[i]);
-        };
-      };
+    cm.on('giftCodeRedeemError', function (msg) {
+      api.onRedeemError(msg && msg.reason);
+    });
+    cm.on('giftPendingListSuccess', function (msg) {
+      api.renderList && api.renderList((msg && msg.gifts) || []);
+    });
+    cm.on('giftClaimSuccess', function (msg) {
+      api.delivered && api.delivered(msg && msg.grantId);
+      api.refresh();
+    });
+    cm.on('giftClaimError', function (msg) {
+      api.refresh();
+    });
+    // Popup oficial de restauración: el server solo lo responde con
+    // regalos en espera; empuja el refresco de la lista.
+    cm.on('restoreMysteryBoxSuccess', function () {
+      setTimeout(function () { api.refresh(); }, 300);
     });
   }
 
-  function install() {
-    // index.html stubs window.indexedDB = {} until the game's IDB shim
-    // replaces it with the real one — wait until open() is a function.
-    if (!window.indexedDB || typeof window.indexedDB.open !== "function") return false;
-    if (window.__missingIdHealerRan) return true;
-    window.__missingIdHealerRan = true;
-
-    var dbName = resolveLang() + DB_SUFFIX;
-    healDb(dbName).then(function (ok) {
-      if (!ok) {
-        try { console.warn("[DofEmu][MISSING_ID healer] skipped for " + dbName); } catch (_) {}
-      }
-    });
-    return true;
-  }
-
-  var tries = 0;
+  // Poll permanente pero barato: el DOM de la tienda solo existe mientras
+  // la ventana está abierta (se crea lazy al abrirla y muere al cerrarla)
+  // y cada chequeo es una lectura trivial.  El overlay sigue el estado
+  // REAL renderizado de la vista de Goultinas, sin adivinar internals.
   var iv = setInterval(function () {
-    if (install() || ++tries > 300) clearInterval(iv);
-  }, 1000);
+    hookMessages();
+    try { syncOverlay(); } catch (err) { /* ignore */ }
+  }, 400);
 })();

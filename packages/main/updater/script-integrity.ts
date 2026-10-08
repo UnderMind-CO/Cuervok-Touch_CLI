@@ -39,14 +39,14 @@ export interface ScriptIntegrityEntry {
  * Claves = rutas relativas dentro de GAME_PATH (formato del manifest).
  */
 export const GAME_SCRIPT_INTEGRITY: Record<string, ScriptIntegrityEntry> = {
-  'build/script.js': {
-    sha256: '0b480e5afde680568f2b1a7c4b781ba7dd703e34232a0be3333244f685e1af1b',
-    size: 5395253,
+  "build/script.js": {
+    "sha256": "5ee3498a4be95c9be77efffd719025e603a78106fffb5ee5edfa08fd1a836531",
+    "size": 5395620
   },
-  'build/primus.js': {
-    sha256: '015f5f7d5d1b3f6fa5aa5a19acfbafbdc48e7d766366091dc030dfa73ff040a1',
-    size: 201388,
-  },
+  "build/primus.js": {
+    "sha256": "015f5f7d5d1b3f6fa5aa5a19acfbafbdc48e7d766366091dc030dfa73ff040a1",
+    "size": 201388
+  }
 }
 
 function sha256Of(data: string | Buffer): string {
@@ -99,10 +99,14 @@ export function verificationOnLaunch(): { ok: boolean; failures: string[] } {
   const gamePath = get.GAME_PATH()
 
   // primus.js se copia sin regex → hash estable entre updates.
+  // El pin puede estar AUSENTE si el manifest oficial dejó de servirlo y
+  // el pin se regeneró con una versión antigua del script de pineado: sin
+  // esta guardia, primus.sha256 de undefined TIRABA el arranque del cliente
+  // (TypeError) — el fallo se reporta, nunca se tira.
   const primus = GAME_SCRIPT_INTEGRITY['build/primus.js']
   try {
     const p = path.join(gamePath, 'build/primus.js')
-    if (fs.existsSync(p)) {
+    if (primus && fs.existsSync(p)) {
       const buf = fs.readFileSync(p)
       if (sha256Of(buf) !== primus.sha256 || buf.length !== primus.size) {
         failures.push(`build/primus.js modificado en disco (sha=${sha256Of(buf).slice(0, 12)}…)`)
