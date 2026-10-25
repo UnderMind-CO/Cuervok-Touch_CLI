@@ -24,6 +24,11 @@ export class UpdaterWindow extends EventEmitter {
       maxWidth: 700,
       maxHeight: 190,
       title: 'Cuervok Updater',
+      // Sin barra de título ni botones nativos (minimizar/cerrar): mientras
+      // se valida la actualización solo se ve el overlay (gif + texto).
+      // El usuario siempre conserva Alt+F4 y el cierre desde la barra de
+      // tareas de Windows.
+      frame: false,
       autoHideMenuBar: true,
       backgroundColor: '#111218',
       resizable: false,

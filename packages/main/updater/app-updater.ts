@@ -5,6 +5,24 @@ import { logger } from '../logger'
 
 type StatusCallback = (status: AppUpdateStatus) => void
 
+/*
+ * El feed se fija en electron-builder (package.json → build.publish →
+ * provider generic, verlo en el "app-update.yml" empaquetado). En runtime
+ * se admite un override por variable de entorno (solo en packaged) para
+ * poder cambiar de VPS o probar un feed de staging sin rebuild:
+ * - CUV_UPDATES_URL: URL completa del feed (e.g. https://midominio.com/releases/cuervok)
+ * - CUV_SERVER_URL: mismo dominio del servidor (se sirve desde <base>/releases/cuervok)
+ */
+function applyFeedOverride(): void {
+  if (!app.isPackaged) return
+  const feedUrl =
+    process.env.CUV_UPDATES_URL ||
+    (process.env.CUV_SERVER_URL ? `${process.env.CUV_SERVER_URL.replace(/\/+$/, '')}/releases/cuervok` : null)
+  if (!feedUrl) return
+  autoUpdater.setFeedURL({ provider: 'generic', url: feedUrl })
+  logger.info(`[app-update] feed override → ${feedUrl}`)
+}
+
 export class AppUpdater {
   private readonly _onStatus: StatusCallback
   private _status: AppUpdateStatus = { phase: 'idle', message: 'Waiting to check for app updates.' }
@@ -74,6 +92,8 @@ export class AppUpdater {
   start() {
     if (this._started) return
     this._started = true
+
+    applyFeedOverride()
 
     if (!app.isPackaged) {
       this._setStatus({

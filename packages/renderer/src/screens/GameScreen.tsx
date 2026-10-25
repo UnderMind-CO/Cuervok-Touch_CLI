@@ -221,7 +221,7 @@ function GameIframe({ tab, gameSrc, isVisible, onIframeRef }: { tab: GameTab; ga
         largeImageKey: 'dofus_logo',
         largeImageText: 'Dofus Touch — Cuervok',
         buttons: [
-          { label: 'Join Discord', url: 'https://discord.gg/hbKhGnQFM' },
+          { label: 'Join Discord', url: 'https://discord.gg/fF9gjhtfuJ' },
           { label: 'Website', url: 'https://cuervok.com' }
         ]
       }))

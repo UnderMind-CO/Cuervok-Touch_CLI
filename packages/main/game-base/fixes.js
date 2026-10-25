@@ -542,11 +542,19 @@ for (var id in events) {
     var a = (window.Config && window.Config.assetsUrl) || '../assets/';
     return String(a).replace(/\/+$/, '');
   }
+  // Origen del servidor local SIN la ruta /assets: /shopimg vive en la RAIZ
+  // del proxy (GET /shopimg/{iconId}.png).  Prependre assetsUrl (…/assets/)
+  // producía /assets/shopimg/… (ruta inexistente → cada intento consumesu
+  // timeout de red y el icono fallaba; log 17102026).
+  function originBase() {
+    var s = assetsBase();
+    if (/\/assets$/i.test(s)) s = s.replace(/\/assets$/i, '');
+    return s;
+  }
   function iconCandidates(g) {
-    var base = assetsBase();
-    if (g.kind === 'GOULTINES') return [base + '/gfx/items/goultine.png'];
+    if (g.kind === 'GOULTINES') return [assetsBase() + '/gfx/items/goultine.png'];
     if (!g.iconId) return [];
-    return [base + '/shopimg/' + g.iconId + '.png', base + '/gfx/items/' + g.iconId + '.png'];
+    return [originBase() + '/shopimg/' + g.iconId + '.png', assetsBase() + '/gfx/items/' + g.iconId + '.png'];
   }
   function buildGiftIcon(g) {
     var box = el('div', 'giftCardIcon');
@@ -804,4 +812,392 @@ for (var id in events) {
     hookMessages();
     try { syncOverlay(); } catch (err) { /* ignore */ }
   }, 400);
+})();
+
+// ═══ Cuervok hero UI extras (client-side, features propias del emulador) ═══
+// Dos bloques self-contained:
+//   1) MULTI-EQUIP BADGE: el bundle pinta la marca "equipado" (icono héroe)
+//      contra su ÚNICO _equippedHeroId (el ÚLTIMO EquipHeroResponseMessage).
+//      Con multi-héroe VIP los héroes anteriores pierden la marca aunque
+//      sigan equipados server-side.  Aquí rastreamos TODOS los ids de
+//      héroes equipados (EquipHeroResponseMessage con returnCode 10) y
+//      re-aplicamos la clase oficial .equipped en CADA tile de la lista
+//      (HeroListTile), resolviendo el id por tile.getHeroId() con fallback
+//      por nombre → heroData.getAllHeros().
+//   2) OJO DE VISIBILIDAD en el header de la ventana de héroes
+//      (equipEntity tab "hero"): tooltip Show/Hide heros, envía
+//      HeroVisibilityToggleRequestMessage; el servidor responde
+//      HeroVisibilityStateMessage y SOLO cambia los actores de MAPA de los
+//      héroes: grupo, combates, seguimiento y el resto del modo héroes
+//      siguen funcionando idéntico.
+;(function () {
+  if (window.$_heroUiExtras) return;
+  window.$_heroUiExtras = true;
+
+  /* ════════════════════════════════════════════════════════════════════
+     1) MULTI-EQUIP: la marca .equipped en TODOS los héroes equipados
+     ════════════════════════════════════════════════════════════════════ */
+
+  var equippedHeroIds = {};   // 'h<id>': true
+
+  function isEquipped(id) { return !!equippedHeroIds['h' + id]; }
+  function addEquipped(id) { if (id > 0) equippedHeroIds['h' + id] = true; }
+
+  // GATING (pedido del owner): la función de visibilidad solo está
+  // disponible con AL MENOS 1 héroe equipado — sin héroes no hay nada
+  // que mostrar/ocultar en el mapa.
+  // Tres fuentes (la primera que de un sí gana):
+  //   1. Registro local (EquipHeroResponseMessage returnCode 10).
+  //   2. Slot oficial del bundle: heroData.getEquippedHeroId() > 0
+  //      (el server re-envía el equip de TODOS los héroes al conectar,
+  //      HeroResyncManager — este slot siempre queda apuntando al último).
+  //   3. Fallback visual: cualquier tile de la lista con clase .equipped.
+  function hasEquippedHero() {
+    for (var k in equippedHeroIds) { if (equippedHeroIds[k]) return true; }
+    try {
+      var hd = window.gui && window.gui.playerData && window.gui.playerData.heroData;
+      if (hd && typeof hd.getEquippedHeroId === 'function' && hd.getEquippedHeroId() > 0) return true;
+    } catch (e) {}
+    try {
+      var root = getHeroWindowRoot();
+      if (root && root.querySelector && root.querySelector('.HeroListTile.equipped')) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  // Id de héroe por tile: las instancias del bundle HeroListTile guardan
+  // heroId (tile.getHeroId(), closure del bundle).  Fallback estable:
+  // nombre del tile → heroData.getAllHeros().
+  var _tileIdCache = {};
+  function tileHeroId(tile) {
+    try {
+      if (typeof tile.getHeroId === 'function') {
+        var id = tile.getHeroId();
+        if (id > 0) return id;
+      }
+    } catch (e) {}
+    try {
+      var nameEl = tile.querySelector('.heroName');
+      if (!nameEl) return 0;
+      var name = (nameEl.textContent || '').trim();
+      if (!name) return 0;
+      if (_tileIdCache[name]) return _tileIdCache[name];
+      var hd = window.gui && window.gui.playerData && window.gui.playerData.heroData;
+      var heroes = hd && hd.getAllHeros && hd.getAllHeros();
+      if (heroes) {
+        for (var i = 0; i < heroes.length; i++) {
+          if (String(heroes[i].name) === name) {
+            _tileIdCache[name] = heroes[i].id;
+            return heroes[i].id;
+          }
+        }
+      }
+    } catch (e) {}
+    return 0;
+  }
+
+  function refreshTiles() {
+    try {
+      var root = getHeroWindowRoot();
+      if (!root || !root.querySelectorAll) return;
+      var tiles = root.querySelectorAll('.HeroListTile');
+      for (var i = 0; i < tiles.length; i++) {
+        var heroId = tileHeroId(tiles[i]);
+        if (!heroId) continue;
+        // Marca OFICIAL del bundle (CSS .equipped .tileContainer:before con
+        // tiny_icon_hero.png) — toggle de la clase misma, cero CSS custom.
+        tiles[i].classList.toggle('equipped', isEquipped(heroId));
+      }
+    } catch (e) { /* non-fatal */ }
+  }
+
+  function scheduleBadgeRefresh() {
+    [0, 50, 200, 600].forEach(function (d) { setTimeout(refreshTiles, d); });
+  }
+
+  // El bundle reconstruye tiles en listDataRefreshed y solo etiqueta al
+  // tile cuyo heroId == getEquippedHeroId(); con multi-equip los demás
+  // pierden la clase — el poll (abajo, 400 ms) la re-aplica barato.
+  function reconcileBadge() {
+    refreshTiles();
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     2) OJO DE VISIBILIDAD
+     ════════════════════════════════════════════════════════════════════ */
+
+  var state = {
+    visible: true,        // default: mostrar (cada relog vuelve a mostrar)
+    initialized: false
+  };
+
+  function txt() {
+    // Texto del botón, tooltip y alt (pedido del owner).
+    return {
+      show: 'Show Heros',
+      hide: 'Hide Heros',
+      titleShow: 'Show Ur heros of the Map',
+      titleHide: 'Hide Ur heros of the Map',
+      alt: 'Control who sees your heroes on the map'
+    };
+  }
+
+  function send() {
+    try {
+      window.dofus.sendMessage('HeroVisibilityToggleRequestMessage', {});
+    } catch (err) {
+      try { console.error('[heroEye] toggle send failed', err); } catch (_) {}
+    }
+  }
+
+  // El server usa el canal sendMessage (InterceptFrame); aquí escuchamos
+  // por el bus oficial de conexión (mismo patrón que los otros messages).
+  function wireServerState() {
+    var cm = window.dofus && window.dofus.connectionManager;
+    if (!cm || cm.__heroEyeWired) return;
+    cm.__heroEyeWired = true;
+    try {
+      cm.on('HeroVisibilityStateMessage', function (msg) {
+        state.visible = !!(msg && msg.visible);
+        state.initialized = true;
+        updateEye();
+      });
+    } catch (err) {
+      try { console.error('[heroEye] wire failed', err); } catch (_) {}
+    }
+  }
+
+  // ── estilos del ojo (CSS inyectado, sin ensuciar el bundle) ──
+  // Botón verde OFICIAL (.Button .greenButton del bundle) SOLO CON TEXTO
+  // (pedido del owner: sin icono) — el texto dinámico Hide/Show Heros
+  // indica el estado por sí solo, con los efectos nativos de presión.
+  function injectCss() {
+    if (document.getElementById('heroEyeCss')) return;
+    var css = document.createElement('style');
+    css.id = 'heroEyeCss';
+    css.textContent = [
+    // Botón flex: sin icono, solo el texto centrado (horizontal + vertical).
+    '.heroEyeIcon{display:flex;align-items:center;justify-content:center;height:40px;min-height:0;box-sizing:border-box;cursor:pointer;overflow:hidden;}',
+    // Label: flujo flex, centrado, letras negras, sin estilos adicionales.
+    '.heroEyeIcon .heroEyeLabel{display:inline-block;white-space:nowrap;color:#000;}',
+    // Efectos OFICIALES del juego: hover = brillo, active/pressed = el mismo
+    // transform scale(.95,.93) que usa .greenButton.pressed del bundle.
+    '.heroEyeIcon:hover{filter:brightness(1.08);}',
+    '.heroEyeIcon:active,.heroEyeIcon.pressed{transform:scale(.95,.93);-webkit-transform:scale(.95,.93);}'
+    ].join("");
+    document.head.appendChild(css);
+  }
+
+  // Tooltip reutilizando el helper oficial del bundle (addTooltip).
+  function attachTooltip(elNode) {
+    try {
+      var tooltips = null;
+      try { tooltips = window.gui && window.gui.richTooltipZone; } catch (e) {}
+      var t = txt();
+      // addTooltip existe como helper global del bundle (usado por chat/party).
+      if (window.gui && typeof window.gui.addTooltip === 'function') {
+        window.gui.addTooltip(elNode, function () {
+          return state.visible ? t.titleHide : t.alt;
+        });
+        // Alt/ARIA del botón oficial (pedido del owner).
+        try { elNode.setAttribute('alt', t.alt); } catch (_) {}
+        return;
+      }
+      if (window.r !== undefined && window.r.addTooltip) {
+        window.r.addTooltip(elNode, function () {
+          return state.visible ? t.titleHide : t.alt;
+        });
+        return;
+      }
+    } catch (err) { /* fallback nativo abajo */ }
+    // Fallback: title nativo (el canvas del cliente no lo pinta, pero es
+    // inofensivo y se ve en DOM debugging).
+    elNode.title = (state.visible ? t.titleHide : t.alt);
+  }
+
+  // ── navegación al container de la ventana de héroes ──
+  function findHeroWindow() {
+    var w = null;
+    try {
+      if (window.gui && typeof window.gui.getWindow === 'function') {
+        var w0 = window.gui.getWindow('equipEntity');
+        // La instancia existe SIEMPRE (creada lazy); solo nos montamos si
+        // openState=true (la ventana está visible).
+        if (w0 && w0.openState && w0.rootElement) w = w0;
+      }
+    } catch (err) {}
+    if (!w) {
+      // getDisplayedWindow no existe en este bundle — iterar children del
+      // windowsContainer (por si un fork lo expone distinto).
+      try {
+        var wc = window.gui && window.gui.windowsContainer;
+        // WuiDom guarda los hijos en _childrenList (childrenList sin "_"
+        // no existe — era la razón por la que el ojo no se montaba).
+        var kids = wc && (wc._childrenList || wc.childrenList || wc.children);
+        if (kids) {
+          for (var i = 0; i < kids.length; i++) {
+            var k = kids[i];
+            if (k && k.id === 'equipEntity' && k.openState && k.rootElement) { w = k; break; }
+          }
+        }
+      } catch (err) {}
+    }
+    return w;
+  }
+
+  function getHeroWindowRoot() {
+    var w = findHeroWindow();
+    return w ? w.rootElement : null;
+  }
+
+  var eyeNode = null, eyeLabelNode = null;
+  function mountEye() {
+    var win = findHeroWindow();
+    if (!win || !win.rootElement || !win.rootElement.querySelector) return;
+    var root = win.rootElement;
+    // Sin héroes equipados el botón no existe (gating del owner).
+    if (!hasEquippedHero()) { hideEye(); return; }
+    // SOLO la pestaña HERO: el tab companion comparte la misma ventana
+    // (equipEntity). El contenido del tab hero es .HeroWindow y el de
+    // companion es .CompanionWindow — si no está el hero visible, no
+    // montamos nada (así el ojo nunca aparece en la UI de compañeros).
+    var heroPane = root.querySelector('.HeroWindow');
+    if (!heroPane) { hideEye(); return; }
+    injectCss();
+    if (eyeNode && eyeNode.isConnected && root.contains(eyeNode)) {
+      updateEye();
+      return;
+    }
+    // POSICIÓN (pedida): dentro del cuerpo del tab hero, arriba a la
+    // derecha del panel de la LISTA (columna derecha) — no junto al
+    // botón de cerrar del header.  El panel es .HeroWindow .rightColumn
+    // > .HeroList; si no está montado aún, salimos (el poll reintenta).
+    var listPane = heroPane.querySelector('.HeroList');
+    if (!listPane) { hideEye(); return; }
+    if (eyeNode && eyeNode.isConnected) { try { eyeNode.remove(); } catch (_) {} }
+    if (eyeLabelNode && eyeLabelNode.isConnected) { try { eyeLabelNode.remove(); } catch (_) {} }
+    eyeLabelNode = null;
+
+    // ── BOTÓN: chrome oficial .Button .greenButton (nine-slice), flex con
+    // SOLO el label del texto dinámico (pedido del owner: sin icono).
+    // Sin width → shrink-to-fit exacto al texto; align-items +
+    // justify-content:center lo centran vertical y horizontalmente.
+    eyeNode = document.createElement('div');
+    eyeNode.className = 'heroEyeIcon Button greenButton';
+    eyeNode.setAttribute('id', 'heroEyeIcon');
+    eyeNode.addEventListener('tap', function (e) { e.stopPropagation(); send(); });
+    eyeNode.addEventListener('click', function (e) { e.stopPropagation(); send(); });
+    var st = eyeNode.style;
+    st.setProperty('position', 'absolute', 'important');
+    st.setProperty('bottom', '10px', 'important');
+    st.setProperty('right', '40%', 'important');
+    st.setProperty('height', '40px', 'important');
+    st.setProperty('padding', '0', 'important');
+    st.setProperty('margin', '0', 'important');
+    st.setProperty('background', 'none', 'important');
+    st.setProperty('float', 'none', 'important');
+    listPane.appendChild(eyeNode);
+
+    // ── TEXTO dinámico DENTRO del botón (pedido del owner): letras
+    // NEGRAS, SIN estilos adicionales; flex lo centra vertical solo.
+    eyeLabelNode = document.createElement('div');
+    eyeLabelNode.className = 'heroEyeLabel';
+    var sl = eyeLabelNode.style;
+    sl.setProperty('margin', '0 10px', 'important');
+    // Letras NEGRAS (pedido del owner).
+    sl.setProperty('color', '#212020', 'important');
+    eyeNode.appendChild(eyeLabelNode);
+    attachTooltip(eyeNode);
+    updateEye();
+  }
+
+  // La ventana/tab se cerró: desmontar el ojo para que no quede huérfano.
+  function hideEye() {
+    if (eyeNode && eyeNode.isConnected) { try { eyeNode.remove(); } catch (_) {} }
+    if (eyeLabelNode && eyeLabelNode.isConnected) { try { eyeLabelNode.remove(); } catch (_) {} }
+  }
+
+  function updateEye() {
+    if (!eyeNode) return;
+    var t = txt();
+    // TEXTO dinámico: opción activa (héroes visibles) → "Hide Heros";
+    // opción inactiva (ocultos) → "Show Heros".  Sin icono: el texto es
+    // la única representación visual del estado (pedido del owner).
+    if (eyeLabelNode) eyeLabelNode.textContent = state.visible ? t.hide : t.show;
+    eyeNode.title = t.alt;
+  }
+
+  // Poll barato: la ventana se crea/destruye lazy, el DOM cambia al abrir
+  // la pestaña de héroes (misma estrategia usada por el bloque gift codes).
+  function wireProtocol() {
+    var cm = window.dofus && window.dofus.connectionManager;
+    if (!cm || cm.__heroExtrasWire) return;
+    cm.__heroExtrasWire = true;
+    try {
+      cm.on('EquipHeroResponseMessage', function (m) {
+        try {
+          if (!m || m.returnCode !== 10) return;   // HERO_SUCCESS oficial
+          addEquipped(m.additionalEntityId);
+          scheduleBadgeRefresh();
+        } catch (e) { /* non-fatal */ }
+      });
+      // Unequip no trae id (protocolo oficial); el bundle re-renderiza la
+      // lista y el reconcile re-aplica la marca SOLO en los aún equipados.
+      cm.on('UnequipAdditionalEntityResponseMessage', function (m) {
+        try {
+          if (m && m.returnCode === 10) scheduleBadgeRefresh();
+        } catch (e) { /* non-fatal */ }
+      });
+      cm.on('HeroesListResponseMessage', scheduleBadgeRefresh);
+    } catch (err) {
+      try { console.error('[heroExtras] wire failed', err); } catch (_) {}
+    }
+  }
+
+  var iv = setInterval(function () {
+    wireProtocol();
+    wireServerState();
+    try { mountEye(); } catch (err) { /* ignore */ }
+    try { reconcileBadge(); } catch (err) { /* ignore */ }
+  }, 400);
+})();
+
+// ── Sprite highlight crash guard ────────────────────────────────────────
+// Race del engine: refreshAnimation() (script.js:437) llama
+// _updateSpriteHighlight() sin chequear que el batch del mapa ya creó su
+// vertex buffer.  Si un sprite entra a _updatedSprites antes de finalize()
+// (setTexture durante la carga del mapa), _longView sigue null y
+// _longView.subarray lanza "TypeError: Cannot read properties of null
+// (reading 'subarray')" — y el loop de _refreshPrecisionRendering lo repite
+// cada frame.  Guard: envolver el prototype del batch (se alcanza desde
+// mapRenderer.graphics) y no-op cuando el buffer no existe aún; finalize()
+// redibuja todo de todas formas.
+;(function () {
+  if (window.$_spriteHighlightGuard) return;
+  window.$_spriteHighlightGuard = true;
+
+  var guardTimer = setInterval(function () {
+    try {
+      var mr = window.isoEngine && window.isoEngine.mapRenderer;
+      var gs = mr && mr.graphics;
+      if (!gs) return;
+      for (var i = 0; i < gs.length; i++) {
+        var g = gs[i];
+        if (!g || !g._updatedSprites) continue;
+        var proto = Object.getPrototypeOf(g);
+        if (!proto || typeof proto._updateSpriteHighlight !== 'function') continue;
+        if (proto.__cuervokHighlightGuard) { clearInterval(guardTimer); return; }
+        proto.__cuervokHighlightGuard = true;
+        var orig = proto._updateSpriteHighlight;
+        proto._updateSpriteHighlight = function (sprite) {
+          try {
+            if (!this._longView || !this._vertexBufferCreated) return;
+            return orig.call(this, sprite);
+          } catch (err) { /* un frame perdido < crash del render loop */ }
+        };
+        clearInterval(guardTimer);
+        return;
+      }
+    } catch (err) { /* retry en el próximo tick */ }
+  }, 500);
 })();

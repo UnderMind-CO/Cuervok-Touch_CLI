@@ -1,146 +1,115 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { AlertTriangle, CheckCircle2, LoaderCircle, RefreshCw, RotateCw } from 'lucide-react'
 import { colors } from '@/theme'
-import logoImg from '@/assets/logo.png'
+import checkingGif from '@/assets/checking-updates.gif'
 import type { AppUpdateStatus } from '@cuervok/shared'
+
+/*
+ * Updater Window — una sola UI para todo el ciclo de arranque:
+ *
+ *   Please Wait... Checking Updates...  → mientras se valida la app/game
+ *   Updating...                         → descarga de app/game en curso
+ *   Update Complete...                  → listo (se abre el juego o se
+ *                                         auto-instala la app y reinicia)
+ *   Update failed... (clic para reintentar) → solo error de descarga nueva
+ *
+ * El panel clásico del updater ya no se muestra en ningún punto: la ventana
+ * frameless está SIEMPRE en el overlay (gif + texto), así no hay parpadeos ni
+ * UI antigua visible detrás. El ciclo es:
+ *
+ *   arranque → check app update → si hay: auto-instalar (quitAndInstall) y
+ *   relanzar → si no hay: update del juego → launchGameWindow.
+ */
 
 type Status = 'checking' | 'app-downloading' | 'app-ready' | 'downloading' | 'done' | 'error'
 
-const STEPS = [
-  { title: 'Copying base files' },
-  { title: 'Downloading manifests' },
-  { title: 'Downloading assets' },
-  { title: 'Downloading game files' },
-  { title: 'Finding versions' },
-  { title: 'Applying patches' },
-  { title: 'Writing files' },
-  { title: 'Cleaning up' },
-  { title: 'Saving manifests' },
-  { title: 'Done' }
-] as const
-
-const shellStyle: CSSProperties = {
-  flex: 1,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 14,
-  background: colors.bg
-}
-
-function stepFromMessage(msg: string): number {
-  const lower = msg.toLowerCase()
-  for (let i = STEPS.length - 1; i >= 0; i--) {
-    if (lower.includes(STEPS[i].title.toLowerCase())) return i
-  }
-  return 0
-}
-
-function formatMode(installed: boolean): string {
-  return installed ? 'Update' : 'Install'
-}
-
-function getHeadline(status: Status, installed: boolean): string {
-  if (status === 'checking') return 'Checking updates'
-  if (status === 'app-downloading') return 'Updating Cuervok'
-  if (status === 'app-ready') return 'App update ready'
-  if (status === 'done') return installed ? 'Update complete' : 'Install complete'
-  if (status === 'error') return installed ? 'Update failed' : 'Install failed'
-  return installed ? 'Updating game' : 'Installing game'
-}
-
-function getSummary(status: Status, installed: boolean): string {
-  if (status === 'checking') return 'Checking the desktop app first, then game files.'
-  if (status === 'app-downloading') return 'Downloading the latest published release artifact.'
-  if (status === 'app-ready') return 'Restart Cuervok to install the downloaded app update.'
-  if (status === 'done') return 'Launching the game.'
-  if (status === 'error') return installed ? 'The existing install can still be opened.' : 'Retry the install.'
-  return installed ? 'Applying only the required file updates.' : 'Downloading and patching the game files.'
+function overlayText(status: Status): string {
+  if (status === 'downloading' || status === 'app-downloading') return 'Updating...'
+  if (status === 'done' || status === 'app-ready') return 'Update Complete...'
+  if (status === 'error') return 'Update failed — click to retry'
+  return 'Please Wait, Checking Updates...'
 }
 
 function shouldRunGameUpdate(status: AppUpdateStatus): boolean {
   return status.phase === 'disabled' || status.phase === 'not-available' || status.phase === 'error' || status.phase === 'idle'
 }
 
-function isActiveAppUpdate(status: AppUpdateStatus): boolean {
-  return status.phase === 'checking' || status.phase === 'available' || status.phase === 'downloading' || status.phase === 'downloaded'
-}
-
 export function SetupScreen() {
   const [status, setStatus] = useState<Status>('checking')
-  const [percent, setPercent] = useState(0)
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
-  const [currentStep, setCurrentStep] = useState(0)
-  const [hasExistingInstall, setHasExistingInstall] = useState(false)
-  const [appUpdate, setAppUpdate] = useState<AppUpdateStatus | null>(null)
   const didStartRef = useRef(false)
   const gameUpdateStartedRef = useRef(false)
   const installedRef = useRef(false)
+  const autoInstallStartedRef = useRef(false)
   const launchTimeoutRef = useRef<number | null>(null)
 
   const scheduleLaunch = () => {
     if (launchTimeoutRef.current !== null) return
     launchTimeoutRef.current = window.setTimeout(() => {
       window.cuervok.launchGameWindow()
-    }, 800)
+    }, 700)
   }
 
-  const runUpdate = async (installed: boolean) => {
+  const startGameUpdate = (installed: boolean) => {
     if (gameUpdateStartedRef.current) return
     gameUpdateStartedRef.current = true
-    setHasExistingInstall(installed)
+    installedRef.current = installed
     setStatus('downloading')
-    setError('')
-    setPercent(0)
-    setCurrentStep(0)
-    setMessage(installed ? 'Checking for updates...' : 'Preparing initial download...')
 
-    try {
-      await window.cuervok.downloadGame()
+    void window.cuervok.downloadGame().then(() => {
       setStatus('done')
       scheduleLaunch()
-    } catch (err: unknown) {
-      if (installed) {
-        window.cuervok.logger.warn('Game update failed, launching existing install', err)
+    }).catch((err: unknown) => {
+      window.cuervok.logger.warn('Game update failed', err)
+      if (installedRef.current) {
+        // Update fallido con instalación previa: abrimos lo que ya hay.
         window.cuervok.launchGameWindow()
         return
       }
-
-      setError(err instanceof Error ? err.message : String(err))
       setStatus('error')
-    }
+    })
   }
 
-  const handleAppUpdateStatus = (update: AppUpdateStatus, installed: boolean) => {
-    setAppUpdate(update)
+  const retryDownload = () => {
+    if (status !== 'error') return
+    gameUpdateStartedRef.current = false
+    startGameUpdate(installedRef.current)
+  }
+
+  const handleAppUpdateStatus = (update: AppUpdateStatus) => {
+    // Una vez que arrancó el update del juego, cualquier emisión tardia del
+    // check de la app (doble "Checking for update") no debe devolver la UI a
+    // "Checking Updates" — eso era la causa visible del parpadeo.
+    if (gameUpdateStartedRef.current) {
+      if (update.phase === 'downloaded' && !autoInstallStartedRef.current) {
+        autoInstallStartedRef.current = true
+        setStatus('app-ready')
+        window.setTimeout(() => window.cuervok.installAppUpdate(), 1400)
+      }
+      return
+    }
+
+    if (update.phase === 'downloaded') {
+      // Hay app update listo: "Update Complete..." y auto-instalación
+      // (quitAndInstall → relanza → re-entra este ciclo sin update pendiente).
+      if (!autoInstallStartedRef.current) {
+        autoInstallStartedRef.current = true
+        setStatus('app-ready')
+        window.setTimeout(() => window.cuervok.installAppUpdate(), 1400)
+      }
+      return
+    }
 
     if (update.phase === 'checking' || update.phase === 'available') {
       setStatus('checking')
-      setMessage(update.message ?? 'Checking for app update...')
-      setPercent(0)
       return
     }
 
     if (update.phase === 'downloading') {
       setStatus('app-downloading')
-      setMessage(update.message ?? 'Downloading app update...')
-      setPercent(update.percent ?? 0)
-      return
-    }
-
-    if (update.phase === 'downloaded') {
-      setStatus('app-ready')
-      setMessage(update.message ?? 'App update ready.')
-      setPercent(100)
       return
     }
 
     if (shouldRunGameUpdate(update)) {
-      if (update.phase === 'error') {
-        window.cuervok.logger.warn('App update failed, continuing with game update', update.error)
-      }
-      void runUpdate(installed)
+      startGameUpdate(installedRef.current)
     }
   }
 
@@ -150,37 +119,26 @@ export function SetupScreen() {
 
     window.cuervok.checkGameInstalled().then(async (installed) => {
       installedRef.current = installed
-      setHasExistingInstall(installed)
 
       const current = await window.cuervok.getAppUpdateStatus()
-      handleAppUpdateStatus(current, installed)
-      if (isActiveAppUpdate(current)) return
+      handleAppUpdateStatus(current)
+      // La auto-check de AppUpdater.start() (1.8s) emite su resultado por la
+      // suscripción de abajo. Lanzar un segundo check manual duplicaría las
+      // emisiones ("Checking for update" dos veces) y era fuente de parpadeo;
+      // solo consultamos manualmente cuando no hay estado previo (idle).
+      if (current.phase !== 'idle') return
 
       const checked = await window.cuervok.checkAppUpdate()
-      handleAppUpdateStatus(checked, installed)
+      handleAppUpdateStatus(checked)
     }).catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : String(err))
-      setStatus('error')
+      window.cuervok.logger.error('Updater boot failed', err)
+      startGameUpdate(installedRef.current)
     })
   }, [])
 
   useEffect(() => {
-    const unsubAppUpdate = window.cuervok.onAppUpdateStatus((update) => {
-      handleAppUpdateStatus(update, installedRef.current)
-    })
-    const unsub = window.cuervok.onDownloadProgress((msg, pct) => {
-      setMessage(msg)
-      setPercent(pct)
-      setCurrentStep(stepFromMessage(msg))
-      if (pct >= 100) {
-        setStatus('done')
-        scheduleLaunch()
-      }
-    })
-    return () => {
-      unsubAppUpdate()
-      unsub()
-    }
+    const unsubAppUpdate = window.cuervok.onAppUpdateStatus(handleAppUpdateStatus)
+    return () => unsubAppUpdate()
   }, [])
 
   useEffect(() => {
@@ -191,140 +149,43 @@ export function SetupScreen() {
     }
   }, [])
 
-  const startDownload = async () => {
-    gameUpdateStartedRef.current = false
-    await runUpdate(hasExistingInstall)
-  }
-
-  const installAppUpdate = () => {
-    window.cuervok.installAppUpdate()
-  }
-
-  const safePercent = Math.max(0, Math.min(100, status === 'done' || status === 'app-ready' ? 100 : percent))
-  const headline = getHeadline(status, hasExistingInstall)
-  const summary = getSummary(status, hasExistingInstall)
-  const primaryMessage = message || (status === 'checking' ? 'Waiting for updater...' : 'Preparing updater...')
+  const clickable = status === 'error'
 
   return (
-    <div style={shellStyle}>
+    <div
+      onClick={clickable ? retryDownload : undefined}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 18,
+        // Fondo opaco: la ventana del updater nunca deja ver otra cosa detrás.
+        background: colors.bg,
+        zIndex: 100,
+        // Frameless: el overlay ES la ventana. En error se vuelve clicable
+        // (reintentar), así que ahí se libera el drag.
+        WebkitAppRegion: clickable ? 'no-drag' : 'drag',
+        ...(clickable ? ({ cursor: 'pointer' } as CSSProperties) : {})
+      } as CSSProperties}
+    >
+      <img src={checkingGif} alt="" style={{ width: 150, height: 150, pointerEvents: 'none' }} />
       <div
         style={{
-          width: '100%',
-          border: `1px solid ${colors.brandBorderFaint}`,
-          borderRadius: 10,
-          background: colors.bg,
-          boxShadow: colors.modalShadow,
-          padding: 14
+          fontSize: 15,
+          fontWeight: 600,
+          letterSpacing: 0.4,
+          color: colors.text
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <img src={logoImg} alt="" style={{ width: 18, height: 18 }} />
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: colors.text }}>Cuervok</div>
-            <div style={{ fontSize: 11, color: colors.textMuted }}>{formatMode(hasExistingInstall)} window</div>
-          </div>
-        </div>
-
-        <div style={{ fontSize: 18, fontWeight: 700, color: colors.text, marginBottom: 4 }}>
-          {headline}
-        </div>
-        <div style={{ fontSize: 12, color: colors.textMuted, marginBottom: 10 }}>
-          {summary}
-        </div>
-
-        <div
-          style={{
-            border: `1px solid ${status === 'error' ? 'rgba(255,68,68,0.25)' : colors.border}`,
-            borderRadius: 8,
-            background: status === 'error' ? 'rgba(244,68,68,0.05)' : colors.surface,
-            padding: 12,
-            marginBottom: status === 'error' ? 10 : 0
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-            {status === 'done' ? (
-              <CheckCircle2 size={16} color={colors.accentText} />
-            ) : status === 'app-ready' ? (
-              <CheckCircle2 size={16} color={colors.accentText} />
-            ) : status === 'error' ? (
-              <AlertTriangle size={16} color={colors.danger} />
-            ) : (
-              <LoaderCircle size={16} color={colors.accentText} style={{              animation: 'cuervok-spin 1.2s linear infinite' }} />
-            )}
-            <div style={{ fontSize: 12, color: status === 'error' ? colors.danger : colors.textSecondary }}>
-              {status === 'error' ? error : primaryMessage}
-            </div>
-          </div>
-
-          <div
-            style={{
-              height: 8,
-              borderRadius: 999,
-              overflow: 'hidden',
-              background: 'rgba(255,255,255,0.06)'
-            }}
-          >
-            <div
-              style={{
-                width: `${safePercent}%`,
-                height: '100%',
-                borderRadius: 999,
-                background: `linear-gradient(90deg, ${colors.brandMuted}, ${colors.accent})`,
-                transition: 'width 0.3s ease'
-              }}
-            />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8, fontSize: 11, color: colors.textMuted }}>
-            <span>{status.startsWith('app-') ? `Cuervok ${appUpdate?.version ?? 'update'}` : STEPS[Math.min(currentStep, STEPS.length - 1)]?.title}</span>
-            <span style={{ fontFamily: 'var(--font-mono)' }}>{safePercent.toFixed(0)}%</span>
-          </div>
-        </div>
-
-        {status === 'app-ready' && (
-          <button
-            onClick={installAppUpdate}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '9px 12px',
-              borderRadius: 8,
-              border: `1px solid ${colors.accentBorder}`,
-              background: 'rgba(201,162,77,0.14)',
-              color: colors.accentText,
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            <RotateCw size={14} />
-            <span>Restart and Update</span>
-          </button>
-        )}
-
-        {status === 'error' && (
-          <button
-            onClick={startDownload}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '9px 12px',
-              borderRadius: 8,
-              border: `1px solid ${colors.accentBorder}`,
-              background: 'rgba(201,162,77,0.10)',
-              color: colors.accentText,
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: 'pointer'
-            }}
-          >
-            <RefreshCw size={14} />
-            <span>{hasExistingInstall ? 'Retry Update' : 'Retry Download'}</span>
-          </button>
-        )}
+        {overlayText(status)}
       </div>
     </div>
   )
+}
+
+function isActiveAppUpdate(status: AppUpdateStatus): boolean {
+  return status.phase === 'available' || status.phase === 'downloading' || status.phase === 'downloaded'
 }

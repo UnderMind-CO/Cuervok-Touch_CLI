@@ -1,0 +1,96 @@
+{
+  "214": {
+    "id": 214,
+    "nameId": "Invocación de Arakna",
+    "descriptionId": "Este hechizo permite invocar a una arakna",
+    "typeId": 57,
+    "scriptParams": "animId:1",
+    "scriptParamsCritical": "null",
+    "scriptId": 1,
+    "scriptIdCritical": 0,
+    "iconId": 214,
+    "previewZoneDefault": "",
+    "canHeroUse": true,
+    "spellLevels": [
+      1066,
+      1067,
+      1068,
+      1069,
+      1070
+    ]
+  },
+  "4949": {
+    "id": 4949,
+    "nameId": "Palabra Atravesadora",
+    "descriptionId": "Ocasiona daños de fuego a los enemigos en zona y les atribuye una <strong style=\"color:#a366c0\">marca maldita</strong>.\nCura a los aliados alcanzados y les atribuye una <strong style=\"color:#a366c0\">marca bendecida</strong>.",
+    "typeId": 7,
+    "scriptParams": "caster_separator:Animation du caster,animId:502,Gfx sur cible 1_separator:Gfx sur cible 1,targetGfxId:1585,targetGfxDisplayType:2,Gfx sur cible 2_separator:Gfx sur cible 2,targetGfxDisplayType2:0,Gfx sur le caster_separator:Gfx sur le caster,casterGfxDisplayType:0,other_separator:Autre",
+    "scriptParamsCritical": "",
+    "scriptId": 1,
+    "scriptIdCritical": 0,
+    "iconId": 10149,
+    "previewZoneDefault": "L3",
+    "canHeroUse": true,
+    "spellLevels": [
+      25110,
+      25111,
+      25112,
+      25113,
+      25114,
+      25115
+    ]
+  },
+  "7353": {
+    "id": 7353,
+    "nameId": "Huida",
+    "descriptionId": "Teletransporta al xelor y/o entidades a su posición anterior.\n\nPuede generar un <strong style=\"color:#ebc304\">telefrag</strong>.",
+    "typeId": 5,
+    "scriptParams": "caster_separator:Animation du caster,animId:2,Gfx sur cible 1_separator:Gfx sur cible 1,targetGfxId:1009,targetGfxDisplayType:0,Gfx sur cible 2_separator:Gfx sur cible 2,targetGfxId2:1010,targetGfxDisplayType2:0,targetGfxShowUnder2:1,Gfx sur le caster_separator:Gfx sur le caster,casterGfxDisplayType:0,other_separator:Autre",
+    "scriptParamsCritical": "",
+    "scriptId": 1,
+    "scriptIdCritical": 0,
+    "iconId": 90,
+    "previewZoneDefault": "C1",
+    "canHeroUse": true,
+    "spellLevels": [
+      31881,
+      33186,
+      33187,
+      33188,
+      33189,
+      33190
+    ]
+  },
+  "9001": {
+    "id": 9001,
+    "nameId": "[!] Wild Spirit",
+    "descriptionId": "+8 power for each MP spent 2 turns, stackable up to 20 times, if the turn ends without spending any MP, restores 10% of maximum health.",
+    "typeId": 494,
+    "scriptParams": "",
+    "scriptParamsCritical": "",
+    "scriptId": 0,
+    "scriptIdCritical": 0,
+    "iconId": 1553,
+    "previewZoneDefault": "null",
+    "canHeroUse": true,
+    "spellLevels": [
+      37075
+    ]
+  },
+  "13766": {
+    "id": 13766,
+    "nameId": "Bouftea Cargo",
+    "descriptionId": "The special spell (Greater Bouftea) allows you to use it twice per battle. It pushes the caster 3 squares in a given direction.",
+    "typeId": 57,
+    "scriptParams": "animId:9",
+    "scriptParamsCritical": "",
+    "scriptId": 0,
+    "scriptIdCritical": 0,
+    "iconId": 15584,
+    "previewZoneDefault": "L2",
+    "canHeroUse": true,
+    "spellLevels": [
+      137661
+    ]
+  }
+}

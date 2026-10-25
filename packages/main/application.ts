@@ -453,8 +453,11 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
       if (!iconId) return c.text('Not Found', 404)
       const result = await handleAssetRequest('assets', `gfx/items/${iconId}.png`)
       if (result.status !== 200 || !result.body) return c.text('Asset not found', result.status as any)
+      // Iconos de item del CDN: estáticos → 7 días de caché en el navegador
+      // (antes 86400 = 1 día; cada reapertura diaria re-descargaba todos los
+      // tiles de la boutique).
       return new Response(new Uint8Array(result.body), {
-        headers: { 'Content-Type': 'image/png', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=86400' }
+        headers: { 'Content-Type': 'image/png', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=604800' }
       })
     })
 
@@ -687,15 +690,18 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
     this._gameWindow?.processAuthCallback(url)
   }
 
-  private _createGameWindow() {
+  private _createGameWindow(): GameWindow {
     const rendererUrl = this._getRendererUrl('/game')
     this._store.set('game_renderer_url', rendererUrl)
     this._gameWindow = new GameWindow({ url: rendererUrl, index: 0 })
+    const gameWindow = this._gameWindow
 
-    this._gameWindow.on('closed', () => {
+    gameWindow.on('closed', () => {
       this._gameWindow = null
       if (!this._updaterWindow) app.quit()
     })
+
+    return gameWindow
   }
 
   private _createUpdaterWindow() {
@@ -729,7 +735,14 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
     this._startupComplete = true
 
     if (!this._gameWindow) {
-      this._createGameWindow()
+      const gameWindow = this._createGameWindow()
+      // La ventana de juego se crea OCULTA (show:false + ready-to-show).
+      // Mantenemos el overlay del updater visible hasta que el contenido del
+      // juego pinta por primera vez — sin flashes de otra UI detrás.
+      // Failsafe: si ready-to-show no llegara nunca, cerramos igual a los 20s.
+      const shownPromise = gameWindow.shown
+      const failsafe = new Promise<void>((resolve) => setTimeout(resolve, 20_000))
+      await Promise.race([shownPromise, failsafe])
     } else {
       this._gameWindow.focus()
     }

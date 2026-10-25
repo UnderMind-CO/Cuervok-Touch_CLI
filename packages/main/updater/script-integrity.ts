@@ -40,8 +40,8 @@ export interface ScriptIntegrityEntry {
  */
 export const GAME_SCRIPT_INTEGRITY: Record<string, ScriptIntegrityEntry> = {
   "build/script.js": {
-    "sha256": "5ee3498a4be95c9be77efffd719025e603a78106fffb5ee5edfa08fd1a836531",
-    "size": 5395620
+    "sha256": "19ef3558e4520620091bd3123dd0643fa01d333fde7755bb64bd8acfdefcbff9",
+    "size": 5397029
   },
   "build/primus.js": {
     "sha256": "015f5f7d5d1b3f6fa5aa5a19acfbafbdc48e7d766366091dc030dfa73ff040a1",
@@ -122,4 +122,118 @@ export function verificationOnLaunch(): { ok: boolean; failures: string[] } {
   }
 
   return { ok: failures.length === 0, failures }
+}
+
+/* ── PIN POST-PATCH del script.js (build/.script-pin.json) ───────────
+ *
+ * verificationOnLaunch() solo puede recomprobar los archivos que NO
+ * tocamos con regex (hoy primus.js): los hashes post-patch de script.js
+ * difieren del pin CDN por diseño. Ese hueco permitía editar script.js
+ * EN DISCO entre updates (auto-follow, auto-farm, exploits) sin
+ * detección — el vector que este archivo existe para cerrar.
+ *
+ * Cierre: processGame() re-pinnea el archivo que va a servir (hash
+ * post-patch + stamp del patch set) y mantiene una copia BASELINE
+ * (build/.script.baseline.js, copia post-regex). En el arranque
+ * siguiente, si el hash difiere con el MISMO stamp, se restaura la
+ * baseline y el propio processGame re-aplica los patches sobre ella.
+ */
+
+/** Stamp del patch set actual — BUMP MANUAL al cambiar los patches de processGame. */
+export const SCRIPT_PIN_STAMP = 'v1-2026-10-24'
+
+export interface ScriptPin {
+  sha256: string
+  size: number
+  stamp: string
+  writtenAt: string
+}
+
+function scriptPaths() {
+  const gamePath = get.GAME_PATH()
+  return {
+    scriptPath: path.join(gamePath, 'build', 'script.js'),
+    pinPath: path.join(gamePath, 'build', '.script-pin.json'),
+    baselinePath: path.join(gamePath, 'build', '.script.baseline.js')
+  }
+}
+
+export function readScriptPin(): ScriptPin | null {
+  try {
+    const { pinPath } = scriptPaths()
+    return fs.existsSync(pinPath) ? JSON.parse(fs.readFileSync(pinPath, 'utf-8')) : null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Comprueba el script.js de disco contra el pin post-patch. En mismatch
+ * con el mismo stamp intenta restaurar la baseline (post-regex,
+ * pre-processGame). Nunca lanza: un fallo inesperado se registra en
+ * logs, y el arranque de la ventana de juego no se bloquea.
+ */
+export function verifyPatchedScriptOnLaunch(): { tampered: boolean; restored: boolean; reason?: string } {
+  const pin = readScriptPin()
+  if (!pin || pin.stamp !== SCRIPT_PIN_STAMP) return { tampered: false, restored: false }
+
+  const { scriptPath, baselinePath } = scriptPaths()
+  try {
+    const buf = fs.readFileSync(scriptPath)
+    if (sha256Of(buf) === pin.sha256 && buf.length === pin.size) {
+      return { tampered: false, restored: false }
+    }
+
+    const reason = `sha actual=${sha256Of(buf).slice(0, 12)}…/${buf.length}B, pin=${pin.sha256.slice(0, 12)}…/${pin.size}B`
+    if (!fs.existsSync(baselinePath)) {
+      logger.error(`[integrity] script.js MODIFICADO en disco y sin baseline disponible (${reason})`)
+      return { tampered: true, restored: false, reason }
+    }
+    logger.error(`[integrity] script.js MODIFICADO en disco (${reason}) — restaurando baseline pinneada`)
+    fs.writeFileSync(scriptPath, fs.readFileSync(baselinePath))
+    return { tampered: true, restored: true, reason }
+  } catch (e: any) {
+    logger.error(`[integrity] verificación del script parcheado falló: ${e?.message ?? e}`)
+    return { tampered: true, restored: false, reason: e?.message ?? String(e) }
+  }
+}
+
+/**
+ * Garantiza la copia baseline (post-regex, pre-processGame) de script.js.
+ * La llama el updater justo tras escribir el juego (tras el gate pre-regex)
+ * y processGame como último recurso.
+ */
+export function ensureScriptBaseline(): void {
+  try {
+    const { scriptPath, baselinePath } = scriptPaths()
+    if (fs.existsSync(scriptPath) && !fs.existsSync(baselinePath)) {
+      fs.copyFileSync(scriptPath, baselinePath)
+      logger.info('[integrity] baseline de script.js creada (post-regex)')
+    }
+  } catch (e: any) {
+    logger.warn(`[integrity] no se pudo crear la baseline: ${e?.message ?? e}`)
+  }
+}
+
+/**
+ * Re-pinnea el script.js que processGame va a servir (hash post-patch +
+ * stamp) y asegura la baseline. Se ejecuta al FINAL de processGame en cada
+ * arranque, así que el pin siempre tiene el último estado legal conocido.
+ */
+export function writeScriptPin(): void {
+  try {
+    const { scriptPath, pinPath } = scriptPaths()
+    if (!fs.existsSync(scriptPath)) return
+    ensureScriptBaseline()
+    const buf = fs.readFileSync(scriptPath)
+    const pin: ScriptPin = {
+      sha256: sha256Of(buf),
+      size: buf.length,
+      stamp: SCRIPT_PIN_STAMP,
+      writtenAt: new Date().toISOString()
+    }
+    fs.writeFileSync(pinPath, JSON.stringify(pin))
+  } catch (e: any) {
+    logger.warn(`[integrity] no se pudo escribir el pin post-patch: ${e?.message ?? e}`)
+  }
 }

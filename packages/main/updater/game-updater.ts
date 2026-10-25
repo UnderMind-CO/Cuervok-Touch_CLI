@@ -6,7 +6,7 @@ import path from 'path'
 import { get, FROZEN_VERSION } from '../constants'
 import { DOFUS_ORIGIN, DOFUS_ITUNES } from '@cuervok/shared'
 import { logger } from '../logger'
-import { GAME_SCRIPT_INTEGRITY, verifyScriptIntegrity } from './script-integrity'
+import { GAME_SCRIPT_INTEGRITY, verifyScriptIntegrity, ensureScriptBaseline } from './script-integrity'
 
 export interface FrozenState {
   frozen: boolean
@@ -188,6 +188,11 @@ export class GameUpdater {
 
     this._onProgress('Writing files...', 85)
     this._writeFiles(dofusFiles)
+    // Capture the pristine-build baseline immediately: the pin + baseline
+    // pair drives the anti-tampering check on every launch (verify
+    // script.js → restore baseline → re-apply patches). Must run before ANY
+    // subsequent processGame so the baseline never embeds a stale pin.
+    ensureScriptBaseline()
 
     this._onProgress('Cleaning up...', 90)
     this._removeOld(assetDiff, localAsset)

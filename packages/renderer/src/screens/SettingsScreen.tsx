@@ -264,20 +264,22 @@ function AboutTab() {
         marginTop: 8
       }}>
         <p style={{ margin: '0 0 12px' }}>
-          This project is an enthusiast idea from a young developer passionate about video games and software.
+          Cuervok is a project developed by the community & for the community that aims to capture the essence of Dofus Touch with a custom twist, enhancing the player experience.
         </p>
         <p style={{ margin: 0, fontSize: 10, color: colors.textFaint }}>
-          All rights reserved to Ankama Games.
+          All rights reserved to Ankama Games ®.
         </p>
       </div>
 
       <div style={{
         padding: '10px 0',
         borderTop: `1px solid ${colors.borderFaint}`,
-        display: 'flex',
+        display: 'block',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6
+        gap: 6,
+        textAlign: 'center',
+        
       }}>
         <button
           onClick={() => window.cuervok.openExternal('https://github.com/UnderMind-CO')}
@@ -294,7 +296,9 @@ function AboutTab() {
             padding: '6px 16px',
             borderRadius: 6,
             transition: 'all 0.15s',
-            fontFamily: 'inherit'
+            fontFamily: 'inherit',
+            textAlign: 'center',
+            marginLeft: '35%'
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = 'rgba(201,162,77,0.1)'
@@ -309,6 +313,9 @@ function AboutTab() {
           <ExternalLink size={14} />
           Dev By Under
         </button>
+        <p style={{ margin: 0, fontSize: 8, color: colors.textFaint, textAlign: 'center', display: 'block' }}>
+          This client is a fork of <a href="https://github.com/angine67/DofuEmu" style={{ color: colors.accent, textDecoration: 'underline' }} target="_blank" rel="noopener noreferrer">DofuEmu</a> All Rights Reserved.
+        </p>
       </div>
     </Section>
   )
@@ -316,7 +323,7 @@ function AboutTab() {
 
 const TABS = [
   { id: 'General', icon: Globe },
-  { id: 'Hotkeys', icon: Keyboard },
+  /* { id: 'Hotkeys', icon: Keyboard }, */
   { id: 'About', icon: Info },
 ] as const
 
@@ -353,7 +360,7 @@ export function SettingsScreen() {
         })}
       </div>
       {tab === 'General' && <GeneralTab />}
-      {tab === 'Hotkeys' && <HotkeysTab />}
+      {/* {tab === 'Hotkeys' && <HotkeysTab />} */}
       {tab === 'About' && <AboutTab />}
     </div>
   )

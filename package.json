@@ -10,8 +10,10 @@
     "dev": "node scripts/watch.mjs",
     "build": "node scripts/build.mjs",
     "dist": "node scripts/bump-version.mjs && npm run build && electron-builder",
-    "release": "npm run build && electron-builder --publish always",
+    "release": "node scripts/bump-version.mjs && npm run build && electron-builder",
+    "postrelease:upload": "echo 'Sube los archivos de release/ (latest.yml + .exe + .blockmap) al feed del VPS — ver docs/2026-10-24-updates-en-vps.md'",
     "realse": "pnpm run release",
+    "feed:prepare": "node scripts/prepare-vps-feed.mjs",
     "typecheck": "tsc --noEmit",
     "build:shockwave": "cmd /c scripts\build-shockwave.cmd",
     "almanax:preload": "node scripts/preload-almanax.mjs --langs es,en,fr --validate --gen-index --check-recurrence --delay 120",
@@ -25,11 +27,12 @@
     "appId": "com.cuervok.app",
     "productName": "Cuervok",
     "icon": "resources/icon.png",
+    "afterPack": "scripts/afterpack.cjs",
     "publish": [
       {
-        "provider": "github",
-        "owner": "angine67",
-        "repo": "Cuervok"
+        "provider": "generic",
+        "url": "https://web-retro.changethis-domain.com/prod/updater",
+        "channel": "latest"
       }
     ],
     "mac": {
@@ -82,6 +85,7 @@
     "hono": "^4.7.0"
   },
   "devDependencies": {
+    "@electron/fuses": "^2.1.3",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",

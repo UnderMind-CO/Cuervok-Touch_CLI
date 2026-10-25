@@ -7,6 +7,7 @@ import { MOBILE_UA_BASE } from '@cuervok/shared'
 import { get } from '../constants'
 import { logger } from '../logger'
 import { getHelperSnippet, getRuntimeHelperSnippet } from '../scripts'
+import { verifyPatchedScriptOnLaunch, writeScriptPin } from '../updater/script-integrity'
 import { getAppIconPath } from '../icon-path'
 import { NetworkCapture } from './network-capture'
 
@@ -245,6 +246,7 @@ function goBackToGame(){
 
 export class GameWindow extends EventEmitter {
   private readonly _win: BrowserWindow
+  private _shown: Promise<void>
   private _globalMuted = false
   private _soundOnFocus = true
   private _capture: NetworkCapture
@@ -253,7 +255,10 @@ export class GameWindow extends EventEmitter {
     super()
 
     this._win = new BrowserWindow({
-      show: true,
+      // Se crea OCULTA: el updater overlay permanece visible hasta que el
+      // contenido del juego está listoready (ready-to-show). Así la ventana
+      // del juego nunca se ve "flashar" detrás del updater mientras carga.
+      show: false,
       width: INITIAL_WIDTH,
       height: INITIAL_HEIGHT,
       frame: false,
@@ -289,6 +294,16 @@ export class GameWindow extends EventEmitter {
     // Start network capture for protocol reverse-engineering
     this._capture = new NetworkCapture(this._win.webContents)
     this._capture.start()
+
+    // La ventana solo aparece cuando su contenido pinta por primera vez,
+    // y Application cierra el updater overlay justo después de `_shown`.
+    this._shown = new Promise<void>((resolve) => {
+      this._win.once('ready-to-show', () => {
+        this._win.show()
+        this._win.focus()
+        resolve()
+      })
+    })
 
     logger.info(`Loading URL: ${opts.url}`)
     // v7 — one-shot purge of the game's IndexedDB data caches from the MAIN
@@ -343,6 +358,15 @@ export class GameWindow extends EventEmitter {
 
   get id() {
     return this._win.webContents.id
+  }
+
+  /**+
+   * Resuelve cuando la ventana ya está pintada y visible (ready-to-show).
+   * Application lo usa para cerrar el updater overlay depués de este punto,
+   * garantizando que el swap updater → juego es limpio (sin flashes).
+   */
+  get shown(): Promise<void> {
+    return this._shown
   }
 
   focus() {
@@ -407,6 +431,20 @@ export class GameWindow extends EventEmitter {
     const gamePath = get.GAME_PATH()
     const buildPath = path.join(gamePath, 'build', 'script.js')
     const indexPath = path.join(gamePath, 'index.html')
+
+    // ─── Anti-tamper post-patch: verify script.js against its pin ─────
+    // Runs live BEFORE the regenaration loop: if the file is altered
+    // between updates (auto-follow, exploits), we restore the baseline
+    // and the loop below re-applies the patches over the restored file.
+    try {
+      const integrity = verifyPatchedScriptOnLaunch()
+      if (integrity.tampered && !integrity.restored) {
+        logger.error('processGame: script.js tampered and no baseline available — the client starts anyway (degraded)')
+      }
+      // integrity.restored is logged by script-integrity itself
+    } catch (err: any) {
+      logger.error('processGame: script integrity verification failed', err)
+    }
 
     // ─── Patch the game's index.html to boot once Config is ready ──
     // The game-base index.html (copied by the updater) only DEFINES
@@ -591,6 +629,30 @@ _fetchConfig()})();
           'if(_pc&&this.fighterList._childrenList[_tl]!==_pc){' +
           'this.fighterList.insertChildBefore(_pc,_tl+1<r.length?this.fighterList.getChild(r[_tl+1]):null)}}}' +
           'var h=r.length,f=0;for(i=0;i<h;i++)',
+      },
+      {
+        // QUIET GUARD — TemporaryAnimationManager.assignSymbol. El engine del
+        // juego usa un TemporaryAnimationManager como fallback cuando el
+        // template de bone/skin de un look llega vacio ("boneTemplate
+        // isEmpty"); cualquier consulta de simbolo sobre ese manager emite
+        // el console.warn "Attempt to call abstract method
+        // TemporaryAnimationManager.assignSymbol" y devuelve el callback
+        // (comportamiento BENIGNO del engine). Cuando el mismo look es
+        // consultado repetidamente el warning satura el log del renderer sin
+        // aportar informacion nueva. Este patch conserva el aviso SOLO en su
+        // primera aparicion (throttle global por sesion) y deja intacto el
+        // retorno del callback, asi ni el render ni la funcionalidad cambian.
+        // Anchor: el cuerpo minificado exacto del assignSymbol abstracto.
+        // IMPORTANTE: la variable SIEMPRE via window.$_animSymbolWarnGuard —
+        // una referencia implicita sin prefijo lanza ReferenceError dentro del
+        // módulo minificado (crash real: "$_animSymbolWarnGuard is not
+        // defined" al setDisposition/addEmptyActor).
+        name: '$_animSymbolWarnGuard',
+        re: /(\w+)\.prototype\.assignSymbol=function\((\w),(\w),(\w)\)\{return console\.warn\("Attempt to call abstract method TemporaryAnimationManager\.assignSymbol",\2\),\4&&\4\(\)\}/,
+        template: (m) =>
+          m[1] + '.prototype.assignSymbol=function(' + m[2] + ',' + m[3] + ',' + m[4] + '){' +
+          'window.$_animSymbolWarnGuard||(window.$_animSymbolWarnGuard=console.warn("Attempt to call abstract method TemporaryAnimationManager.assignSymbol",{symbol:' + m[2] + '})),' +
+          m[4] + '&&' + m[4] + '()}',
       }
     ]
 
@@ -709,6 +771,11 @@ _fetchConfig()})();
       fs.writeFileSync(buildPath, build)
       logger.info('processGame: wrote patched script.js')
     }
+    // Re-pin the served script.js (post-patch hash + stamp) and refresh the
+    // baseline if missing. Runs every launch, no matter whether we changed
+    // the file ourselves — attacks modify the file AFTER we write it, so we
+    // always pin the latest state.
+    writeScriptPin()
   }
 
   private _setupRequestInterceptors() {
@@ -891,11 +958,19 @@ _fetchConfig()})();
         //   the ":" in catalog-pages:get is rewritten to "_" to dodge any EmbedIO route quirk —
         //   the server registers both)
         if (url.hostname === 'shop-api.ankama.com') {
+          // El idioma del {lang} del URL oficial es la fuente fiel del idioma
+          // del cliente: se reenvía al Auth como ?lang= (el servidor lo
+          // combina ?lang= ?language= body.language → shop-{lang}.json).
+          const langMatch = url.pathname.match(/^\/([a-z]{2,5})(?=\/shops\/DOFUS_TOUCH_INGAME)/i)
+          const lang = langMatch ? langMatch[1].toLowerCase() : ''
           const langless = url.pathname.replace(/^\/[a-z]{2,5}(?=\/shops\/DOFUS_TOUCH_INGAME)/i, '')
           const safePath = langless.replace('catalog-pages:get', 'catalog-pages_get')
+          const hasLangOnQuery = /(^|[?&])(lang|language)=/.test(url.search)
+          const langParam = hasLangOnQuery ? '' : `lang=${lang}`
+          const newSearch = langParam ? (url.search ? `${url.search}&${langParam}` : `?${langParam}`) : url.search
           const newPath = '/api/mega' + safePath
-          logger.info(`[REDIRECT] MegaShop → ${AUTH_BASE}${newPath}${url.search}`)
-          callback({ redirectURL: `${AUTH_BASE}${newPath}${url.search}` })
+          logger.info(`[REDIRECT] MegaShop${lang ? ` [${lang}]` : ''} → ${AUTH_BASE}${newPath}${newSearch}`)
+          callback({ redirectURL: `${AUTH_BASE}${newPath}${newSearch}` })
           return
         }
 
