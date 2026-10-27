@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
-import { IPCEvents, GameContext, NativeNotificationPayload, AppUpdateStatus, AuthSession } from '@cuervok/shared'
+import { IPCEvents, GameContext, NativeNotificationPayload, AppUpdateStatus, AuthSession, ClientIntegrityStatus } from '@cuervok/shared'
 
 const cuervokApi = {
   fetchGameContext: async (): Promise<GameContext> => {
@@ -93,6 +93,17 @@ const cuervokApi = {
     const listener = (_: IpcRendererEvent, status: AppUpdateStatus) => cb(status)
     ipcRenderer.on(IPCEvents.APP_UPDATE_STATUS, listener)
     return () => { ipcRenderer.removeListener(IPCEvents.APP_UPDATE_STATUS, listener) }
+  },
+
+  // Client integrity (app.asar anti-tamper)
+  getClientIntegrity: async (): Promise<ClientIntegrityStatus | null> => {
+    return ipcRenderer.invoke(IPCEvents.GET_CLIENT_INTEGRITY)
+  },
+
+  onClientIntegrity: (cb: (status: ClientIntegrityStatus) => void): (() => void) => {
+    const listener = (_: IpcRendererEvent, status: ClientIntegrityStatus) => cb(status)
+    ipcRenderer.on(IPCEvents.CLIENT_INTEGRITY_STATUS, listener)
+    return () => { ipcRenderer.removeListener(IPCEvents.CLIENT_INTEGRITY_STATUS, listener) }
   },
 
   showNativeNotification: (payload: NativeNotificationPayload) => {

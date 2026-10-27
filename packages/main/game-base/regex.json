@@ -10,6 +10,7 @@
     ["Math\\.min\\(Math\\.max\\((\\w),\\s*(\\w)\\),\\s*this\\.maxZoom\\)", "Math.max($1,$2)"],
     ["=\\s*\\w\\.viewport(Width|Height)\\s*\\|\\|", "="],
     ["new (\\w)\\(document\\.getElementsByClassName\\(\"dofusBody\"\\)\\[0\\]\\)", "new $1(document.getElementById(\"dofusBody\"))"],
+    ["\\{(\\w{1,2})\\.toggleClassName\\(\"removeNotch\"", "{$1&&$1.rootElement&&$1.toggleClassName(\"removeNotch\""],
     ["(if\\(!\\w{1,2}\\|\\|!\\w{1,2}\\.appToken\\)return) void \\w{1,2}\\.error\\(new Error\\(\"Need the config\\.\"\\)\\)", "$1"]
     , ["(\\b\\w{1,2})=(\\w{1,2})\\.addSprite\\((\\w{1,2}),(\\w{1,2})\\[\\3\\.g\\]\\)", "window.__cuervokPrepareMapElement($3);$1=$2.addSprite($3,$4[$3.g]),window.__cuervokApplyMapElement($1,$3)"]
   ],

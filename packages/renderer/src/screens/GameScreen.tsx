@@ -12,7 +12,7 @@ import { initAutoGroup, broadcastLeaderPosition, destroyAutoGroup, sendPartyInvi
 import { initNotificationFocus } from '@/mods/notification-focus'
 import { colors } from '@/theme'
 import { captureCharacterIcon } from '@/utils/capture-icon'
-import type { HotkeyAction, AuthSession, SavedAccount } from '@cuervok/shared'
+import type { HotkeyAction, AuthSession, SavedAccount, ClientIntegrityStatus } from '@cuervok/shared'
 import { DofusWindow, HTMLIFrameElementWithDofus } from '@/types/dofus-window'
 import logoImg from '@/assets/logo.png'
 import loadingBgImg from '@/assets/game-loading-bg.png'
@@ -30,6 +30,33 @@ declare global {
     $current_id: string
     $appSchemeLinkCalled: (payload: string) => void
   }
+}
+
+const integrityBannerStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  padding: '4px 12px',
+  fontSize: 11,
+  fontFamily: 'monospace',
+  background: 'linear-gradient(90deg, #7f1d1d 0%, #a33327 100%)',
+  color: '#fff',
+  borderBottom: '1px solid rgba(0,0,0,0.45)',
+  flexShrink: 0,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis'
+}
+
+function IntegrityBanner({ status }: { status: ClientIntegrityStatus }) {
+  return (
+    <div style={integrityBannerStyle}>
+      <span>⚠ Cliente modificado</span>
+      <span style={{ opacity: 0.85, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        La instalación de Cuervok (app.asar) no coincide con el feed oficial ({status.reason})
+      </span>
+    </div>
+  )
 }
 
 const loadingBackdropStyle: CSSProperties = {
@@ -401,7 +428,19 @@ export function GameScreen() {
   const [isMaximized, setIsMaximized] = useState(false)
   const [dragTabId, setDragTabId] = useState<string | null>(null)
   const [dragOverTabId, setDragOverTabId] = useState<string | null>(null)
+  const [clientIntegrity, setClientIntegrity] = useState<ClientIntegrityStatus | null>(null)
   const iframeRefs = useRef<Record<string, HTMLIFrameElementWithDofus | null>>({})
+
+  // Integridad del cliente (app.asar): GET en pantalla + broadcast si la
+  // verificación (que corre en el main al arrancar) termina más tarde.
+  useEffect(() => {
+    let mounted = true
+    window.cuervok.getClientIntegrity().then((status) => {
+      if (mounted && status) setClientIntegrity(status)
+    }).catch(() => {})
+    const unsub = window.cuervok.onClientIntegrity((status) => setClientIntegrity(status))
+    return () => { mounted = false; unsub() }
+  }, [])
 
   const getGameWindow = useCallback((tabId: string): any => {
     return iframeRefs.current[tabId]?.contentWindow ?? null
@@ -888,6 +927,7 @@ export function GameScreen() {
           title="Starting Cuervok"
           subtitle="Loading the local game context and preparing the client shell."
         />
+        {clientIntegrity?.phase === 'modified' && <IntegrityBanner status={clientIntegrity} />}
       </div>
     )
   }
@@ -999,6 +1039,7 @@ export function GameScreen() {
           <WindowButton onClick={() => window.cuervok.close()} hoverBg={colors.dangerClose}><X size={14} /></WindowButton>
         </div>
       </div>
+      {clientIntegrity?.phase === 'modified' && <IntegrityBanner status={clientIntegrity} />}
       <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
         {tabs.map((tab) => {
           return (

@@ -823,3 +823,84 @@ body, html {
 }
 .giftCard .giftCodeBtn { min-width: 0; width: 100%; padding: 4px 6px; font-size: 11px; }
 .giftCodeEmpty { color: #a99f8a; font-style: italic; padding: 8px 2px; }
+
+/* ─────────────────────────────────────────────────────────────────────
+   $_jobsPanelWide_v1 — Panel de oficios: se ven TODOS los oficios.
+   Complemento de $_jobsPaging_v1 (script.js, 28+9 casillas):
+   la columna izquierda (casillas de oficio + diario de habilidades) pasa
+   al 54% del ancho y la tarjetita de casillas hace flex-wrap con iconos
+   de 56px, así los ~26 oficios + 8 especialidades caben a la vista y la
+   columna de recetas (col2) queda más compacta (menos alto: título con
+   padding reducido y separación menor entre recetas). La paginación queda
+   disponible como red de seguridad si un oficio no cabe en la grilla.
+   ───────────────────────────────────────────────────────────────────── */
+.window .jobsWindow .col1 {
+  width: 54%;
+  -webkit-flex: 0 0 auto;
+  flex: 0 0 auto;
+}
+
+.window .jobsWindow .jobsList {
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  padding: 6px 8px 24px;
+  min-height: 60px;
+}
+
+.window .jobsWindow .jobsList .job {
+  width: 56px;
+  height: 56px;
+  margin: 2px 4px;
+}
+
+.window .jobsWindow .jobExpBlock {
+  min-height: 46px;
+}
+
+.window .jobsWindow .RecipeBox {
+  margin-bottom: 3px;
+}
+
+.window .jobsWindow .RecipeBox .recipeTitle {
+  padding: 3px;
+}
+
+.window .jobsWindow .RecipeBox .recipeTitle .recipeName,
+.window .jobsWindow .RecipeBox .recipeTitle .recipeLevel {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   $_jobsIconsClean_v1 — Panel de oficios: zona de iconos limpia.
+   Petición del jugador (2026-10-27): los textos de nivel de cada casilla
+   (“Niv. X”) quedaban ocultos o mal posicionados dentro de la mini-casilla
+   de 56px. Se eliminan TODOS los textos de nivel de la zona de iconos
+   (oficios principales y especialidades) y se deja solo el rótulo
+   “Especialidades”, que pasa a una fila propia encima de las casillas
+   de especialidad para organizar la grilla (oficios arriba, rótulo,
+   especialidades debajo).
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Sin “Niv. X” en ninguna casilla de la zona de iconos */
+.window .jobsWindow .jobsList .job .level {
+  display: none !important;
+}
+
+/* Rótulo “Especialidades”: fila propia, legible, antes de sus casillas */
+.window .jobsWindow .jobsList .specialisation {
+  flex: 0 0 100%;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.window .jobsWindow .jobsList .specialisation .text {
+  width: 100%;
+  display: block;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #e8d9b8;
+  padding: 2px 4px 6px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.65);
+}

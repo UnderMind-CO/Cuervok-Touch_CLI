@@ -40,8 +40,8 @@ export interface ScriptIntegrityEntry {
  */
 export const GAME_SCRIPT_INTEGRITY: Record<string, ScriptIntegrityEntry> = {
   "build/script.js": {
-    "sha256": "19ef3558e4520620091bd3123dd0643fa01d333fde7755bb64bd8acfdefcbff9",
-    "size": 5397029
+    "sha256": "e25548c242ed4d449e8518bdee09f01c2b5d47fd67960dec41b26e7b5b20c630",
+    "size": 5397223
   },
   "build/primus.js": {
     "sha256": "015f5f7d5d1b3f6fa5aa5a19acfbafbdc48e7d766366091dc030dfa73ff040a1",
@@ -140,7 +140,7 @@ export function verificationOnLaunch(): { ok: boolean; failures: string[] } {
  */
 
 /** Stamp del patch set actual — BUMP MANUAL al cambiar los patches de processGame. */
-export const SCRIPT_PIN_STAMP = 'v1-2026-10-24'
+export const SCRIPT_PIN_STAMP = 'v2-2026-10-27-jobs-icons'
 
 export interface ScriptPin {
   sha256: string
@@ -206,10 +206,17 @@ export function verifyPatchedScriptOnLaunch(): { tampered: boolean; restored: bo
 export function ensureScriptBaseline(): void {
   try {
     const { scriptPath, baselinePath } = scriptPaths()
-    if (fs.existsSync(scriptPath) && !fs.existsSync(baselinePath)) {
-      fs.copyFileSync(scriptPath, baselinePath)
-      logger.info('[integrity] baseline de script.js creada (post-regex)')
-    }
+    if (!fs.existsSync(scriptPath)) return
+    // Refresca SIEMPRE: con el "crear solo si falta", la baseline quedaba
+    // obsoleta tras una actualización oficial de Ankama (nuevo bundle) y
+    // verifyPatchedScriptOnLaunch restauraba el bundle VIEJO sobre el
+    // nuevo (visto 2026-10-27 15:49: script 1.74.10 escrito por el updater
+    // y revertido a 1.74.9 por la baseline pre-update). La baseline debe
+    // reflejar el último estado LEGAL conocido, que es este archivo tal
+    // como acaba de escribirlo el updater/processGame.
+    const fresh = !fs.existsSync(baselinePath)
+    fs.copyFileSync(scriptPath, baselinePath)
+    logger.info(fresh ? '[integrity] baseline de script.js creada (post-regex)' : '[integrity] baseline de script.js refrescada (post-regex)')
   } catch (e: any) {
     logger.warn(`[integrity] no se pudo crear la baseline: ${e?.message ?? e}`)
   }

@@ -1201,3 +1201,268 @@ for (var id in events) {
     } catch (err) { /* retry en el próximo tick */ }
   }, 500);
 })();
+// ── $_jobsDiag_v1 — sonda de diagnóstico SOLO-CONSOLE ───────────────────
+// Contexto: la ventana de Oficios muestra los slots vacíos aunque el proxy
+// sirve gfx/jobs/{1..40}.png con 200 image/png y los items sí cargan.  Esta
+// sonda (no toca UI) remite a game-console.log el estado REAL del runtime:
+//   • Config.assetsUrl/uiUrl, wizAssets presente
+//   • jobOriginalOrder + iconId de los 6 primeros oficios
+//   • resultado crudo de assetPreloader.preloadImages(gfx/jobs/…)
+//   • backgroundImage aplicado a cada jobIcon tras _updateJobIcons()
+// Marca única: se auto-desactiva si liberas con doble llamada.
+;(function () {
+  if (window.$_jobsDiag_v1) return;
+  window.$_jobsDiag_v1 = true;
+  var tries = 0, pend = 0, pendTries = 0;
+  var timer = setInterval(function () {
+    var jd = window.gui && window.gui.playerData && window.gui.playerData.jobs;
+    if (jd && jd.jobOriginalOrder && jd.jobOriginalOrder.length) {
+      clearInterval(timer);
+      // el panel puede abrirse después del login: si no está abierto, reintentar
+      pendTries = 0;
+      var rep = function () { if (diag() === false && ++pendTries < 15) pend = setTimeout(rep, 4000); };
+      pend = setTimeout(rep, 12000);
+    } else if (++tries > 600) { clearInterval(timer); console.warn('[jobsDiag] jobs data never appeared'); }
+  }, 200);
+
+  function bgOf(w) {
+    try {
+      var ic = w && w.jobButtons && w.jobButtons[0] && w.jobButtons[0].getChild('jobIcon');
+      var root = ic && ic.icon && ic.icon.rootElement;
+      return root ? root.style.backgroundImage : '(no root)';
+    } catch (e) { return '(err ' + (e && e.message) + ')'; }
+  }
+  function diag() {
+    try {
+      var w0 = null;
+      try { w0 = window.gui.getWindow('jobs'); } catch (e0) {}
+      if (!w0 && window.gui && window.gui.windowsContainer) {
+        var kc = window.gui.windowsContainer;
+        var kk = kc && (kc._childrenList || kc.childrenList || kc.children);
+        if (kk) for (var j0 = 0; j0 < kk.length; j0++) if (kk[j0] && kk[j0].id === 'jobs') { w0 = kk[j0]; break; }
+      }
+      if (!w0) { console.warn('[jobsDiag] panel aún cerrado (reintentando)'); return false; }
+      var cfg = window.Config || {};
+      console.warn('[jobsDiag] assetsUrl=' + cfg.assetsUrl + ' uiUrl=' + cfg.uiUrl + ' wizAssets=' + (!!window.wizAssets));
+      var jd = window.gui.playerData.jobs || {};
+      var order = jd.jobOriginalOrder || [];
+      console.warn('[jobsDiag] order len=' + order.length + ' first12=' + order.slice(0, 12).join(','));
+      var list = jd.list || {};
+      var out = [], n = 0;
+      for (var k in list) {
+        if (n++ >= 8) break;
+        var it = list[k];
+        out.push(k + ':icon=' + (it.info && it.info.iconId != null ? it.info.iconId : 'MISSING') + ',spec=' + (it.info && it.info.specializationOfId != null ? it.info.specializationOfId : '-'));
+      }
+      console.warn('[jobsDiag] list ' + Object.keys(list).length + ' → ' + out.join(' | '));
+      var w = w0;
+      console.warn('[jobsDiag] panel wrapper jobButtons=' + (w.jobButtons || []).length + ' mark=' + (w._jobsPatchMark || '(none)') + ' hasJobMap=' + (!!w.jobMap));
+      console.warn('[jobsDiag] slot0 backgroundImage ANTES de recargar: ' + bgOf(w));
+      var ap = window.assetPreloader;
+      if (ap && ap.preloadImages) {
+        ap.preloadImages(['gfx/jobs/1.png', 'gfx/jobs/13.png', 'gfx/jobs/30.png'], function (res) {
+          console.warn('[jobsDiag] preloadImages res=' + JSON.stringify(res));
+          // estado del slot 0 tras una pasada de _updateJobIcons
+          if (w._updateJobIcons) { w._updateJobIcons(); console.warn('[jobsDiag] slot0 backgroundImage tras _updateJobIcons: ' + bgOf(w)); }
+        });
+      } else console.warn('[jobsDiag] assetPreloader.preloadImages AUSENTE');
+    } catch (e) { console.warn('[jobsDiag] error ' + (e && e.message)); }
+  }
+})();
+
+// ── $_jobsIconForce_v2 — fuerza el icono de cada slot de Oficios ─────────────
+// v2 (2026-10-27): v1 abandonaba el escaneo en el PRIMER avistamiento de la
+// ventana 'jobs' (clearInterval inmediato). Si esa primera pasada ocurría
+// antes de que existieran casillas con jobId y _updateJobIcons (wrapper
+// registrado pero sin datos, o método aún no montado), el hook no eficaba y
+// el pintado nunca volvía a intentarse — sin log de [jobsIconForce] EXACTO en
+// game-console.log. Ahora:
+//   • el escaneo no se abandona hasta que la ventana esté HACKEADA y al
+//     menos una casilla tenga jobId;
+//   • tras el primer pintado queda un repintado cada 8 s (recupera el estilo
+//     si el juego lo limpia en un refresco de la ventana);
+//   • cada cambio de estado se reporta una vez por sesión en game-console.log
+//     (marcador [jobsIconForce]) — casillas sin jobId, iconId fuera de
+//     rango 1..40 (→ el caso "especialidad sin icono en el CDN"), o la
+//     pasada que repinta/sostiene los slots;
+//   • vacía el texto "Niv. X" de cada casilla ($_jobsIconsClean_v1 lo esconde
+//     por CSS; el widget también queda sin texto aunque el juego lo repinte:
+//     texts ocultos/mal posicionados según lo pedido).
+;(function () {
+  if (window.$_jobsIconForce_v2) return
+  window.$_jobsIconForce_v2 = true
+
+  function assetsBase() {
+    var u = (window.Config && window.Config.assetsUrl) || 'http://127.0.0.1:8765/assets/'
+    return String(u).replace(/\/+$/, '')
+  }
+
+  function findWindow() {
+    var w = null
+    try { w = window.gui && window.gui.getWindow && window.gui.getWindow('jobs') } catch (e) {}
+    if (!w && window.gui && window.gui.windowsContainer) {
+      var kids = window.gui.windowsContainer._childrenList || window.gui.windowsContainer.childrenList || window.gui.windowsContainer.children
+      if (kids) for (var i = 0; i < kids.length; i++) if (kids[i] && kids[i].id === 'jobs') { w = kids[i]; break }
+    }
+    return w
+  }
+
+  function iconChild(b) {
+    try { var c = b.getChild && b.getChild('jobIcon'); if (c) return c } catch (e) {}
+    try { return b.itemSlot || (b.children && b.children.jobIcon) || null } catch (e2) {}
+    return null
+  }
+
+  function rootOf(icon) {
+    try { if (icon && icon.icon && icon.icon.rootElement) return icon.icon.rootElement } catch (e) {}
+    return null
+  }
+
+  function paint(w) {
+    if (!w || !w.jobMap) return { checked: 0, painted: 0, noJobId: 0, badIcon: [] }
+    var arrs = [w.jobButtons, w.jobSelectButtons, w.jobSelectSpecialButtons]
+    var base = assetsBase()
+    var st = { checked: 0, painted: 0, noJobId: 0, badIcon: [] }
+    for (var ai = 0; ai < arrs.length; ai++) {
+      var arr = arrs[ai] || []
+      for (var bi = 0; bi < arr.length; bi++) {
+        var b = arr[bi]
+        if (!b) continue
+        if (!b.jobId) { st.noJobId++; continue }
+        var entry = w.jobMap[b.jobId]
+        var info = entry && entry.info
+        var ic = info ? info.iconId : null
+        if (!(ic >= 1 && ic <= 40)) {
+          if (st.badIcon.length < 8) st.badIcon.push(b.jobId + ':' + (ic == null ? 'null' : ic))
+          continue
+        }
+        var root = rootOf(iconChild(b))
+        if (!root) continue
+        st.checked++
+        var cur = root.style.backgroundImage || ''
+        if (cur.indexOf('gfx/jobs/') < 0) {
+          root.style.backgroundImage = 'url("' + base + '/gfx/jobs/' + ic + '.png")'
+          st.painted++
+        }
+        // Texto de nivel fuera: el CSS ($_jobsIconsClean_v1) lo esconde y
+        // aquí se vacía el widget también (idempotente).
+        try {
+          var lv = b.getChild && b.getChild('level')
+          if (lv && lv.rootElement && (lv.rootElement.textContent || '').trim() && typeof lv.setText === 'function') lv.setText('')
+        } catch (e3) {}
+      }
+    }
+    return st
+  }
+
+  function hook(w) {
+    if (!w || w.$_iconForceHooked) return true
+    if (typeof w._updateJobIcons !== 'function') return false
+    var orig = w._updateJobIcons
+    w.$_iconForceHooked = true
+    w._updateJobIcons = function () {
+      var r = orig.apply(this, arguments)
+      try { paint(this) } catch (e) { console.warn('[jobsIconForce] err ' + (e && e.message)) }
+      return r
+    }
+    console.warn('[jobsIconForce] hook montado sobre _updateJobIcons')
+    return true
+  }
+
+  var lastSig = ''
+  function report(st) {
+    var bits = []
+    if (st.checked && st.painted) bits.push('slots=' + st.checked + ' repintados=' + st.painted)
+    else if (st.checked) bits.push('slots=' + st.checked + ' con imagen actual')
+    if (st.noJobId) bits.push('casillas sin jobId=' + st.noJobId)
+    if (st.badIcon.length) bits.push('iconId fuera de rango 1..40 → ' + st.badIcon.join(','))
+    var sig = bits.join(' | ')
+    if (!sig || sig === lastSig) return
+    lastSig = sig
+    console.warn('[jobsIconForce] ' + sig)
+  }
+
+  var ready = false
+  var timer = setInterval(function () {
+    try {
+      var w = findWindow()
+      if (!w) return
+      if (!w.$_iconForceHooked && !hook(w)) return
+      var st = paint(w)
+      report(st)
+      if (st.checked > 0) {
+        ready = true
+        clearInterval(timer)
+        // Repintado de sostén: el juego puede limpiar estilos al refrescar
+        // la ventana; cada 8 s restablece los iconos y el estado del texto.
+        setInterval(function () {
+          try { var w2 = findWindow(); if (w2) paint(w2) } catch (e) {}
+        }, 8000)
+      }
+    } catch (e) { console.warn('[jobsIconForce] scan err ' + (e && e.message)) }
+  }, 1500)
+})()
+
+// ── $_jobsIconsPrewarm_v1 — calienta los PNG de Oficios en el arranque ──────
+// Síntoma: el PRIMER aperturar de la ventana de Oficios pinta las casillas
+// vacías; al reeconomizarla salen todos los iconos. Causa: los PNG
+// gfx/jobs/{1..40}.png solo se piden cuando el panel se abre por primera vez,
+// y mientras el HTTP del CDN los baja (proxy local → origen) el slot queda
+// sin imagen. Solución: precargar los 40 PNG desde el arranque (mismo origen
+// que usa _jobsIconForce al repintar), de forma que cuando el usuario abra
+// el panel ya estén en la caché HTTP/memoria y el primer pintado sea
+// inmediato. Idempotente (se desactiva tras terminar), con reporte único
+// por sesión y tope de reintento. Marca visible: [jobsPrewarm].
+;(function () {
+  if (window.$_jobsIconsPrewarm_v1) return
+  window.$_jobsIconsPrewarm_v1 = true
+
+  function assetsBase() {
+    var u = (window.Config && window.Config.assetsUrl) || 'http://127.0.0.1:8765/assets/'
+    return String(u).replace(/\/+$/, '')
+  }
+
+  var tries = 0, done = false, started = false
+  var timer = setInterval(function () {
+    if (done) { clearInterval(timer); return }
+    var base = assetsBase()
+    if (!base) { if (++tries > 600) { clearInterval(timer); console.warn('[jobsPrewarm] sin base de assets — cancelado') } return }
+    if (!started) {
+      started = true
+      var imgs = []
+      for (var i = 1; i <= 40; i++) {
+        var im = new Image()
+        im.onload = im.onerror = (function (mm) { return function () { mm.__done = true } })(im)
+        im.src = base + '/gfx/jobs/' + i + '.png'
+        imgs.push(im)
+      }
+      // Cache de widgets vía assetPreloader cuando exista (mismo pipeline que
+      // usa el juego al pintar casillas).
+      try {
+        var ap = window.assetPreloader
+        if (ap && typeof ap.preloadImages === 'function') {
+          var files = []
+          for (var j = 1; j <= 40; j++) files.push('/gfx/jobs/' + j + '.png')
+          ap.preloadImages(files, function (res) {
+            try { console.warn('[jobsPrewarm] preloadImages listo ' + JSON.stringify(res)) } catch (e2) { console.warn('[jobsPrewarm] preloadImages listo') }
+          })
+        }
+      } catch (e3) { console.warn('[jobsPrewarm] preloadImages err ' + (e3 && e3.message)) }
+    }
+    var ready = 0, errs = 0, pend = 0
+    for (var k = 0; k < imgs.length; k++) {
+      if (imgs[k].__done) { if (imgs[k].naturalWidth > 0) ready++; else errs++ }
+      else pend++
+    }
+    if (pend === 0 && (started)) {
+      done = true
+      clearInterval(timer)
+      console.warn('[jobsPrewarm] Oficios precargados: ok=' + ready + ' fallos=' + errs + ' de 40')
+    } else if (++tries > 600) {
+      done = true
+      clearInterval(timer)
+      console.warn('[jobsPrewarm] timeout (200 s): ok=' + ready + ' fallos=' + errs + ' pendientes=' + pend)
+    }
+  }, 500)
+
+})()

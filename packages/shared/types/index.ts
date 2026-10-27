@@ -1,4 +1,16 @@
 export * from './auth'
+
+/** Estado de la verificación de integridad de app.asar del PROPIO cliente. */
+export interface ClientIntegrityStatus {
+  phase: 'verified' | 'modified' | 'unknown' | 'dev'
+  reason?: string
+  /** SHA-256 del app.asar en disco. */
+  actualSha256?: string
+  /** SHA-256 esperado, publicado en el feed (client-integrity.json). */
+  expectedSha256?: string
+  checkedAt?: string
+}
+
 export interface GameContext {
   gameSrc: string
   characterImagesSrc: string
@@ -215,5 +227,9 @@ export enum IPCEvents {
 
   // Discord RPC
   DISCORD_RPC_UPDATE = 'discord_rpc_update',
-  DISCORD_RPC_CLEAR = 'discord_rpc_clear'
+  DISCORD_RPC_CLEAR = 'discord_rpc_clear',
+
+  // Client integrity (app.asar anti-tamper)
+  GET_CLIENT_INTEGRITY = 'get_client_integrity',
+  CLIENT_INTEGRITY_STATUS = 'client_integrity_status'
 }

@@ -1,62 +1,68 @@
-/** Electron Fuses — hardening del binario (hook afterPack de electron-builder).
+/**
+ * afterpack.cjs — hook de electron-builder (build.afterPack en package.json).
  *
- * El proyecto es ESM ("type": "module"), pero electron-builder 22 carga este
- * hook con require(), por eso es un .cjs y exporta `exports.default`.
+ * Aplica Electron Fuses al ejecutable empaquetado ANTES de crear el
+ * instalador. Objetivo anti-tamper: un asar trocado ni siquiera carga.
  *
- * Qué bloquea cada fuse (FuseV1Options de @electron/fuses):
- * - RunAsNode: ELECTRON_RUN_AS_NODE convierte el cliente en un Node genérico
- *   (permite ejecutar JS arbitrario con TODOS los módulos del app) → off.
- * - EnableNodeOptionsEnvironmentVariable: la variable NODE_OPTIONS permite
- *   cargar módulos arbitrarios (--require) en el arranque → off.
- * - EnableNodeCliInspectArguments: el debugger remoto (--inspect) queda off,
- *   bloquea manipular el proceso del cliente corriendo desde fuera → off.
- * - EnableCookieEncryption: cifra las cookies en disco con una key ligada a
- *   la cuenta de Windows → ON, evita robar sesiones copiando el perfil.
- * - OnlyLoadAppFromAsar: el binario solo carga la app desde app.asar.
- *   Es el fuse más invasivo (un fallo rompe el arranque del instalador
- *   empaquetado): se deja en false explícito y se enciende cuando el
- *   instalador haya sido probado de extremo a extremo.
- * - EnableEmbeddedAsarIntegrityValidation: DEBE quedar en false con
- *   electron-builder 22 — el builder no escribe el recurso de checksum del
- *   app.asar dentro del .exe en Windows y el runtime muere en el arranque
- *   con FATAL "asar/archive_win.cc: FindResource failed 0x715"
- *   (verificado: exit -36861). Cuando se suba electron-builder a >= 24.9
- *   (embed de asar integrity para Windows) se reenciende junto con
- *   OnlyLoadAppFromAsar.
+ *   - ENABLE_EMBEDDED_ASAR_INTEGRITY_VALIDATION: Electron incrusta el hash
+ *     del asar firmado en el binario; si resources/app.asar se edita a mano
+ *     (asar extract → patch → pack), el proceso muere al arrancar.
+ *   - ONLY_LOAD_APP_FROM_ASAR: cierra el bypass de cargar main desde
+ *     app.asar.unpacked u otros paths arbitrarios.
+ *   - RUN_AS_NODE=false / ENABLE_NODE_OPTIONS_ENV_VAR=false /
+ *     ENABLE_NODE_CLI_INSPECT=false: bloquean ELECTRON_RUN_AS_NODE,
+ *     NODE_OPTIONS y --inspect, los tres saltos clásicos para ejecutar
+ *     el binario sin respetar el entrypoint ni con un inspector abierto.
+ *   - ENABLE_COOKIE_ENCRYPTION=true: el cookies store usa los OS secrets
+ *     (tokens de sesión no legibles copiando el archivo).
  *
- * ⚠ Un fuse que crashea el arranque deja el cliente inusable hasta un nuevo
- *   instalador: cualquier cambio aquí debe probarse lanzando
- *   release/win-unpacked/Cuervok.exe antes de publicar.
+ * Nota: la validación embebida de asar se apoya en que el binario esté
+ * firmado (Authenticode en Windows). Sin firma funciona igual el flip del
+ * fuse, pero la barrera más sólida es firma + fuse.
  */
+
 const path = require('path')
-const { flipFuses, FuseV1Options, FuseVersion } = require('@electron/fuses')
+const fs = require('fs')
 
-exports.default = async function afterPack(context) {
-  const isWin = context.electronPlatformName === 'win32'
-  // electron-builder: Windows → <ProductName>.exe, Linux → <productName>
-  const exeName = isWin
-    ? `${context.packager.appInfo.productFilename}.exe`
-    : context.packager.appInfo.productFilename
-  const exePath = path.join(context.appOutDir, exeName)
-
-  console.log(`[afterpack] Flipping Electron Fuses on ${exePath}`)
-
-  try {
-    await flipFuses(exePath, {
-      version: FuseVersion.V1,
-      [FuseV1Options.RunAsNode]: false,
-      [FuseV1Options.EnableCookieEncryption]: true,
-      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
-      [FuseV1Options.EnableNodeCliInspectArguments]: false,
-      [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: false,
-      [FuseV1Options.OnlyLoadAppFromAsar]: false,
-      [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: false,
-      [FuseV1Options.GrantFileProtocolToExtraUtility]: false
-    })
-  } catch (err) {
-    console.error('[afterpack] flipFuses FAILED:', err)
-    throw err
+async function afterPack(context) {
+  // electron-builder empaqueta SIN asar si build.asar=false; los fuses de
+  // integridad exigen asar: advertir claramente si la config lo desactiva.
+  const packager = context.packager
+  const usesAsar = packager.config.asar !== false
+  if (!usesAsar) {
+    console.warn('[afterpack] build.asar está en false — los fuses ONLY_LOAD_APP_FROM_ASAR y EMBEDDED_ASAR_INTEGRITY_VALIDATION no se aplican (requieren empaquetado asar).')
   }
 
-  console.log('[afterpack] Fuses flipped OK')
+  const { flipFuses, FuseVersion, FuseV1Options } = require('@electron/fuses')
+
+  const productName = packager.appInfo.productFilename
+  const executableCandidates = process.platform === 'win32'
+    ? [path.join(context.appOutDir, `${productName}.exe`)]
+    : process.platform === 'darwin'
+      ? [path.join(context.appOutDir, `${productName}.app`, 'Contents', 'MacOS', productName)]
+      : [path.join(context.appOutDir, productName)]
+
+  const executable = executableCandidates.find((p) => fs.existsSync(p))
+  if (!executable) {
+    console.warn(`[afterpack] ejecutable no encontrado en ${context.appOutDir} (se buscó: ${executableCandidates.join(', ')}) — fuses NO aplicados`)
+    return
+  }
+
+  // flipFuses exige el directorio o el binario; usar el binario directo.
+  // Empaquetamos con Electron >= v28 → fuses v1 es el formato correcto.
+  await flipFuses(executable, {
+    version: FuseVersion.V1,
+    [FuseV1Options.RunAsNode]: false,
+    [FuseV1Options.EnableCookieEncryption]: true,
+    [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+    [FuseV1Options.EnableNodeCliInspectArguments]: false,
+    [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: usesAsar,
+    [FuseV1Options.OnlyLoadAppFromAsar]: usesAsar,
+    [FuseV1Options.LoadBrowserProcessSpecificV8Snapshot]: false,
+    [FuseV1Options.GrantFileProtocolExtraPrivileges]: false
+  })
+
+  console.log(`[afterpack] Fuses aplicados a ${executable}: RunAsNode/NODE_OPTIONS/inspect desactivados, asar-only=${usesAsar}, cookie encryption ON.`)
 }
+
+module.exports = afterPack

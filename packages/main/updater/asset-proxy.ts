@@ -361,6 +361,19 @@ export async function handleAssetRequest(
     return { status: 400, body: null, contentType: 'text/plain' }
   }
 
+  // GFX JOBS — the official `ui` tree (uiUrl) never publishes `gfx/jobs/…`:
+  // every `assets/ui/1.10.x_…/gfx/jobs/*.png` answers S3 AccessDenied while
+  // the SAME route under the current assets token answers 200 (verified
+  // 2026-10-27: gfx/jobs/13.png → 200 under 3.3.9_…, 403 under ui/1.10.7_…).
+  // The jobs panel resolves its PNGs against uiUrl, so they arrive as
+  // kind='ui', miss every local layer and 403 at the network — leaving the
+  // job slots WITHOUT icons. Re-route those requests to the assets pipeline
+  // (same overrides → mirror → cache → CDN order) so they hit the files that
+  // actually exist.
+  if (kind === 'ui' && /^gfx\/jobs\/.+$/i.test(cleanRoute)) {
+    return handleAssetRequest('assets', cleanRoute)
+  }
+
   // Local overrides take precedence over cache and CDN.  This is how custom
   // items created in the editor reach the game: drop `skins/{id}.json` +
   // `skins/{id}.png` and `gfx/items/{iconId}.png` into an asset-overrides

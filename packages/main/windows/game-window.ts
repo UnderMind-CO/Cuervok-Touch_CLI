@@ -459,6 +459,32 @@ export class GameWindow extends EventEmitter {
       indexHtml = indexHtml.replace(/<script>\$_configGuarded[^]*?<\/script>\s*/g, '')
       indexHtml = indexHtml.replace(/<script>\$_configBoot_v\d[^]*?<\/script>\s*/g, '')
       indexHtml = indexHtml.replace(/<script>\$_dummyPurge_v\d[^]*?<\/script>\s*/g, '')
+      // Cache-bust de fixes.js en cada arranque: el servidor local no envía
+      // cabeceras de caché, así que Chromium no debería cachear, pero un
+      // fixes.js pegado en heurística haría que hotfixes/sondas nunca lleguen
+      // al juego. Timestamp fresco por índice.html patcheado.
+      if (/fixesScript\.src\s*=\s*"fixes\.js(\?[^"]*)?"\s*;/.test(indexHtml)) {
+        const bustTs = Date.now()
+        indexHtml = indexHtml.replace(
+          /fixesScript\.src\s*=\s*"fixes\.js(\?[^"]*)?"\s*;/,
+          `fixesScript.src = "fixes.js?v=${bustTs}";`
+        )
+        logger.info(`Patched: fixes.js cached-busted (v=${bustTs})`)
+      // Cache-bust par de script.js: los parches de paginación/repintado se
+      // regeneran aún con hotfixes; sin timestamp la pestaña del juego puede
+      // seguir cargando el script.js VIEJO de la caché de Chromium incluso
+      // tras reiniciar la app y el fix del crash nunca llega al runtime.
+      if (/scriptScript\.src\s*=\s*"build\/(?:script\.js|script\.js\?\d+)"\s*;/.test(indexHtml)) {
+        const bustTsjs = Date.now()
+        indexHtml = indexHtml.replace(
+          /scriptScript\.src\s*=\s*"build\/(?:script\.js|script\.js\?\d+)"\s*;/,
+          `scriptScript.src = "build/script.js?v=${bustTsjs}";`
+        )
+        logger.info(`Patched: script.js cache-busted (v=${bustTsjs})`)
+      }
+      try { fs.writeFileSync(indexPath, indexHtml) } catch (err) { /* best-effort */ }
+      }
+
       if (!indexHtml.includes('$_configBoot_v5')) {
         // v5: requests config.json with the language SAVED by the game's login
         // language selector (localStorage key "all#lang" / "<account>#lang")
@@ -631,6 +657,20 @@ _fetchConfig()})();
           'var h=r.length,f=0;for(i=0;i<h;i++)',
       },
       {
+        // NOTCH GUARD — `Cannot read properties of null (reading
+        // 'classList')` en displayNotch ← _resizeUi ← _initAutoResize.  `rt`
+        // es un wrapper creado sobre document.dofusBody EN la carga del
+        // módulo de interfaz; si el boot de la UI móvil aún no montó el
+        // <div class="dofusBody">, `rt.rootElement` es null y el primer
+        // _resizeUi (que corre antes del resto del init) reventa.  El
+        // behaviour es 100% cosmético (clase removeNotch del notch iOS), así
+        // que el guard simplemente salta el toggle si el DOM no existe.
+        // Anchor: el cuerpo minificado único del displayNotch.
+        name: '$_notchGuard',
+        re: /\{(\w{1,2})\.toggleClassName\("removeNotch"/,
+        template: (m) => `{${m[1]}&&${m[1]}.rootElement&&${m[1]}.toggleClassName("removeNotch"`,
+      },
+      {
         // QUIET GUARD — TemporaryAnimationManager.assignSymbol. El engine del
         // juego usa un TemporaryAnimationManager como fallback cuando el
         // template de bone/skin de un look llega vacio ("boneTemplate
@@ -655,6 +695,142 @@ _fetchConfig()})();
           m[4] + '&&' + m[4] + '()}',
       }
     ]
+
+    // ─── PANEL DE OFICIOS ($_jobsPaging_v2) ──────────────────────
+    // El Touch oficial tiene 3 casillas de oficio + 3 de especialidad y las
+    // asigna POSICIONALMENTE; TouchEmu otorga TODOS los oficios, así que el
+    // overflow crashea la ventana ("Cannot set properties of undefined
+    // (setting 'jobId')") y las casillas salen vacías. Ver ver:
+    // scripts/patch-jobs-panel.py (mismo parche, aplicable hoy sin build).
+    //   1) $_jobsPaging_v2: _updateJobButtons no crashea, separa mains/specs
+    //      y reparte por páginas (con FLEX-WRAP de $_jobsPanelWide_v1 los
+    //      todos los oficios caben en una página; la paginación queda como
+    //      red de seguridad). Además oculta las casillas sobrantes.
+    //      v2 corrige el fill de v1: iteraba por el nº de OFICIOS y indexaba
+    //      el array de BOTONES (b[k] undefined → "Cannot set '_pageGroup'"
+    //      y la ventana muerta), ahora itera por el nº de BOTONES y
+    //      guarda eliminadamente el acceso.
+    //   2) $_jobsTapNav_v1: RUEDA sobre el bloque de casillas cambia de
+    //      página; TAP en la casilla ya seleccionada o vacía también.
+    //   3) $_jobsSlotsBump_v1: crea 28+9 casillas en _createDom (harán falta
+    //      para los 26 oficios + 8 especialidades del otorgamiento).
+    {
+      const NEW_UPD =
+        '_updateJobButtons=function(e){var t=this;t._jobsPatchMark="$_jobsPaging_v2";' +
+        'for(var n=0;n<t.jobButtons.length;n++)r(t.jobButtons[n],null);' +
+        'if(!e||!e.length)return;t._jobOrder=e;t._mainJobs=[];t._specJobs=[];' +
+        'for(n=0;n<e.length;n++){var a=t.jobMap[e[n]];if(!a)continue;' +
+        '(a.info&&a.info.specializationOfId?t._specJobs:t._mainJobs).push(e[n])}' +
+        'var i=t.jobSelectButtons.length,o=t.jobSelectSpecialButtons.length;' +
+        't._mainPages=Math.max(1,Math.ceil(t._mainJobs.length/i));' +
+        't._specPages=Math.max(1,Math.ceil(t._specJobs.length/o));' +
+        't._mainPage=((t._mainPage||0)%t._mainPages+t._mainPages)%t._mainPages;' +
+        't._specPage=((t._specPage||0)%t._specPages+t._specPages)%t._specPages;' +
+        'var c=function(b,l,p,g){var n=b.length,s=p*n;for(var k=0;k<n;k++){' +
+        'var id=(s+k<l.length)?l[s+k]:null,ob=id!=null?t.jobMap[id]:null;' +
+        'if(g&&b[k])b[k]._pageGroup=g;if(b[k])r(b[k],ob)}};' +
+        'c(t.jobSelectButtons,t._mainJobs,t._mainPage,"m");' +
+        'c(t.jobSelectSpecialButtons,t._specJobs,t._specPage,"s");' +
+        'for(n=0;n<t.jobButtons.length;n++){var jb=t.jobButtons[n];jb.jobId?jb.show():jb.hide()}' +
+        't._jobsAdvance=function(g){var pg=g==="s"?t._specPage:t._mainPage,' +
+        'ps=g==="s"?t._specPages:t._mainPages;pg=(pg+1)%ps;' +
+        'if(g==="s")t._specPage=pg;else t._mainPage=pg;' +
+        't._updateJobButtons(t._jobOrder);t._getJobImages(function(){t._updateJobIcons()})};' +
+        'if(!t._jobsWheelBound&&t.jobListElement){t._jobsWheelBound=true;' +
+        't.jobListElement.addEventListener("wheel",function(ev){ev.preventDefault();' +
+        'var el=ev.target,sp=el&&el.closest&&el.closest(".specialisation"),' +
+        'g=sp?"s":"m",ps=g==="s"?t._specPages:t._mainPages,' +
+        'pg=g==="s"?t._specPage:t._mainPage;' +
+        'pg=(pg+(ev.deltaY>0?1:-1)+ps)%ps;' +
+        'if(g==="s")t._specPage=pg;else t._mainPage=pg;' +
+        't._updateJobButtons(t._jobOrder);' +
+        't._getJobImages(function(){t._updateJobIcons()})},{passive:false})}}'
+      patches.push({
+        name: '$_jobsPaging_v1',
+        re: /_updateJobButtons=function\(e\)\{for\(var t=0;t<this\.jobButtons\.length;t\+\+\)r\(this\.jobButtons\[t\],null\);var i=0,n=0;for\(t=0;t<e\.length;t\+\+\)\{var o=this\.jobMap\[e\[t\]\],a=o\.info\.specializationOfId\?this\.jobSelectSpecialButtons\[n\+\+\]:this\.jobSelectButtons\[i\+\+\];r\(a,o\)\}\}/,
+        template: () => NEW_UPD
+      })
+      // UPGRADE ($_jobsPaging_v2Fill): instalaciones ya parcheadas con v1
+      // llevan el fill roto (var s=p*l.length, bucle sobre l.length) — el
+      // skip-guard de arriba detiene el parche por el marcador v1. Este
+      // parche SOLO reemplaza el fill defectuoso; tras aplicado el fill
+      // corregido el regex deja de matchear (idempotente por no-match).
+      patches.push({
+        name: '$_jobsPaging_v2Fill',
+        re: /var c=function\(b,l,p,g\)\{var s=p\*l\.length;for\(var k=0;k<l\.length;k\+\+\)\{var id=\(s\+k<l\.length\)\?l\[s\+k\]:null,ob=id!=null\?t\.jobMap\[id\]:null;if\(g\)b\[k\]\._pageGroup=g;r\(b\[k\],ob\)\}\}/,
+        template: () =>
+          'var c=function(b,l,p,g){var n=b.length,s=p*n;for(var k=0;k<n;k++){' +
+          'var id=(s+k<l.length)?l[s+k]:null,ob=id!=null?t.jobMap[id]:null;' +
+          'if(g&&b[k])b[k]._pageGroup=g;if(b[k])r(b[k],ob)}};'
+      })
+      // BUMP del marcador v1→v2 (revea $_jobsPaging_v2 en el dump del
+      // bundle tras el upgrade del fill).
+      patches.push({
+        name: '$_jobsPaging_v2Mark',
+        re: /t\._jobsPatchMark="\$_jobsPaging_v1"/,
+        template: () => 't._jobsPatchMark="$_jobsPaging_v2"'
+      })
+      patches.push({
+        name: '$_jobsTapNav_v1',
+        re: /o\.itemSlot\.on\("tap",function\(\)\{o\.jobId&&i\.selectJob\(o\.jobId\)\}\)/,
+        template: () =>
+          'o.itemSlot.on("tap",function(){' +
+          'if(!o.jobId||i.currentJobBtn===o){' +
+          'o._pageGroup&&i._jobsAdvance&&i._jobsAdvance(o._pageGroup);return}' +
+          'i.selectJob(o.jobId)})'
+      })
+      patches.push({
+        name: '$_jobsSlotsBump_v1',
+        re: /y=i\(1126\),z=3,w=3,C=100,I=\{\};/,
+        template: () => 'y=i(1126),z=28,w=9,C=100,I={};'
+      })
+      // ICONOS DE OFICIOS ($_jobsIconFallback_v1) — _getJobImages precarga
+      // `gfx/jobs/{iconId}.png` por JOB id en la caché I (a(child) lee
+      // I[jobId] para setImage) y SALTA el slot cuando info.iconId === -1:
+      // los slots quedan sin icono porque (a) TouchEmu otorga especialidades
+      // cuyo icono no existe en el CDN oficial (117/671/6622 → AccessDenied;
+      // el CDN solo publica gfx/jobs/1..40) y (b) la tabla Jobs del cliente
+      // quedó sin iconId para algunos oficios. Este parche resuelve el
+      // icono ANTES de precargar:
+      //   1. iconId válido (1..40, lo publicado por el CDN) → tal cual.
+      //   2. iconId fuera de rango/undefined y oficio ESPECIALIZACIÓN →
+      //      icono del oficio base (jobMap[specializationOfId].info.iconId).
+      //   3. aún inválido → icono genérico 30 (jobMap[30].info.iconId si
+      //      razonable, si no 1). Nunca empuja "gfx/jobs/undefined.png".
+      // Requiere el re-ruteo kind=ui → kind=assets de gfx/jobs en el
+      // asset-proxy (el panel resuelve estos PNG contra uiUrl).
+      // OJO: el template reemplaza SOLO la cabeza del bucle — el ancla termina
+      // en `i.push(o))}` y el `return t.length?void _.preloadImages(…):e()}`
+      // original queda intacto detrás. Re-emitir el return aquí DUPLICA el
+      // tail y provoca "Unexpected token 'return'" a top-level (visto u-sub.
+      // 2026-10-27 06:17); el reparador de abajo restaura instalaciones con
+      // ese tail doble.
+      const ICON_FALLBACK =
+        '_getJobImages=function(e){var t=[],i=[],n=this.jobMap;' +
+        'for(var o in n){var a=n[o],ic=a.info?a.info.iconId:-1;' +
+        'if((ic<1||ic>40)&&a.info&&a.info.specializationOfId){var b=n[a.info.specializationOfId];' +
+        'if(b&&b.info&&b.info.iconId>0&&b.info.iconId<=40)ic=b.info.iconId}' +
+        'if(ic<1||ic>40){if(n[30]&&n[30].info&&n[30].info.iconId>0&&n[30].info.iconId<=40)ic=n[30].info.iconId;else ic=1}' +
+        'if(I[o])continue;a.info&&(a.info.iconId=ic);' +
+        't.push("gfx/jobs/"+ic+".png");i.push(o)}'
+      patches.push({
+        name: '$_jobsIconFallback_v1',
+        re: /_getJobImages=function\(e\)\{var t=\[\],i=\[\],n=this\.jobMap;for\(var o in n\)\{var a=n\[o\];a\.info\.iconId===-1\|\|I\[o\]\|\|\(t\.push\("gfx\/jobs\/"\+a\.info\.iconId\+"\.png"\),i\.push\(o\)\)\}/,
+        template: () => ICON_FALLBACK
+      })
+      // REPARADOR ($_jobsIconTailDup_v1): instalaciones parcheadas entre la
+      // 06:17 y este fix quedaron con el tail de _getJobImages duplicado
+      // (`…:e()}return t.length?…:e()}`) — SyntaxError a top-level y la
+      // pestaña del juego no arranca. Colapsa el par al return auténtico.
+      // No debe romper instalaciones sanas: la secuencia DOBLE solo existe
+      // tras el splice roto.
+      patches.push({
+        name: '$_jobsIconTailDup_v1',
+        re: /return t\.length\?void _\.preloadImages\(t,function\(t\)\{for\(var n=0;n<t\.length;n\+\+\)I\[i\[n\]\]=t\[n\];return e\(\)\}\):e\(\)\}return t\.length\?void _\.preloadImages\(t,function\(t\)\{for\(var n=0;n<t\.length;n\+\+\)I\[i\[n\]\]=t\[n\];return e\(\)\}\):e\(\)\}/,
+        template: () =>
+          'return t.length?void _.preloadImages(t,function(t){for(var n=0;n<t.length;n++)I[i[n]]=t[n];return e()}):e()}'
+      })
+    }
 
     for (const patch of patches) {
       if (build.includes(patch.name)) continue
@@ -1110,7 +1286,8 @@ _fetchConfig()})();
       const message = _e.message
       // Persist warnings/errors + diagnostic probes to userData/game-console.log
       // so the game's console can be inspected without the launch terminal.
-      if (level === 'warning' || level === 'error' || message.includes('[AUDIOPROBE]')) {
+      const DIAG_MARKERS = ['[AUDIOPROBE]', '[jobsDiag]', '[jobsIconForce]', '[jobsPrewarm]']
+      if (level === 'warning' || level === 'error' || DIAG_MARKERS.some(m => message.includes(m))) {
         this._logToFile(`[${level}] ${message}`)
       }
       if (level === 'warning' || level === 'error') {

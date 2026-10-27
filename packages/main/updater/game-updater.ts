@@ -162,6 +162,29 @@ export class GameUpdater {
       for (const key in dofusDiff) if (dofusDiff[key] === 0) dofusDiff[key] = 1
     }
 
+    // Self-heal: versions.json puede anunciar una build NEWER que la que
+    // está en disco (visto 2026-10-27: el updater escribió 1.74.10, pero
+    // verifyPatchedScriptOnLaunch restauró la baseline vieja 1.74.9 y el
+    // manifest/versions quedaron sin síncrona). Con diff=0 estar
+    // siguiente arranque NO re-descargaría y la instalación seguiría
+    // desajustada. Si la build del script.js EN DISCO no coincide con la
+    // guardada → forzar re-descarga del script (se re-pinnea + re-baseline
+    // tras el gate de integridad, con esta vez:
+    // ensureScriptBaseline refresca la copia).
+    try {
+      const diskScriptPath = path.join(gamePath, 'build', 'script.js')
+      if (fs.existsSync(diskScriptPath) && storedVersions.buildVersion) {
+        const diskBuild =
+          fs.readFileSync(diskScriptPath, 'utf8').match(/window\.buildVersion\s*=\s*"(\d+\.\d+\.\d+(?:-\d+)?)"/)?.[1]
+        if (diskBuild && diskBuild !== storedVersions.buildVersion) {
+          logger.info(
+            `Version mismatch: versions.json=${storedVersions.buildVersion} ` +
+            `vs script.js en disco=${diskBuild} — forzando re-descarga de build/script.js`)
+          dofusDiff['build/script.js'] = 1
+        }
+      }
+    } catch {}
+
     this._onProgress('Downloading assets...', 15)
     await this._downloadAssetFiles(assetDiff, remoteAsset)
 

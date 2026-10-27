@@ -7,13 +7,14 @@ import { AddressInfo } from 'net'
 import { join } from 'path'
 import fs from 'fs'
 import ElectronStore from 'electron-store'
-import { IPCEvents, GameContext, NativeNotificationPayload, AppUpdateStatus, AuthSession } from '@cuervok/shared'
+import { IPCEvents, GameContext, NativeNotificationPayload, AppUpdateStatus, AuthSession, ClientIntegrityStatus } from '@cuervok/shared'
 import { get, DTO_NEWS_PATH } from './constants'
 import { GameWindow } from './windows/game-window'
 import { existsSync } from 'node:fs'
 import { UpdaterWindow } from './windows/updater-window'
 import { AppUpdater, GameUpdater } from './updater'
 import { verificationOnLaunch } from './updater/script-integrity'
+import { verifyClientIntegrity, enforceClientIntegrity, getClientIntegrityResult } from './updater/client-integrity'
 import { handleAssetRequest, syncAssetVersions, getOverrideRoots, getOverrideWriteRoot } from './updater/asset-proxy'
 import { logger } from './logger'
 import { emulatorSupervisor, waitForPort } from './emulator-supervisor'
@@ -49,6 +50,74 @@ function walkDir(dir: string, prefix: string, out: Set<string>) {
     if (entry.isDirectory()) walkDir(join(dir, entry.name), rel, out)
     else out.add(rel)
   }
+}
+
+// ─── Validación de entrada de IPC (renderer hostil) ─────────────────
+
+const MAX_SETTINGS_JSON = 2 * 1024 * 1024
+const MAX_STORE_JSON = 4 * 1024 * 1024
+const MAX_STORE_KEY = 128
+const MAX_AUTH_FIELD = 512
+const MAX_GAME_LOGIN_JSON = 64 * 1024
+
+/** Claves reservadas: solo las escribe el main, nunca el renderer. */
+const RESERVED_STORE_KEYS = new Set(['settings', 'game_renderer_url', 'pending_game_login'])
+
+/** Origen de la plataforma de login (la propia login page vive aquí). */
+function platformOrigin(): string {
+  const raw = process.env.CUV_SERVER_URL || 'http://localhost:3001'
+  try { return new URL(raw).origin } catch { return 'http://localhost:3001' }
+}
+
+/** retry-login: solo "back-to-game" o URLs http(s) de la plataforma de login. */
+function retryLoginUrlAllowed(url: string): boolean {
+  if (typeof url !== 'string' || !url) return false
+  let parsed: URL
+  try { parsed = new URL(url) } catch { return false }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false
+  if (parsed.username || parsed.password) return false
+  return parsed.origin === platformOrigin()
+}
+
+/** check-service-health: solo http(s), sin credenciales y sin ruta/query. */
+function httpOriginAllowed(origin: string): boolean {
+  if (typeof origin !== 'string' || !origin) return false
+  try {
+    const u = new URL(origin)
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return false
+    if (u.username || u.password) return false
+    if (typeof u.hostname !== 'string' || !u.hostname) return false
+    if ((u.pathname && u.pathname !== '/') || u.search || u.hash) return false
+    return true
+  } catch { return false }
+}
+
+/**
+ * game-login-complete: valida la forma del payload — objeto plano con
+ * campos acotados (cadenas de hasta 512, enteros seguros); token obligatorio.
+ * Devuelve el objeto saneado o null si hay que rechazarlo.
+ */
+function validateGameLoginPayload(authData: unknown): Record<string, unknown> | null {
+  if (typeof authData !== 'string' || !authData || authData.length > MAX_GAME_LOGIN_JSON) return null
+  let data: unknown
+  try { data = JSON.parse(authData) } catch { return null }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return null
+  const out: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
+    if (key.length > 64) return null
+    if (typeof value === 'string') {
+      if (value.length > MAX_AUTH_FIELD) return null
+      out[key] = value
+    } else if (typeof value === 'number' && Number.isSafeInteger(value)) {
+      out[key] = value
+    } else if (value === null || typeof value === 'boolean') {
+      out[key] = value
+    } else {
+      return null // objetos/nested → rechazar
+    }
+  }
+  if (typeof out.token !== 'string' || !out.token) return null
+  return out
 }
 
 function createStaticHandler(basePath: string, urlPrefix: string) {
@@ -643,13 +712,21 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
 
   run() {
     this._loadVersions()
-    this._setupIPCHandlers()
-    this._appUpdater = new AppUpdater((status) => this._broadcastAppUpdateStatus(status))
-    this.ensureWindow()
-    this._appUpdater.start()
+    // Gate de integridad del cliente: si el app.asar está modificado (o el
+    // feed no puede certificar la versión instalada), NO se arranca nada —
+    // ni IPC, ni ventanas, ni updater, ni Discord — y se cierra la sesión.
+    void this._gateOnClientIntegrity().then(() => {
+      if (this._clientIntegrityBlocked) return
+      this._setupIPCHandlers()
+      this._appUpdater = new AppUpdater((status) => this._broadcastAppUpdateStatus(status))
+      const integrity = getClientIntegrityResult()
+      if (integrity) this._broadcastClientIntegrityStatus(integrity)
+      this.ensureWindow()
+      this._appUpdater.start()
 
-    // Connect to Discord Rich Presence (best-effort, non-blocking)
-    connectDiscordRpc().catch(() => {})
+      // Connect to Discord Rich Presence (best-effort, non-blocking)
+      connectDiscordRpc().catch(() => {})
+    })
   }
 
   private _loadVersions() {
@@ -774,22 +851,34 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
 
     ipcMain.on(IPCEvents.SET_SETTINGS, (_event, settings: string) => {
       try {
+        // Cap defensivo para el settings-store (JSON del renderer: un payload
+        // sobredimensionado o inválido se descarta). electron-store es
+        // persistente, no debe convertirse en un "dumper".
+        if (typeof settings !== 'string' || settings.length > MAX_SETTINGS_JSON) return
         this._store.set('settings', JSON.parse(settings))
       } catch {}
     })
 
     ipcMain.handle(IPCEvents.STORE_GET, (_event, key: string) => {
+      if (typeof key !== 'string' || key.length > MAX_STORE_KEY) return null
       const val = this._store.get(key)
       return val !== undefined ? JSON.stringify(val) : null
     })
 
     ipcMain.on(IPCEvents.STORE_SET, (_event, key: string, value: string) => {
       try {
+        if (typeof key !== 'string' || !key || key.length > MAX_STORE_KEY) return
+        if (RESERVED_STORE_KEYS.has(key)) {
+          logger.error(`[ipc] STORE_SET rechazado por clave reservada: ${key}`)
+          return
+        }
+        if (typeof value !== 'string' || value.length > MAX_STORE_JSON) return
         this._store.set(key, JSON.parse(value))
       } catch {}
     })
 
     ipcMain.on(IPCEvents.STORE_DELETE, (_event, key: string) => {
+      if (typeof key !== 'string' || key.length > MAX_STORE_KEY) return
       this._store.delete(key)
     })
 
@@ -853,6 +942,13 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
 
     ipcMain.on(IPCEvents.INSTALL_APP_UPDATE, () => {
       this._appUpdater?.installNow()
+    })
+
+    // Integridad del cliente (app.asar anti-tamper): GET para los windows
+    // que se abren después de la verificación (broadcast va por
+    // CLIENT_INTEGRITY_STATUS).
+    ipcMain.handle(IPCEvents.GET_CLIENT_INTEGRITY, () => {
+      return getClientIntegrityResult()
     })
 
     ipcMain.on(IPCEvents.SHOW_NATIVE_NOTIFICATION, (event, payload: NativeNotificationPayload) => {
@@ -928,26 +1024,43 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
 
     // Retry login: re-load the login URL (used by fallback page)
     ipcMain.on('retry-login', (_event, url: string) => {
-      if (this._gameWindow) {
-        if (url === 'back-to-game') {
+      // Validación: el navegador del renderer es hostil — solo aceptamos el
+      // caso especial "back-to-game" y URLs http(s) cuyo ORIGIN esté en la
+      // allowlist (web-retro platform / renderer de la propia app). Cualquier
+      // otra cosa (file:, javascript:, data:, hosts arbitrarios) se rechaza
+      // y queda registrada.
+      if (typeof url === 'string' && url === 'back-to-game') {
+        if (this._gameWindow) {
           const rendererUrl = this._store.get('game_renderer_url') as string
           if (rendererUrl) {
             logger.info('[FALLBACK] Navigating back to game renderer')
             this._gameWindow.loadURL(rendererUrl)
           }
-        } else {
-          logger.info(`[FALLBACK] Retrying login URL: ${url}`)
-          this._gameWindow.loadURL(url)
         }
+        return
+      }
+      if (retryLoginUrlAllowed(url)) {
+        logger.info(`[FALLBACK] Retrying login URL: ${url}`)
+        this._gameWindow?.loadURL(url)
+      } else {
+        logger.error(`[FALLBACK] retry-login rechazado por validate: ${String(url).slice(0, 120)}`)
       }
     })
 
     // Health check: ping a service origin with a short timeout
     ipcMain.handle('check-service-health', async (_event, origin: string): Promise<boolean> => {
+      // Validación: solo se autoriza HEAD http(s) con host explícito; sin
+      // credenciales embebidas, sin ruta arbitraria que no sea / (evita
+      // convertir el puente en un prober SSRF genérico del renderer).
+      if (typeof origin !== 'string' || !httpOriginAllowed(origin)) {
+        logger.error(`[health] check-service-health rechazado: ${String(origin).slice(0, 120)}`)
+        return false
+      }
       try {
         const controller = new AbortController()
         const timer = setTimeout(() => controller.abort(), 3000)
-        const resp = await fetch(origin, { method: 'HEAD', signal: controller.signal })
+        const parsed = new URL(origin)
+        const resp = await fetch(parsed.origin, { method: 'HEAD', signal: controller.signal, redirect: 'manual' })
         clearTimeout(timer)
         return resp.ok || resp.status < 500
       } catch {
@@ -957,11 +1070,17 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
 
     // Game login complete: store auth and navigate back to the game
     ipcMain.handle('game-login-complete', (_event, authData: string) => {
+      // Validación: solo aceptamos un JSON con la forma esperada y campos
+      // acotados; descartamos payloads sobredimensionados u objetos raros
+      // para que el renderer no use este puente como dropper de estado.
+      const parsed = validateGameLoginPayload(authData)
+      if (!parsed) {
+        logger.error('[auth] game-login-complete rechazado: payload inválido o sobredimensionado')
+        return
+      }
       try {
-        const data = JSON.parse(authData)
-        // Store as a pending login for GameScreen to pick up
-        this._store.set('pending_game_login', data)
-        logger.info(`Game login complete: stored pending auth for user '${data.username || ''}'`)
+        this._store.set('pending_game_login', parsed)
+        logger.info(`Game login complete: stored pending auth for user '${parsed.username || ''}'`)
         // Navigate back to the game renderer
         const rendererUrl = this._store.get('game_renderer_url') as string
         if (rendererUrl && this._gameWindow) {
@@ -1033,6 +1152,68 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
   private _broadcastAppUpdateStatus(status: AppUpdateStatus) {
     for (const win of BrowserWindow.getAllWindows()) {
       win.webContents.send(IPCEvents.APP_UPDATE_STATUS, status)
+    }
+  }
+
+  // ─── Integridad de app.asar (anti-tamper del propio cliente) ───
+  // Compara el SHA-256 del app.asar desplegado contra el pin publicado en
+  // el feed (client-integrity.json). modified O unknown (feed caído, versión
+  // sin pin) BLOQUEAN el arranque: el gate corres ANTES de registrar IPC y
+  // de abrir cualquier ventana. En dev (no empaquetado) no bloquea.
+  private _clientIntegrityBlocked = false
+
+  private async _gateOnClientIntegrity(): Promise<void> {
+    if (!app.isPackaged) {
+      // En dev no hay asar en producción ni pin: verificar solo para log.
+      void verifyClientIntegrity()
+      return
+    }
+    const { blocked, status } = await enforceClientIntegrity()
+    if (!blocked) return
+    this._clientIntegrityBlocked = true
+    logger.error('[client-integrity] CLIENTE BLOQUEADO — arranque abortado:', status.reason)
+    this._stopServer()
+    this._showIntegrityBlockedWindow(status)
+  }
+
+  private _stopServer() {
+    try { this._server.close() } catch { /* best-effort */ }
+  }
+
+  /** Ventana de bloqueo: única salida permitida (Cerrar → app.quit). */
+  private _showIntegrityBlockedWindow(status: ClientIntegrityStatus) {
+    const reason = String(status.reason || 'La instalación no coincide con el feed oficial')
+    const html = `<!doctype html><html><head><meta charset="utf-8"><style>
+      body{margin:0;font-family:Segoe UI,system-ui,sans-serif;background:#0b0d12;color:#e8e6e3;display:flex;align-items:center;justify-content:center;height:100vh;}
+      .card{max-width:420px;padding:28px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#14161c,#0e1016);text-align:center;}
+      h1{margin:0 0 10px;font-size:18px;color:#ff8a80;}
+      p{margin:0 0 14px;font-size:13px;line-height:1.5;color:#b9b6b1;}
+      code{font-size:11px;color:#8f8b85;word-break:break-all;}
+      button{margin-top:6px;padding:8px 22px;border-radius:8px;border:none;background:#a33327;color:#fff;font-size:13px;cursor:pointer;}
+    </style></head><body><div class="card">
+      <h1>⚠ Cliente bloqueado</h1>
+      <p>La instalación de Cuervok está modificada o no se pudo verificar contra el feed oficial. Para proteger tu cuenta no se permite su uso.</p>
+      <p>Reinstala Cuervok desde el instalador oficial.</p>
+      <code>${reason.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] as string)}</code>
+      <div><button onclick="window.close()">Cerrar</button></div>
+    </div>
+    <script>document.querySelector('button').addEventListener('click',function(){window.close()})</script>
+    </body></html>`
+    const win = new BrowserWindow({
+      width: 500, height: 320,
+      resizable: false, maximizable: false, minimizable: false,
+      frame: false, alwaysOnTop: true, center: true, show: false,
+      backgroundColor: '#0b0d12',
+      webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false }
+    })
+    win.on('closed', () => { app.quit() })
+    win.once('ready-to-show', () => win.show())
+    void win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html))
+  }
+
+  private _broadcastClientIntegrityStatus(status: ClientIntegrityStatus) {
+    for (const win of BrowserWindow.getAllWindows()) {
+      try { win.webContents.send(IPCEvents.CLIENT_INTEGRITY_STATUS, status) } catch { /* window closing */ }
     }
   }
 }

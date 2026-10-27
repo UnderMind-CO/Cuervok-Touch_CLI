@@ -3,6 +3,7 @@ import type { GameContext } from '@cuervok/shared'
 import type { NativeNotificationPayload } from '@cuervok/shared'
 import type { AppUpdateStatus } from '@cuervok/shared'
 import type { AuthSession } from '@cuervok/shared'
+import type { ClientIntegrityStatus } from '@cuervok/shared'
 
 interface CuervokAPI {
   fetchGameContext(): Promise<GameContext>
@@ -25,6 +26,8 @@ interface CuervokAPI {
   checkAppUpdate(): Promise<AppUpdateStatus>
   installAppUpdate(): void
   onAppUpdateStatus(cb: (status: AppUpdateStatus) => void): () => void
+  getClientIntegrity(): Promise<ClientIntegrityStatus | null>
+  onClientIntegrity(cb: (status: ClientIntegrityStatus) => void): () => void
   showNativeNotification(payload: NativeNotificationPayload): void
   onNativeNotificationClick(cb: (tabId?: string) => void): () => void
   setSoundOnFocus(value: boolean): void
