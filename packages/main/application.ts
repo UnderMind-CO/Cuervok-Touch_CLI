@@ -1182,28 +1182,80 @@ honoApp.get('/renderer/*', createStaticHandler(join(__dirname, '../renderer/'), 
 
   /** Ventana de bloqueo: única salida permitida (Cerrar → app.quit). */
   private _showIntegrityBlockedWindow(status: ClientIntegrityStatus) {
-    const reason = String(status.reason || 'La instalación no coincide con el feed oficial')
+    const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string)
+    const phase = String(status.phase || 'unknown').toUpperCase()
+    // Código técnico derivable del estado — sin depender del texto plano.
+    let code = 'INTEGRITY_FILES_MISMATCH'
+    if (phase === 'MODIFIED') code = status.expectedSha256 && status.actualSha256 ? 'INTEGRITY_FILES_MISMATCH' : 'INTEGRITY_CHECK_FAILED'
+    else if (phase === 'UNKNOWN') {
+      const r = String(status.reason || '')
+      code = r.includes('ilegible') ? 'FILES_READ_FAILED'
+        : r.includes('inaccesible') ? 'FEED_PIN_UNAVAILABLE'
+        : r.includes('no publica pin') ? 'FEED_PIN_MISSING_VERSION'
+        : r.includes('no resuelto') ? 'FEED_URL_UNRESOLVED'
+        : 'INTEGRITY_UNKNOWN'
+    } else code = 'INTEGRITY_CHECK_FAILED'
+    // La UI NO muestra datos sensibles: ni el pin expected/actual, ni los
+    // prefijos del hash, ni el reason crudo (que puede arrastrar fragmentos
+    // del sha256). Los valores completos solo van al log del proceso main.
+    const integrity = phase === 'MODIFIED' && status.expectedSha256
+      ? 'MISMATCH — expected/actual withheld (ver log de la app)'
+      : 'PIN UNAVAILABLE — expected/actual withheld'
+    const rows: Array<[string, string]> = [
+      ['ENGINE', 'client-files gate (An error occurred during validation.)'],
+      ['PHASE', phase],
+      ['CODE', code],
+      ['INTEGRITY', integrity],
+      ['APP_VERSION', app.getVersion()],
+      ['COMPONENT', 'resources/app.asar'],
+      ['CHECKED_AT', status.checkedAt || '—'],
+      ['DETAIL', 'An error occurred during validation.'],
+    ]
+    // Reporte técnico para el portapapeles (idéntico a la UI, sin datos sensibles).
+    const reportText = 'CUERVOK · CLIENT INTEGRITY GATE — STARTUP_ABORTED [' + code + ']\n'
+      + rows.map(([k, v]) => k + ': ' + v).join('\n')
+    const reportJson = JSON.stringify(reportText).replace(/</g, '\\u003c')
     const html = `<!doctype html><html><head><meta charset="utf-8"><style>
-      body{margin:0;font-family:Segoe UI,system-ui,sans-serif;background:#0b0d12;color:#e8e6e3;display:flex;align-items:center;justify-content:center;height:100vh;}
-      .card{max-width:420px;padding:28px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,#14161c,#0e1016);text-align:center;}
-      h1{margin:0 0 10px;font-size:18px;color:#ff8a80;}
-      p{margin:0 0 14px;font-size:13px;line-height:1.5;color:#b9b6b1;}
-      code{font-size:11px;color:#8f8b85;word-break:break-all;}
-      button{margin-top:6px;padding:8px 22px;border-radius:8px;border:none;background:#a33327;color:#fff;font-size:13px;cursor:pointer;}
-    </style></head><body><div class="card">
-      <h1>⚠ Cliente bloqueado</h1>
-      <p>La instalación de Cuervok está modificada o no se pudo verificar contra el feed oficial. Para proteger tu cuenta no se permite su uso.</p>
-      <p>Reinstala Cuervok desde el instalador oficial.</p>
-      <code>${reason.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] as string)}</code>
-      <div><button onclick="window.close()">Cerrar</button></div>
+      body{margin:0;font-family:Consolas,Menlo,monospace;background:#0a0c10;color:#d7d4cf;display:flex;align-items:center;justify-content:center;height:100vh;}
+      .panel{width:520px;max-height:88vh;overflow:auto;background:#111318;border:1px solid rgba(255,255,255,.09);border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,.6);}
+      .head{padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.08);background:#1a0d0d;}
+      .head .tag{font-size:10px;letter-spacing:.14em;color:#8a5454;}
+      .head h1{margin:4px 0 0;font-size:14px;font-weight:600;color:#ff8a80;letter-spacing:.02em;}
+      .head h1 .code{color:#b96a64;}
+      .grid{padding:14px 18px;}
+      .row{display:flex;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px;line-height:1.45;}
+      .row .k{flex:0 0 158px;color:#6f7b8a;text-transform:uppercase;letter-spacing:.08em;}
+      .row .v{flex:1;color:#c8c4be;user-select:text;word-break:break-all;}
+      .row .v.err{color:#ff8a80;}
+      .foot{padding:12px 18px 16px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;}
+      .foot .hint{font-size:11px;color:#8f8b85;font-family:Segoe UI,system-ui,sans-serif;}
+      button{padding:7px 20px;border-radius:8px;border:none;background:#a33327;color:#fff;font-size:12px;cursor:pointer;}
+      button.copy{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:transparent;color:#b9b6b1;font-size:12px;font-family:Consolas,Menlo,monospace;cursor:pointer;margin-right:8px;}
+      button.copy:hover{border-color:rgba(255,255,255,.35);color:#e4e1dc;}
+      button.copy svg{display:block;}
+    </style></head><body><div class="panel">
+      <div class="head"><div class="tag">CUERVOK · CLIENT INTEGRITY GATE</div><h1>STARTUP_ABORTED <span class="code">[${code}]</span></h1></div>
+      <div class="grid">${rows.map(([k, v]) => `<div class="row"><span class="k">${esc(k)}</span><span class="v${k === 'CODE' || k === 'PHASE' || k === 'DETAIL' ? ' err' : ''}">${esc(v)}</span></div>`).join('')}</div>
+      <div class="foot"><span class="hint">La instalación difiere del pin del feed oficial — reinstala Cuervok desde el instalador oficial.</span><span style="display:flex;align-items:center;"><button type="button" class="copy" id="copyReport" title="Copiar el reporte técnico (sin hashes) al portapapeles"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar reporte</button><button data-close onclick="window.close()">Cerrar</button></span></div>
     </div>
-    <script>document.querySelector('button').addEventListener('click',function(){window.close()})</script>
+    <script>window.__REPORT=${reportJson};
+    document.getElementById('copyReport').addEventListener('click',async function(){
+      var btn=this,text=window.__REPORT,ok=false
+      try{await navigator.clipboard.writeText(text);ok=true}catch(e){}
+      if(!ok){try{var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();ok=document.execCommand('copy');document.body.removeChild(ta)}catch(e2){}}
+      var prev=btn.innerHTML
+      btn.innerHTML=ok
+        ?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Copiado'
+        :'No se pudo copiar'
+      setTimeout(function(){btn.innerHTML=prev},1600)
+    })
+    </script>
     </body></html>`
     const win = new BrowserWindow({
-      width: 500, height: 320,
+      width: 560, height: 460,
       resizable: false, maximizable: false, minimizable: false,
       frame: false, alwaysOnTop: true, center: true, show: false,
-      backgroundColor: '#0b0d12',
+      backgroundColor: '#0a0c10',
       webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false }
     })
     win.on('closed', () => { app.quit() })

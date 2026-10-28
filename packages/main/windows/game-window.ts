@@ -830,6 +830,26 @@ _fetchConfig()})();
         template: () =>
           'return t.length?void _.preloadImages(t,function(t){for(var n=0;n<t.length;n++)I[i[n]]=t[n];return e()}):e()}'
       })
+      // CRASH GUARD ($_jobsEffectsRaceGuard_v1) — «Cannot read properties of
+      // undefined (reading 'length')» al abrir el panel de oficios: dos
+      // agregaciones de la misma tabla (Effects/Skill — craftableItemIds y
+      // efectos de recetas comparten pipeline) corren en paralelo y comparten
+      // el registro `a` del módulo; cada una al terminar ejecuta a[e]=c (SU
+      // mapa extractElementsFrom) y la segunda ya recolectó LAS CLAVES de su
+      // registro: cuando llega su cb, a[e][d] ya no existe → u.length lanza
+      // y la cadena del pendingScan muere (recetas "cargando" para siempre,
+      // script.js 343:11889, visto 2026-10-27 en el cliente web).
+      // Guard: un id sin registrantes vivos no debe reventar el loop — nada
+      // propio queda por marcar roto (la otra llamada se ocupa de sus
+      // instancias); se registra el miss c[d]=S y el flujo sigue.
+      // JUNTO con GameServeModule.GetPatchedScript (mismo guard, cliente
+      // web/CuervokMobile: el bundle servido también lo necesita).
+      patches.push({
+        name: '$_jobsEffectsRaceGuard_v1',
+        re: /if\(!c\[d\]\)\{for\(var u=a\[e\]\[d\],p=0;p<u\.length;p\+=1\)\{var h=u\[p\];if\(h\.setBroken\(!0\),r\(e,d,h\.effectId\)\)\{var f="id "\+d\+" unavailable in table "\+e;f\+=" caller: "\+h\.getCaller\(\),f\+=" for effectId: "\+h\.effectId,y\.error\(new Error\(f\)\)\}\}c\[d\]=S\}/,
+        template: () =>
+          'if(!c[d]){var u=a[e][d];if(u){for(var p=0;p<u.length;p+=1){var h=u[p];if(h.setBroken(!0),r(e,d,h.effectId)){var f="id "+d+" unavailable in table "+e;f+=" caller: "+h.getCaller(),f+=" for effectId: "+h.effectId,y.error(new Error(f))}}}c[d]=S,window.$_jobsEffectsRaceGuard_v1=1}'
+      })
     }
 
     for (const patch of patches) {

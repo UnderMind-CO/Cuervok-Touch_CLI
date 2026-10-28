@@ -107,6 +107,24 @@ export function verifyClientIntegrity(): Promise<ClientIntegrityStatus> {
   return _pending
 }
 
+/**
+ * Lee un archivo REAL de disco, sin el parche fs-para-asar de Electron.
+ * El fs normal resuelve cualquier path que contenga app.asar como un path
+ * DENTRO del asar: leer el propio app.asar con fs normal falla con
+ * "ENOENT,  not found in <app.asar>" (path interno vacío). original-fs es
+ * el fs sin parche que Electron empaca en runtime; si no está disponible
+ * (dev unweighted), cae al fs normal.
+ */
+function readAsarRaw(p: string): Buffer {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const ofs: typeof fs = require('original-fs')
+    return ofs.readFileSync(p)
+  } catch {
+    return fs.readFileSync(p)
+  }
+}
+
 async function run(): Promise<ClientIntegrityStatus> {
   const checkedAt = new Date().toISOString()
 
@@ -125,7 +143,7 @@ async function run(): Promise<ClientIntegrityStatus> {
   let actualSha256 = ''
   let actualSize = -1
   try {
-    const buf = fs.readFileSync(asarPath)
+    const buf = readAsarRaw(asarPath)
     actualSize = buf.length
     actualSha512 = sha512Of(buf)
     actualSha256 = sha256Of(buf)

@@ -1423,13 +1423,17 @@ for (var id in events) {
   }
 
   var tries = 0, done = false, started = false
+  // imgs DEBE vivir fuera del callback: al declararlo dentro, cada tick del
+  // interval lo arranca undefined y el primer tick que ya ve started=true
+  // salta la creación → 'Cannot read properties of undefined (reading length)'.
+  var imgs = []
   var timer = setInterval(function () {
     if (done) { clearInterval(timer); return }
     var base = assetsBase()
     if (!base) { if (++tries > 600) { clearInterval(timer); console.warn('[jobsPrewarm] sin base de assets — cancelado') } return }
     if (!started) {
       started = true
-      var imgs = []
+      imgs = []
       for (var i = 1; i <= 40; i++) {
         var im = new Image()
         im.onload = im.onerror = (function (mm) { return function () { mm.__done = true } })(im)
@@ -1442,7 +1446,7 @@ for (var id in events) {
         var ap = window.assetPreloader
         if (ap && typeof ap.preloadImages === 'function') {
           var files = []
-          for (var j = 1; j <= 40; j++) files.push('/gfx/jobs/' + j + '.png')
+          for (var j = 1; j <= 40; j++) files.push('gfx/jobs/' + j + '.png')
           ap.preloadImages(files, function (res) {
             try { console.warn('[jobsPrewarm] preloadImages listo ' + JSON.stringify(res)) } catch (e2) { console.warn('[jobsPrewarm] preloadImages listo') }
           })

@@ -5,7 +5,19 @@ import { logger } from '../logger'
 import { RETIRED_MAP_IDS } from './map-registry'
 
 const CDN_BASE = 'https://dofustouch.cdn.ankama.com/assets'
-const OFFICIAL_CONFIG_URL = 'https://dt-proxy-production-login.ankama-games.com/config.json?lang=es'
+// All official proxies that serve config.json (same JSON, different regions).
+// The first one historically served assets from the ";login;" host, but Node's
+// fetch can intermittently miss-to-resolve a single host (user log: ENOTFOUND
+// on dt-proxy-production-login while curl could see the same hostname) → the
+// whole session then sticks on the FALLBACK tokens, which Ankama has since
+// retired from the CDN → 403 on every unbundled map JSON → invisible +
+// ASSET_MISSING disconnect. Trying every host in order removes that single
+// point of failure. dt-proxy-production-canada is verified to work (2026-10-28,
+// the game client itself fetches its config.json from there).
+const OFFICIAL_CONFIG_URLS = [
+  'https://dt-proxy-production-login.ankama-games.com/config.json?lang=es',
+  'https://dt-proxy-production-canada.ankama-games.com/config.json?lang=es',
+]
 const USER_AGENT = 'Cuervok Asset Proxy'
 
 // ── Editor "Quitar del mapa" (tab Interactivos) ─────────────────────
@@ -141,9 +153,14 @@ function noteCdnSuccess(): void {
   }
 }
 
-// Fallbacks if the official config cannot be fetched (current as of build 1.73.8)
-const FALLBACK_ASSETS_PATH = '3.2.12_cLlB,151J4Vd.fZX3eoz-xHi7Tx6Mw*3'
-const FALLBACK_UI_PATH = 'ui/1.9.8_,OGnbUiqc0PuT6gr,.TnsfcRbM2d0Ovl'
+// Fallbacks if every official config fetch fails. These must match the
+// tokens the LOWEST LIVE CDN currently serves, otherwise a failed config sync
+// points every network request at a retired path → S3 AccessDenied on every
+// map JSON → invisible characters + ASSET_MISSING. Verified live 2026-10-28
+// (official client session + curl on both paths): assets 3.3.10_9K0… and
+// ui 1.10.7_kD2A… — keep in sync with GameAssetProxy.cs (TouchEmu-Cuervok).
+const FALLBACK_ASSETS_PATH = '3.3.10_9K0.T2bChypxsZ0fDLj7ehuwbXQ6oyhe'
+const FALLBACK_UI_PATH = 'ui/1.10.7_kD2A4c0IKd-TOCZbFm6KLng3zVGyNN88'
 
 // Optional private CDN mirroring the Ankama CDN tree (or a version-agnostic
 // tree without the version segment). When set, it is tried BEFORE the official
@@ -272,34 +289,66 @@ export function getOverrideWriteRoot(): string {
   return fallback
 }
 
+// Self-healing: if the config sync fails at startup the proxy would sit on
+// the FALLBACK tokens for the WHOLE session (they can also be stale after an
+// Ankama bump), so every not-yet-cached map JSON 403s and the client ejects
+// with ASSET_MISSING. A retry timer re-attempts the sync until it succeeds,
+// and then keeps gently refreshing so a mid-session token bump is picked up.
+const VERSION_SYNC_RETRY_MS = 60_000
+const VERSION_SYNC_REFRESH_MS = 30 * 60_000
+let _versionSyncTimer: NodeJS.Timeout | null = null
+
+function scheduleVersionSync(delayMs: number): void {
+  if (_versionSyncTimer) clearTimeout(_versionSyncTimer)
+  _versionSyncTimer = setTimeout(() => {
+    _versionSyncTimer = null
+    void syncAssetVersions()
+  }, delayMs)
+  _versionSyncTimer.unref?.()
+}
+
 /**
  * Fetches the official config.json and extracts the versioned CDN paths
- * for assets (e.g. "3.2.12_cLlB,...*3") and UI (e.g. "ui/1.9.8_,...").
+ * for assets (e.g. "3.3.10_9K0,..*3") and UI (e.g. "ui/1.10.7_,...").
  * Keeps the local proxy pointed at the latest version automatically.
+ * Tries every official proxy host in order; on total failure schedules a
+ * retry instead of staying stuck on the fallback tokens.
  */
 export async function syncAssetVersions(): Promise<void> {
-  try {
-    const signal = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(CDN_FETCH_TIMEOUT_MS) : undefined
-    const res = await fetch(OFFICIAL_CONFIG_URL, { headers: { 'User-Agent': USER_AGENT }, signal })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const config = await res.json()
+  const signal = typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(CDN_FETCH_TIMEOUT_MS) : undefined
+  for (const configUrl of OFFICIAL_CONFIG_URLS) {
+    try {
+      const res = await fetch(configUrl, { headers: { 'User-Agent': USER_AGENT }, signal })
+      if (!res.ok) {
+        logger.warn(`Config sync: HTTP ${res.status} from ${new URL(configUrl).hostname}`)
+        throw new Error(`HTTP ${res.status}`)
+      }
+      const config = await res.json()
 
-    const extract = (url: string): string | null => {
-      const marker = '/assets/'
-      const idx = url.indexOf(marker)
-      return idx === -1 ? null : url.slice(idx + marker.length).replace(/\/+$/, '')
+      const extract = (url: string): string | null => {
+        const marker = '/assets/'
+        const idx = url.indexOf(marker)
+        return idx === -1 ? null : url.slice(idx + marker.length).replace(/\/+$/, '')
+      }
+
+      const assetsPath = extract(config.assetsUrl || '')
+      const uiPath = extract(config.uiUrl || '')
+
+      if (!assetsPath || !uiPath) throw new Error('config.json missing assetsUrl/uiUrl')
+
+      _assetsPath = assetsPath
+      _uiPath = uiPath
+
+      logger.info(`Asset versions: assets=${_assetsPath} ui=${_uiPath} (cache dirs: ${fsSafeVersion(_assetsPath)}, ${fsSafeVersion(_uiPath)}) [${new URL(configUrl).hostname}]`)
+      // Success → stop retrying, keep the gentle mid-session refresh alive.
+      scheduleVersionSync(VERSION_SYNC_REFRESH_MS)
+      return
+    } catch (err) {
+      logger.warn(`Config sync failed for ${configUrl}`, err)
     }
-
-    const assetsPath = extract(config.assetsUrl || '')
-    const uiPath = extract(config.uiUrl || '')
-
-    if (assetsPath) _assetsPath = assetsPath
-    if (uiPath) _uiPath = uiPath
-
-    logger.info(`Asset versions: assets=${_assetsPath} ui=${_uiPath} (cache dirs: ${fsSafeVersion(_assetsPath)}, ${fsSafeVersion(_uiPath)})`)
-  } catch (err) {
-    logger.warn('Could not sync asset versions, using fallback', err)
   }
+  logger.warn('Could not sync asset versions from any official host — using fallback tokens and retrying')
+  scheduleVersionSync(VERSION_SYNC_RETRY_MS)
 }
 
 export function getAssetsPath(): string {
