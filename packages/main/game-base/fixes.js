@@ -1470,3 +1470,252 @@ for (var id in events) {
   }, 500)
 
 })()
+
+// ── $_fragSoulUse_v2 — fragmentos de alma: doble click → selector de item ──
+// El protocolo stock no tiene "usar objeto sobre objeto" (ObjectUseMessage
+// solo lleva el UID del fragmento).  Flujo oficial-style: doble click en un
+// fragmento (typeId 115 / efecto 742) abre la ventana nativa "itemPicking"
+// (la misma del mimetismo) en modo equipamiento; al elegir el item destino
+// se envía ObjectFragmentUseMessage{objectUID, targetUID} y el servidor
+// (FragmentManager) valida elegibilidad, máximo 5 y consume el stack.
+//
+// Piezas usadas del bundle (verificadas en build/script.js):
+//   • window.singletons = webpack require; .c = cache de módulos instanciados
+//     → se localiza el window manager por sus exports (open/getWindow/close/
+//     arrangeOpeningWindow) sin hardcodear el id de módulo.
+//   • window.gui.getWindow('equipment') = ventana de inventario; emite
+//     "slot-doubletap" con el slot (slot.itemInstance = ItemInstance).
+//   • wm.open('itemPicking') devuelve la ItemPickingWindow; .showEquippableItems()
+//     filtra a equipo; la ventana re-emite "slot-doubletap" del storageView.
+//   • window.dofus.sendMessage(type, data) — mismo contrato que ObjectFeedMessage.
+;(function () {
+  if (window.$_fragSoulUse_v2) return
+  window.$_fragSoulUse_v2 = true
+
+  var FRAGMENT_TYPE_ID = 115
+  var MARKER_EFFECT_ID = 742
+  var hooked = false
+
+  function log(m) { try { console.warn('[fragUse] ' + m) } catch (e) {} }
+
+  function itemInstanceOf(slot) {
+    if (!slot) return null
+    if (slot.itemInstance) return slot.itemInstance
+    var ii = slot.getItem && slot.getItem()
+    if (ii) return ii
+    var d = slot.data
+    return d && (d.objectUID !== undefined || typeof d.getProperty === 'function') ? d : null
+  }
+
+  function objectUIDOf(ii) {
+    if (!ii) return null
+    if (ii.objectUID !== undefined && ii.objectUID !== null) return ii.objectUID
+    try { return ii.getProperty ? ii.getProperty('objectUID') : null } catch (e) { return null }
+  }
+
+  function typeIdOf(ii) {
+    if (!ii) return 0
+    var it = ii.item || null
+    if (it && it.typeId !== undefined) return Number(it.typeId)
+    try { return Number(ii.getProperty ? ii.getProperty('typeId') : 0) || 0 } catch (e) { return 0 }
+  }
+
+  function isFragmentInstance(ii) {
+    if (!ii) return false
+    if (typeIdOf(ii) === FRAGMENT_TYPE_ID) return true
+    var effs = ii.effects || null
+    if (effs && effs.length) {
+      for (var i = 0; i < effs.length; i++) {
+        var ef = effs[i]
+        var id = ef && (ef.actionId !== undefined ? ef.actionId : ef.effectId)
+        if (Number(id) === MARKER_EFFECT_ID) return true
+      }
+    }
+    return false
+  }
+
+  function findWindowManager() {
+    try {
+      if (window.gui && typeof window.gui.open === 'function' &&
+          typeof window.gui.getWindow === 'function' &&
+          typeof window.gui.arrangeOpeningWindow === 'function') return window.gui
+      var req = window.singletons
+      if (!req || !req.c) return null
+      for (var id in req.c) {
+        var ex = req.c[id] && req.c[id].exports
+        if (ex && typeof ex.open === 'function' && typeof ex.getWindow === 'function' &&
+            typeof ex.close === 'function' && typeof ex.arrangeOpeningWindow === 'function') {
+          return ex
+        }
+      }
+    } catch (e) {}
+    return null
+  }
+
+  var pendingFragment = null
+
+  function onPickItem(slot) {
+    try {
+      var ii = itemInstanceOf(slot)
+      var targetUID = objectUIDOf(ii)
+      var fragUID = pendingFragment && objectUIDOf(pendingFragment)
+      if (wm && picker) wm.close('itemPicking')
+      if (targetUID == null || fragUID == null || targetUID === fragUID) return
+      if (!window.dofus || typeof window.dofus.sendMessage !== 'function') { log('dofus.sendMessage no disponible'); return }
+      window.dofus.sendMessage('ObjectFragmentUseMessage', {
+        objectUID: fragUID,
+        targetUID: targetUID
+      })
+    } catch (e) { log('pick err ' + (e && e.message)) }
+    finally { pendingFragment = null }
+  }
+
+  var wm = null, picker = null
+
+  function openPickerForFragment(fragII) {
+    try {
+      pendingFragment = fragII
+      picker = wm.open('itemPicking')
+      if (!picker) { pendingFragment = null; log('itemPicking no abrió'); return }
+      if (typeof picker.showEquippableItems === 'function') picker.showEquippableItems()
+      picker.on('slot-doubletap', onPickItem)
+      picker.once('close', function () {
+        try { picker && picker.removeListener && picker.removeListener('slot-doubletap', onPickItem) } catch (e) {}
+        pendingFragment = null
+        picker = null
+      })
+    } catch (e) { log('openPicker err ' + (e && e.message)); pendingFragment = null }
+  }
+
+  function hookEquipmentWindow() {
+    if (hooked) return
+    var eq = null
+    try {
+      if (wm && typeof wm.getWindow === 'function') eq = wm.getWindow('equipment')
+      if (!eq && window.gui && typeof window.gui.getWindow === 'function') eq = window.gui.getWindow('equipment')
+    } catch (e) {}
+    if (!eq || typeof eq.on !== 'function') return
+    hooked = true
+    eq.on('slot-doubletap', function (slot) {
+      try {
+        var ii = itemInstanceOf(slot)
+        if (!isFragmentInstance(ii)) return
+        openPickerForFragment(ii)
+      } catch (e) { log('doubletap err ' + (e && e.message)) }
+    })
+    log('doble click en fragmento → selector de item activo')
+  }
+
+  var tries = 0
+  var timer = setInterval(function () {
+    if (++tries > 600) { clearInterval(timer); return }
+    try {
+      if (!wm) wm = findWindowManager()
+      if (wm && window.gui && window.gui.playerData) hookEquipmentWindow()
+      if (wm && hooked) clearInterval(timer)
+    } catch (e) {}
+  }, 500)
+})()
+
+// ── $_npcBuybackPrice_v1 — precio real al vender a NPCs compradores ──
+// El cliente calcula el precio de venta NPC como max(1, floor(item.price/10))
+// y item.price vale 1 en Items.json → la UI muestra ~1k para todo. El
+// servidor ya paga el precio correcto (NpcBuyback.json: nivel*kamasPorNivel);
+// esto solo corrige la VISTA PREVIA del exchange (unitPrice/total/confirm).
+// Espejo de data/custom/NpcBuyback.json — mantener ambos sincronizados.
+;(function () {
+  if (window.$_npcBuybackPrice_v1) return
+  window.$_npcBuybackPrice_v1 = true
+
+  var BUYBACK = {
+    20516: {
+      minLevel: 10,
+      kamasPerLevel: 100,
+      superTypes: { 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 7: 1, 10: 1, 11: 1, 12: 1 }
+    }
+  }
+
+  function log(m) { try { console.warn('[buybackPrice] ' + m) } catch (e) {} }
+
+  function findWm() {
+    try {
+      if (window.gui && typeof window.gui.open === 'function' &&
+          typeof window.gui.getWindow === 'function' &&
+          typeof window.gui.arrangeOpeningWindow === 'function') return window.gui
+      var req = window.singletons
+      if (!req || !req.c) return null
+      for (var id in req.c) {
+        var ex = req.c[id] && req.c[id].exports
+        if (ex && typeof ex.open === 'function' && typeof ex.getWindow === 'function' &&
+            typeof ex.close === 'function' && typeof ex.arrangeOpeningWindow === 'function') {
+          return ex
+        }
+      }
+    } catch (e) {}
+    return null
+  }
+
+  var wm = null, hooked = false
+
+  function hookTradeItem() {
+    if (hooked) return
+    var win = null
+    try { win = wm && typeof wm.getWindow === 'function' ? wm.getWindow('tradeItem') : null } catch (e) {}
+    if (!win || typeof win.on !== 'function') return
+    hooked = true
+
+    win.on('open', function () {
+      try {
+        var msg = this.msg
+        if (!msg || msg._messageType !== 'ExchangeStartOkNpcShopMessage') return
+        var npcId = msg.npcSellerId != null ? msg.npcSellerId : (msg.npcId != null ? msg.npcId : msg.sellerId)
+        var rule = BUYBACK[npcId]
+        if (!rule) return
+        var box = this.exchangeBox
+        if (!box || typeof box.updateSettingBox !== 'function') return
+        if (box.__buybackWrapped) return
+        box.__buybackWrapped = true
+
+        var orig = box.updateSettingBox
+        box.updateSettingBox = function () {
+          orig.apply(this, arguments)
+          try {
+            if (this.mode !== 'sell-npc') return
+            // Re-resolve the rule on EVERY call: win.msg changes per exchange
+            // and the same settingBox serves shop/bidhouse/other NPCs.
+            var m = win.msg
+            var id = m && (m.npcSellerId != null ? m.npcSellerId : (m.npcId != null ? m.npcId : m.sellerId))
+            var r = BUYBACK[id]
+            if (!r) return
+            var item = arguments[1]
+            var lvl = item && typeof item.getProperty === 'function' ? item.getProperty('level') : null
+            if (lvl == null && item && item.item) lvl = item.item.level
+            lvl = Number(lvl) || 0
+            if (lvl < r.minLevel) return
+            var typeId = item && typeof item.getProperty === 'function' ? item.getProperty('typeId') : null
+            if (typeId == null && item && item.item) typeId = item.item.typeId
+            var types = window.gui && window.gui.databases && window.gui.databases.ItemTypes
+            var st = types && types[typeId] ? types[typeId].superTypeId : null
+            if (st != null && !r.superTypes[st]) return
+            var unit = Math.max(1, Math.floor(lvl * r.kamasPerLevel))
+            if (this.pricePerUnit !== unit) {
+              this.pricePerUnit = unit
+              if (typeof this._updatePrices === 'function') this._updatePrices()
+            }
+          } catch (e) {}
+        }
+        log('precio de recompra corregido para NPC ' + npcId)
+      } catch (e) { log('open err ' + (e && e.message)) }
+    })
+  }
+
+  var tries = 0
+  var timer = setInterval(function () {
+    if (++tries > 600) { clearInterval(timer); return }
+    try {
+      if (!wm) wm = findWm()
+      if (wm && window.gui && window.gui.playerData) hookTradeItem()
+      if (hooked) clearInterval(timer)
+    } catch (e) {}
+  }, 500)
+})()

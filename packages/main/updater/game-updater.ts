@@ -77,6 +77,40 @@ async function fetchToFile(url: string, filePath: string): Promise<void> {
   await pipeline(Readable.fromWeb(res.body as any), ws)
 }
 
+/**
+ * Paridad de parches con la copia INSTALADA. El corto-circuito "frozen"
+ * saltaba TODO el refresh (descarga + _applyRegex), así que cuando se
+ * editaba packages/main/game-base/regex.json la build instalada del PC
+ * seguía con los parches viejos — y con el espejo PC→servidor arrastraba
+ * esa versión vieja a los clientes web y móvil. Compara el hash del
+ * regex.json ACTUAL (game-base primero — fuente de verdad — con la copia
+ * instalada como fallback) contra el regexHash guardado en versions.json;
+ * si difieren, el skip se anula y el flujo completo re-descarga y
+ * re-aplica los parches vigentes.
+ */
+function _regexPatchesDrifted(): boolean {
+  try {
+    const versions: GameVersion | null = fs.existsSync(get.LOCAL_VERSIONS_PATH())
+      ? JSON.parse(fs.readFileSync(get.LOCAL_VERSIONS_PATH(), 'utf-8'))
+      : null
+    if (!versions?.regexHash) return false
+    const candidates = [
+      path.join(__dirname, '../game-base/regex.json'),
+      path.join(__dirname, '../../packages/main/game-base/regex.json'),
+      path.join(get.GAME_PATH(), 'regex.json')
+    ]
+    const src = candidates.find((p) => fs.existsSync(p))
+    if (!src) return false
+    const current = crypto.createHash('sha1').update(fs.readFileSync(src)).digest('hex')
+    if (current !== versions.regexHash) {
+      logger.info(
+        `Regex patches drifted (game-base=${current.slice(0, 8)} vs installed=${versions.regexHash.slice(0, 8)}) — frozen skip anulado, re-aplicando parches`)
+      return true
+    }
+  } catch {}
+  return false
+}
+
 export class GameUpdater {
   private readonly _onProgress: ProgressCallback
 
@@ -126,7 +160,8 @@ export class GameUpdater {
 
     // Check frozen marker — skip full download if frozen version matches
     const frozen = GameUpdater.checkFrozen()
-    if (frozen.frozen && frozen.buildVersion === FROZEN_VERSION) {
+    if (frozen.frozen && frozen.buildVersion === FROZEN_VERSION &&
+        !_regexPatchesDrifted()) {
       this._onProgress('Game data is frozen at version ' + frozen.buildVersion, 100)
       logger.info(`Skipping download: frozen at ${frozen.buildVersion}`)
       // Load existing versions from disk

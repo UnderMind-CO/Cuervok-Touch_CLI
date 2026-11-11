@@ -485,22 +485,29 @@ export class GameWindow extends EventEmitter {
       try { fs.writeFileSync(indexPath, indexHtml) } catch (err) { /* best-effort */ }
       }
 
-      if (!indexHtml.includes('$_configBoot_v5')) {
-        // v5: requests config.json with the language SAVED by the game's login
-        // language selector (localStorage key "all#lang" / "<account>#lang")
-        // instead of the hardcoded "es", so the session boots in the language
-        // the user picked. Content localization rides on /data/map?lang=X and
-        // the client's per-language static-data caches (esDataCache/frDataCache/...).
+      if (!indexHtml.includes('$_configBoot_v6')) {
+        // v6: requests config.json with the language SAVED by the game's login
+        // language selector instead of the hardcoded "es", so the session
+        // boots in the language the user picked. Content localization rides on
+        // /data/map?lang=X and the client's per-language static-data caches
+        // (esDataCache/frDataCache/...).
+        //
+        // _savedLang reads the game's REAL prefs store: the client keeps ALL
+        // preferences inside ONE localStorage blob "dofus.1" (a JSON object
+        // whose keys look like "all#lang" / "<account>#lang") — there are NO
+        // per-key localStorage entries ending in #lang, so scanning
+        // localStorage keys (v5) always fell back to 'es' and every session
+        // booted in Spanish regardless of the selected language.
         // Keeps the v4 retry behavior (every 2s, up to 15 tries) so launching
         // the client slightly before the emulator auth server doesn't dead-end
         // the session on the fallback config. The fallback dataUrl points at the
         // emulator (/api) — NOT at 127.0.0.1:8765/data, which has no route and
         // makes staticContent fail with 404 ("No es/en dictionary").
         const boot = `
-<script>$_configBoot_v5=true;
+<script>$_configBoot_v6=true;
 (function(){var _bootStarted=false;function _boot(){if(_bootStarted)return;_bootStarted=true;if(window.initDofus)window.initDofus()}
 function _tryBoot(){if(window.Config)_boot()}
-function _savedLang(){var def='es';try{var L=window.localStorage;if(!L)return def;var cands=[],all=null;for(var i=0;i<L.length;i++){var k=L.key(i);if(k&&/#lang$/.test(k)){var v=L.getItem(k);if(v&&/^[a-z]{2}$/.test(v)){cands.push(v);if(k==='all#lang'||k.indexOf('#all#lang')>=0)all=v}}}if(all)return all;if(cands.length)return cands[cands.length-1]}catch(e){}return def}
+function _savedLang(){var def='es';try{var raw=window.localStorage&&window.localStorage.getItem('dofus.1');if(!raw)return def;var prefs=JSON.parse(raw);if(prefs&&prefs.prefs)prefs=prefs.prefs;var all=null,last=null;for(var k in prefs){if(/#lang$/.test(k)){var v=prefs[k];if(typeof v==='string'&&/^[a-z]{2}$/.test(v)){if(k==='all#lang'||k.indexOf('#all#lang')>=0)all=v;last=v}}}return all||last||def}catch(e){return def}}
 function _useFallback(){if(!window.Config){window.Config={language:_savedLang(),assetsUrl:'http://127.0.0.1:8765/assets/',dataUrl:'http://localhost:3000/api'}}clearInterval(_p);_boot()}
 if(window.Config){_boot();return}
 var _p=setInterval(_tryBoot,50),_tries=0
@@ -972,6 +979,65 @@ _fetchConfig()})();
     // the file ourselves — attacks modify the file AFTER we write it, so we
     // always pin the latest state.
     writeScriptPin()
+
+    // ─── Paridad PC ↔ web/móvil: espejo automático a data/game ──────
+    // El servidor (TouchEmu GameServeModule) sirve a los clientes web y
+    // la app móvil desde data/game; si nadie corre sync-server-game.mjs
+    // tras un parche, ven una versión vieja del juego. Hasta hoy era un
+    // paso manual: cada vez que processGame termina aquí, replicamos el
+    // mismo plan del script (fixes.js/css desde game-base y el resto
+    // desde la copia PC parcheada de userData; index.html NUNCA — el
+    // servidor usa su boot same-origin propio). Best-effort y silencioso
+    // si TouchEmu no está al lado (instalaciones sin repo vecino → skip
+    // reportado una vez); GetPatchedScript invalida su caché por mtime
+    // al copiar.
+    void this._mirrorGameToServer(gamePath)
+  }
+
+  private _mirrorLoggedMissing = false
+  private _mirrorGameToServer(gamePath: string): void {
+    try {
+      const candidates = [
+        path.join(app.getAppPath(), '..', 'TouchEmu-Cuervok', 'data', 'game'),
+        path.join(process.cwd(), '..', 'TouchEmu-Cuervok', 'data', 'game')
+      ]
+      const serverRoot = candidates.find(
+        (cand) => fs.existsSync(path.join(cand, 'index.html'))
+      )
+      if (!serverRoot) {
+        if (!this._mirrorLoggedMissing) {
+          this._mirrorLoggedMissing = true
+          logger.info('processGame: TouchEmu-Cuervok/data/game no encontrado — espejo PC→servidor desactivado (normal en installs sin repo vecino)')
+        }
+        return
+      }
+      // Misma fuente de verdad que sync-server-game.mjs:
+      //  • fixes.js / fixes.css ← game-base (hotfixes independentes del
+      //    updater congelado)  • el resto ← copia PC parcheada de userData.
+      const plan: Array<{ rel: string; sources: string[] }> = [
+        { rel: 'fixes.js', sources: [path.join(__dirname, '../game-base/fixes.js'), path.join(__dirname, '../../packages/main/game-base/fixes.js'), gamePath + '/fixes.js'] },
+        { rel: 'fixes.css', sources: [path.join(__dirname, '../game-base/fixes.css'), path.join(__dirname, '../../packages/main/game-base/fixes.css'), gamePath + '/fixes.css'] },
+        { rel: 'build/script.js', sources: [gamePath + '/build/script.js'] },
+        { rel: 'build/styles-native.css', sources: [gamePath + '/build/styles-native.css'] },
+        { rel: 'build/primus.js', sources: [gamePath + '/build/primus.js'] },
+        { rel: 'keymaster2.js', sources: [gamePath + '/keymaster2.js'] }
+      ]
+      for (const { rel, sources } of plan) {
+        const src = sources.find((p) => fs.existsSync(p))
+        if (!src) continue
+        const dst = path.join(serverRoot, rel)
+        try {
+          if (fs.existsSync(dst) && fs.readFileSync(src).equals(fs.readFileSync(dst))) continue
+          fs.mkdirSync(path.dirname(dst), { recursive: true })
+          fs.copyFileSync(src, dst)
+          logger.info(`processGame: espejo ${rel} → ${path.relative(serverRoot, dst)} (paridad web/móvil)`)
+        } catch (err) {
+          logger.warn(`processGame: fallo espejando ${rel}`, err)
+        }
+      }
+    } catch (err) {
+      logger.warn('processGame: espejo PC→servidor falló (best-effort)', err)
+    }
   }
 
   private _setupRequestInterceptors() {
