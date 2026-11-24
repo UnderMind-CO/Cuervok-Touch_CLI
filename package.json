@@ -1,6 +1,6 @@
 {
   "name": "cuervok",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Cuervok - Dofus Touch desktop client",
@@ -11,7 +11,8 @@
     "build": "node scripts/build.mjs",
     "dist": "node scripts/bump-version.mjs && npm run build && electron-builder",
     "release": "node scripts/bump-version.mjs && npm run build && electron-builder",
-    "postrelease:upload": "echo 'Sube los archivos de release/ (latest.yml + .exe + .blockmap) al feed del VPS — ver docs/2026-10-24-updates-en-vps.md'",
+    "release:github": "node scripts/bump-version.mjs && npm run build && electron-builder && node scripts/publish-github-release.mjs",
+    "postrelease:upload": "echo 'Feed VPS alternativo: sube release/latest.yml + .exe + .blockmap al directorio del feed — ver docs/2026-10-24-updates-en-vps.md'",
     "realse": "pnpm run release",
     "feed:prepare": "node scripts/prepare-vps-feed.mjs",
     "typecheck": "tsc --noEmit",
@@ -28,13 +29,12 @@
     "productName": "Cuervok",
     "icon": "resources/icon.png",
     "afterPack": "scripts/afterpack.cjs",
-    "publish": [
-      {
-        "provider": "generic",
-        "url": "https://web-retro.changethis-domain.com/prod/updater",
-        "channel": "latest"
-      }
-    ],
+    "publish": {
+      "provider": "github",
+      "owner": "Cuervok",
+      "repo": "Download-releases",
+      "releaseType": "release"
+    },
     "mac": {
       "icon": "resources/icon.icns",
       "target": [

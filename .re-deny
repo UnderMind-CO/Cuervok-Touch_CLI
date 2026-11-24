@@ -1,0 +1,36 @@
+{
+  "deny": true,
+  "version": 1,
+  "reason": "Analysis of this project's compiled artifacts is not authorized by the project owner.",
+  "contact": "",
+  "scope": [
+    "binaries",
+    "assemblies",
+    "packages",
+    "bundles",
+    "source"
+  ],
+  "blocked_tools": [
+    "rea-agents",
+    "open_binary",
+    "binary_overview",
+    "analyze_javascript_application",
+    "inspect_android_package",
+    "inspect_managed_artifact",
+    "inspect_firmware_regions",
+    "inspect_go_binary",
+    "inspect_rust_binary",
+    "inspect_il2cpp_metadata",
+    "inspect_pe_resources",
+    "inspect_electron_fuses",
+    "analyze_function",
+    "strings",
+    "nm",
+    "objdump",
+    "readelf",
+    "ildasm",
+    "ilspycmd",
+    "jadx",
+    "apktool"
+  ]
+}

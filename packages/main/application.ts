@@ -345,150 +345,33 @@ export class Application {
       }
     })
 
-    // ─── Login page for native game launcher ──────────────────
-    // The game's "JUGAR / CUENTA ANKAMA" button opens
-    // http://localhost:3000/login/ankama?... which the emulator doesn't serve.
-    // We intercept that URL (see game-window.ts request interceptor) and
-    // redirect to this route, which renders a styled login form. On submit it
-    // calls the emulator's HAAPI CreateApiKey endpoint and redirects back to
-    // the game via the dofustouch:// custom scheme.
-    honoApp.get('/login/ankama', (c) => {
-      const params = new URL(c.req.url).searchParams
-      const redirectUri = params.get('redirect_uri') || 'dofustouch://authorized'
-      const clientId = params.get('client_id') || '18'
-      const originTracker = params.get('origin_tracker') || ''
-      const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cuervok — Iniciar Sesión</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    background:#0a0a0f;color:#e0e0e0;display:flex;align-items:center;justify-content:center;
-    min-height:100vh}
-  .card{width:380px;padding:40px 32px;border-radius:12px;
-    background:linear-gradient(180deg,rgba(20,20,30,0.95),rgba(12,12,18,0.98));
-    border:1px solid rgba(201,162,77,0.15);box-shadow:0 24px 70px rgba(0,0,0,0.5)}
-  .title{font-size:22px;font-weight:700;color:#e8e0d0;text-align:center;margin-bottom:4px}
-  .subtitle{font-size:13px;color:rgba(255,255,255,0.35);text-align:center;margin-bottom:28px}
-  .field{position:relative;margin-bottom:14px}
-  .field input{width:100%;padding:12px 14px 12px 38px;border-radius:8px;
-    border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);
-    color:#e0e0e0;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s}
-  .field input:focus{border-color:rgba(201,162,77,0.5);box-shadow:0 0 0 2px rgba(201,162,77,0.1)}
-  .field .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);
-    color:rgba(255,255,255,0.25);pointer-events:none;font-size:16px}
-  .btn{width:100%;padding:12px 0;border:none;border-radius:8px;font-size:15px;font-weight:600;
-    cursor:pointer;background:linear-gradient(180deg,#dbb867,#c9a24d 50%,#b8913a);
-    color:#1a1510;letter-spacing:.02em;transition:opacity .2s,transform .1s;margin-top:8px}
-  .btn:hover{opacity:.9}
-  .btn:active{transform:scale(.98)}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  .error{width:100%;padding:10px 14px;border-radius:8px;background:rgba(255,68,68,0.1);
-    border:1px solid rgba(255,68,68,0.25);color:#ff4444;font-size:13px;text-align:center;
-    margin-top:12px;display:none;line-height:1.4}
-  .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(0,0,0,0.2);
-    border-top-color:#1a1510;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:8px}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .footer{text-align:center;margin-top:20px;font-size:11px;color:rgba(255,255,255,0.2)}
-</style>
-</head>
-<body>
-<div class="card">
-  <div class="title">Cuervok</div>
-  <div class="subtitle">Inicia sesión con tu cuenta</div>
-  <form id="loginForm">
-    <div class="field">
-      <span class="icon">👤</span>
-      <input type="text" id="username" placeholder="Usuario" autocomplete="username" autofocus>
-    </div>
-    <div class="field">
-      <span class="icon">🔒</span>
-      <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password">
-    </div>
-    <button class="btn" type="submit" id="submitBtn">Conectar</button>
-    <div class="error" id="error"></div>
-  </form>
-  <div class="footer">Cuervok Desktop</div>
-</div>
-<script>
-  const form = document.getElementById('loginForm');
-  const errEl = document.getElementById('error');
-  const btn = document.getElementById('submitBtn');
-  const REDIRECT = ${JSON.stringify(redirectUri)};
-  const GAME_ID = ${JSON.stringify(clientId)};
-
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const login = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value;
-    if (!login || !password) { showErr('Por favor completa todos los campos'); return; }
-    btn.disabled = true;
-    btn.innerHTML = '<span class=\'spinner\'></span> Conectando...';
-    errEl.style.display = 'none';
-    try {
-      // Step 1: Authenticate against the web platform (security layer)
-      btn.innerHTML = '<span class=\'spinner\'></span> Verificando cuenta web...';
-      const webAuthRes = await fetch('/api/web/login.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ username: login, password: password })
-      });
-      if (!webAuthRes.ok) {
-        const txt = await webAuthRes.text();
-        let reason = txt;
-        try { const p = JSON.parse(txt); reason = p.error || p.reason || txt; } catch(e) {}
-        throw new Error(reason || 'Credenciales web incorrectas (HTTP ' + webAuthRes.status + ')');
+    // ─── Login mode flag for the in-game native form ───────────
+    // fixes.js (running inside the game iframe, same origin) polls this
+    // endpoint to decide whether to inject the native credential mini-form
+    // into the game's own LoginsForm.  Source of truth: the emulator's
+    // config.json — webAuth.requireWebPlatformAuth === false means the
+    // deploy has no web platform (beta/self-hosted) → native login only.
+    // Cached 30 s; any failure keeps the last value and defaults to web
+    // (safe — official flow).
+    let _loginModeCache: { native: boolean; at: number } | null = null
+    honoApp.get('/api/login-mode', async (c) => {
+      try {
+        if (!_loginModeCache || Date.now() - _loginModeCache.at > 30000) {
+          const res = await fetch(`${DOFEMU_BASE}/config.json`, {
+            cache: 'no-store',
+            signal: AbortSignal.timeout(2500)
+          })
+          let native = false
+          if (res.ok) {
+            const cfg = await res.json() as { webAuth?: { requireWebPlatformAuth?: boolean } }
+            native = cfg?.webAuth?.requireWebPlatformAuth === false
+          }
+          _loginModeCache = { native, at: Date.now() }
+        }
+        return c.json({ nativeLogin: _loginModeCache.native })
+      } catch {
+        return c.json({ nativeLogin: _loginModeCache?.native ?? false })
       }
-      const webData = await webAuthRes.json();
-      if (!webData.success) throw new Error(webData.error || 'Credenciales web incorrectas');
-
-      // Step 2: Get game API key from DofEmu emulator
-      btn.innerHTML = '<span class=\'spinner\'></span> Conectando al juego...';
-      const body = new URLSearchParams({ login: login, password: password, game_id: GAME_ID });
-      const apiKeyRes = await fetch('/api/haapi/Ankama/v5/Api/CreateApiKey', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
-        body: body.toString()
-      });
-      if (!apiKeyRes.ok) {
-        const txt = await apiKeyRes.text();
-        let reason = txt;
-        try { reason = JSON.parse(txt).reason || txt; } catch(e) {}
-        throw new Error(reason || 'Error al obtener clave de juego (HTTP ' + apiKeyRes.status + ')');
-      }
-      const keyData = await apiKeyRes.json();
-      const apiKey = keyData.key || keyData.apiKey;
-      if (!apiKey) throw new Error('No se recibió la clave API');
-      const accountId = keyData.account_id != null ? Number(keyData.account_id) : 0;
-      // Send auth data to the parent (Cuervok GameScreen) via postMessage.
-      // The iframe can't navigate to dofustouch:// custom protocol, so we
-      // communicate the session directly to the parent which updates authStore.
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({
-          type: 'cuervok:native-login-success',
-          gameId: new URLSearchParams(window.location.search).get('id') || '',
-          apiKey: apiKey,
-          token: '',
-          accountId: accountId,
-          username: login
-        }, '*');
-      }
-      // Also try the protocol redirect as fallback (works if opened outside iframe)
-      window.location.href = REDIRECT + '?code=' + encodeURIComponent(apiKey) + '&account_id=' + accountId;
-    } catch(err) {
-      showErr(err.message || 'Error de conexión');
-      btn.disabled = false;
-      btn.textContent = 'Conectar';
-    }
-  });
-  function showErr(msg) { errEl.textContent = msg; errEl.style.display = 'block'; }
-</script>
-</body>
-</html>`
-      return c.html(html)
     })
 
     honoApp.get('/game/*', createStaticHandler(get.GAME_PATH(), '/game/'))

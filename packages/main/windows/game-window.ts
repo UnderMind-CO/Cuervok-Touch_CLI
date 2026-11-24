@@ -41,6 +41,34 @@ const PRIMUS_JS_URL = `${LOCAL_SERVER_ORIGIN}/game/build/primus.js`
 // Set CUV_SERVER_URL env var to point to VPS (e.g. https://yourdomain.com)
 const WEBRETRO_ORIGIN = process.env.CUV_SERVER_URL || 'http://localhost:3001'
 
+// Native-login mode (server-driven): the emulator's config.json flag
+// webAuth.requireWebPlatformAuth === false means the deploy has NO web
+// platform (beta/self-hosted) — /login/ankama must open the LOCAL native
+// form (application.ts /login/ankama route) which authenticates straight
+// against the emu HAAPI instead of redirecting to web-retro.  The flag is
+// refetched on every login hit (deduped while in flight); any fetch
+// failure keeps the last known value and the DEFAULT is web (safe).
+let _nativeLoginMode: { enabled: boolean } | null = null
+let _nativeLoginInflight: Promise<void> | null = null
+
+function refreshNativeLoginMode(authBase: string): Promise<void> {
+  if (_nativeLoginInflight) return _nativeLoginInflight
+  _nativeLoginInflight = (async () => {
+    try {
+      const res = await fetch(`${authBase}/config.json`, {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(2500)
+      })
+      if (res.ok) {
+        const cfg = await res.json() as { webAuth?: { requireWebPlatformAuth?: boolean } }
+        _nativeLoginMode = { enabled: cfg?.webAuth?.requireWebPlatformAuth === false }
+      }
+    } catch { /* emulador inalcanzable → se conserva el último valor conocido */ }
+    finally { _nativeLoginInflight = null }
+  })()
+  return _nativeLoginInflight
+}
+
 // Fallback HTML shown when the web-retro platform is unreachable
 // Uses the Electron preload API (window.cuervok) for smart retry.
 const SERVICE_UNAVAILABLE_HTML = `<!DOCTYPE html>
@@ -619,6 +647,27 @@ _fetchConfig()})();
         template: (m) => `window.$_i18nModule=t,${m[0]}`
       },
       {
+        // Expose the BASE Window class (the official chrome every game window
+        // extends: border, header, title, help/close buttons, drag, sounds).
+        // fixes.js subclasses it to build the custom CuervoDex window under a
+        // NEW window id — no official window is modified.
+        // Anchor: unique `e.exports=n,n.prototype.defaultOpenAction` of the
+        // base Window module (verified single occurrence in script.js).
+        name: '$_baseWindowClass',
+        re: /e\.exports=n,n\.prototype\.defaultOpenAction=function\(\)\{\}/,
+        template: (m) => `window.$_baseWindowClass=n,${m[0]}`
+      },
+      {
+        // Expose the EmblemLogo canvas class (module 450) so fixes.js can
+        // render a guild emblem to a canvas — used to texture the tax
+        // collector's GuildUp_1 symbol (official emblem-on-standard look).
+        // Anchor: unique `e.exports=n,n.prototype._generateEmblem` of the
+        // EmblemLogo module (verified single occurrence in script.js).
+        name: '$_emblemLogoClass',
+        re: /e\.exports=n,n\.prototype\._generateEmblem=function/,
+        template: (m) => `window.$_emblemLogoClass=n,${m[0]}`
+      },
+      {
         // CRASH GUARD — StatBuff.remove: `Cannot read properties of null
         // (reading 'active')`.  The buff's EffectInstance.effect (template row
         // from the Effects table) is resolved ASYNC after the buff is built;
@@ -633,6 +682,26 @@ _fetchConfig()})();
         template: () =>
           'n.prototype.remove=function(){if(!this._removed&&!this.effect.effect||!this._removed&&this.effect.effect&&!this.effect.effect.active){var e=this.effect.effect?this.getDelta():0;' +
           'if(e)this.decrementStats(e)}o.prototype.remove.call(this)};$_buffTemplateGuard=true',
+      },
+      {
+        // CUERVODEX DISPLAY-ONLY GUARD — StatBuff.incrementStats.  Los stats
+        // de Prestigio/CuervoDex llegan al cliente YA INTEGRADOS en las
+        // stats del fighter (FightManager los funde server-side en PvM);
+        // el servidor además emite buffs visuales con el hechizo centinela
+        // 200001 para pintar el icono + tooltip por stat.  Sin este guard,
+        // StatBuff.apply incrementaría esas stats OTRA VEZ en el modelo del
+        // cliente (doble conteo visible).  Se detecta por el effectCaller
+        // del buff ("...spellId:200001...") — presente aunque la spell no
+        // resuelva — y se salta TODA la mutación (apply/remove/unstack pasan
+        // por incrementStats/decrementStats).  Los buffs oficiales no se
+        // tocan: su effectCaller nunca lleva spellId:200001.
+        name: '$_cuervoDexBuffGuard_v1',
+        re: /n\.prototype\.incrementStats=function\(e\)\{if\(e\)\{var t=s\(\),i=t\.gui/,
+        template: () =>
+          'n.prototype.incrementStats=function(e){if(e){' +
+          'if((this._effectCaller&&this._effectCaller.indexOf("spellId:200001")>-1)||' +
+          '(this.castingSpell&&this.castingSpell.spell&&this.castingSpell.spell.id===200001))return;' +
+          'var t=s(),i=t.gui'
       },
       {
         // Same guard for unstack() (the dispel path dereferences the same
@@ -676,6 +745,29 @@ _fetchConfig()})();
         name: '$_notchGuard',
         re: /\{(\w{1,2})\.toggleClassName\("removeNotch"/,
         template: (m) => `{${m[1]}&&${m[1]}.rootElement&&${m[1]}.toggleClassName("removeNotch"`,
+      },
+      {
+        // TAX COLLECTOR LOOK — getCreatureBones() hardcodes bonesId 1813 for
+        // GameRolePlayTaxCollectorInformations/GameFightTaxCollectorInformations.
+        // En este asset pack el perceptor oficial se renderiza como criatura
+        // look 714 (modo creaturas).  Un solo sitio devuelve 1813 para ese
+        // par de tipos — verificado: 1 ocurrencia en el bundle.
+        name: '$_taxCollectorLook714',
+        re: /case"GameRolePlayTaxCollectorInformations":case"GameFightTaxCollectorInformations":return 1813/,
+        template: (m) => m[0].replace('1813', '714'),
+      },
+      {
+        // TAX COLLECTOR ROLEPLAY LOOK — setCreatureLook() fuerza la rama de
+        // criatura (getCreatureBones → fallback, scales [90], sin colores)
+        // para GameRolePlayTaxCollectorInformations porque la incluye en la
+        // flag `a` del cálculo de `c`.  El oficial usa el look real del
+        // servidor (bones 714 del NPC Perceptor + guildIdentity con emblema
+        // y colores del gremio).  a=false lo saca de esa rama → en modo
+        // rolplay usa realLook; el fight (GameFightTaxCollectorInformations)
+        // no se toca.
+        name: '$_taxCollectorRealLook',
+        re: /(a)="GameRolePlayTaxCollectorInformations"===this\.data\.type(,c=this\.data\.humanoidInfo\|\|)(\w)\|\|(\w)/,
+        template: (m) => `${m[1]}=!1${m[2]}${m[3]}||${m[4]}`,
       },
       {
         // QUIET GUARD — TemporaryAnimationManager.assignSymbol. El engine del
@@ -862,7 +954,14 @@ _fetchConfig()})();
     for (const patch of patches) {
       if (build.includes(patch.name)) continue
       const match = patch.re.exec(build)
-      if (!match) continue
+      if (!match) {
+        // Ancla rota = parche NO aplicado en esta versión del bundle oficial.
+        // Antes se saltaba en silencio y la feature desaparecía sin rastro
+        // (caso real: tab Guild Boost tras un update). Warn visible en el
+        // log para detectarlo en la primera sesión tras cada actualización.
+        logger.warn(`Patch anchor NOT found (feature may be missing on this game version): ${patch.name}`)
+        continue
+      }
       build = build.replace(match[0], patch.template(match))
       changed = true
       logger.info(`Patched: ${patch.name} exposed`)
@@ -930,23 +1029,21 @@ _fetchConfig()})();
     build = build.replace(/http:\/\/localhost:3000\/build\/primus\.js/g, PRIMUS_JS_URL)
     build = build.replace(/http:\/\/127\.0\.0\.1:3000\/build\/primus\.js/g, PRIMUS_JS_URL)
 
-    // ─── makeUrlSticky: downgrade log from warn to debug ─────────────
+    // ─── makeUrlSticky: silence the expected pre-session warning ──────
     // The game's Primus connection code calls makeUrlSticky(url) which
     // checks window.Config.sessionId.  If the session hasn't been
     // established yet (expected when switching to the game server), it
-    // logs console.warn("Cannot make URL sticky...") and returns the URL
-    // unchanged — the logic is correct, only the log level is excessive.
-    // We change it to console.debug so it doesn't flood [ERROR] logs.
-    //
-    // NOTE: The regex uses [^\"]* to avoid matching the first closing paren
-    // inside the string "(no session ID has been set)".  The minified code
-    // pattern is: console.warn("Cannot make URL sticky...",e),e
+    // logs "Cannot make URL sticky (no session ID has been set)" and
+    // returns the URL unchanged — the logic is correct, the message is
+    // pure noise on every login.  The minified pattern is a comma
+    // expression `console.warn("...",e),e`; replacing the warn call with
+    // `void 0` keeps the `,e` result intact while silencing the log.
     if (!build.includes('$_stickyWarnPatched')) {
       const stickyMatch = build.match(/console\.warn\("Cannot make URL sticky[^"]*",[^)]+\)/);
       if (stickyMatch) {
-        build = build.replace(stickyMatch[0], stickyMatch[0].replace('console.warn', 'console.debug'));
+        build = build.replace(stickyMatch[0], 'void 0');
         changed = true;
-        logger.info('Patched: makeUrlSticky warn → debug');
+        logger.info('Patched: makeUrlSticky warning silenced');
       }
     }
 
@@ -1051,6 +1148,10 @@ _fetchConfig()})();
     // that only set CUV_SERVER_URL.
     const AUTH_BASE = process.env.DOFEMU_BASE || process.env.CUV_SERVER_URL || 'http://localhost:3000'
 
+    // Precalienta el flag de login nativo (config.json del emulador) para
+    // que el primer /login/ankama ya decida con el valor real del server.
+    void refreshNativeLoginMode(AUTH_BASE)
+
     // Client attestation secret stamped on every emulator-bound request
     // (see the onBeforeSendHeaders listener below). Must match
     // ClientAttestation.ExpectedValue in TouchEmu.Server.Auth and
@@ -1098,9 +1199,24 @@ _fetchConfig()})();
         }
 
         // Login page: the game's launcher opens /login/ankama on the emulator
-        // which 404s. Redirect to the web-retro platform login page
-        // (security layer with rate limiting, brute force protection, etc.)
+        // which 404s. Two modes, driven by the emulator's config.json
+        // (webAuth.requireWebPlatformAuth):
+        //  - web (default/prod): redirect to the web-retro platform login
+        //    page (security layer with rate limiting, brute force, etc.)
+        //  - native (beta/self-hosted, flag=false): CANCEL the navigation —
+        //    fixes.js injects the credential mini-form into the game's own
+        //    LoginsForm and the game logs in via native HAAPI CreateApiKey.
+        //    The flag refresh runs in the background so the NEXT hit uses
+        //    the fresh value; the current decision uses the last known one
+        //    (default web = safe).
         if (url.pathname === '/login/ankama') {
+          void refreshNativeLoginMode(AUTH_BASE)
+          const nativeLogin = _nativeLoginMode?.enabled === true
+          if (nativeLogin) {
+            logger.info('[REDIRECT] login page CANCELLED (native mode — in-game form)')
+            callback({ cancel: true })
+            return
+          }
           const loginUrl = `${WEBRETRO_ORIGIN}/login/ankama${url.search}`
           logger.info(`[REDIRECT] login page → ${loginUrl}`)
           callback({ redirectURL: loginUrl })
@@ -1110,6 +1226,13 @@ _fetchConfig()})();
         // Catch-all: any localhost:3000 request that wasn't matched above
         // If it looks like it was meant for the login page, redirect anyway
         if (url.pathname.startsWith('/login') && url.search.includes('code_challenge')) {
+          void refreshNativeLoginMode(AUTH_BASE)
+          const nativeLogin = _nativeLoginMode?.enabled === true
+          if (nativeLogin) {
+            logger.info('[REDIRECT] login fallback CANCELLED (native mode)')
+            callback({ cancel: true })
+            return
+          }
           const loginUrl = `${WEBRETRO_ORIGIN}/login/ankama${url.search}`
           logger.info(`[REDIRECT] login fallback → ${loginUrl}`)
           callback({ redirectURL: loginUrl })

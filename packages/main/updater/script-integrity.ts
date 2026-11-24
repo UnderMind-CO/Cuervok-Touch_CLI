@@ -40,7 +40,7 @@ export interface ScriptIntegrityEntry {
  */
 export const GAME_SCRIPT_INTEGRITY: Record<string, ScriptIntegrityEntry> = {
   "build/script.js": {
-    "sha256": "afab562adb8f211ed1d353ca0f0ac833d89d087cc51b8c1956ae811b11ca56d6",
+    "sha256": "c9ad9570e030f7bbc3264e24229d780f081c7be40e70a39c939a77b2a296b736",
     "size": 5397557
   },
   "build/primus.js": {

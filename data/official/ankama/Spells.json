@@ -92,5 +92,21 @@
     "spellLevels": [
       137661
     ]
+  },
+  "200001": {
+    "id": 200001,
+    "nameId": "CuervoDex",
+    "descriptionId": "Efectos de prestigio y la CuervoDex.",
+    "typeId": 5,
+    "scriptParams": "",
+    "scriptParamsCritical": "",
+    "scriptId": 0,
+    "scriptIdCritical": 0,
+    "iconId": 200001,
+    "previewZoneDefault": "",
+    "canHeroUse": false,
+    "spellLevels": [
+      200001
+    ]
   }
 }

@@ -59,18 +59,21 @@ body, html {
   border-style: solid;
   border-width: 24px;
   border-image: url("https://dofustouch.cdn.ankama.com/assets/ui/1.10.6_AaQ-6RC9Yx4mA0Q0mU5,OPVvhJ6d*st1/ui/containerBg.png") 48 fill;
-  /* Dark stone fallback when the CDN art cannot load. */
-  background-color: #1d1a16;
+  /* Dark stone fallback when the CDN art cannot load (CuervoDex palette). */
+  background-color: #151512;
 
   padding: 12px 16px;
 
-  color: #e8dcc0;
+  color: #d8d2c2;
   font-size: 12px;
   line-height: 1.45;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   -webkit-user-select: none;
   user-select: none;
+  /* Vinyeta interior + brillo superior: da profundidad de marco oficial
+     en vez del fondo plano genérico. */
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,235,180,0.07);
 }
 
 /* The native art moved onto the panel border above — kill the scrolling
@@ -81,22 +84,31 @@ body, html {
 }
 
 .guildBoostSectionTitle {
-  color: #f2c94c;
+  color: #f0d98a;
   font-size: 13px;
   font-weight: bold;
   text-shadow: 0 1px 2px rgba(0,0,0,0.8);
   margin: 10px 0 6px;
-  border-bottom: 1px solid rgba(242, 201, 76, 0.3);
+  border-bottom: 1px solid rgba(240, 217, 138, 0.3);
   padding-bottom: 3px;
   letter-spacing: 0.3px;
+  /* Degradado dorado oficial en el texto del título. */
+  background: linear-gradient(180deg, #ffe9b0 0%, #f0d98a 55%, #c9a24b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .guildBoostTreasury {
-  background: linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.25));
-  border: 1px solid rgba(255,255,255,0.12);
+  /* Borde degradado dorado→bronce (técnica border-box) sobre tarjeta oscura. */
+  border: 1px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(46,45,40,0.72), rgba(33,32,28,0.72)) padding-box,
+    linear-gradient(180deg, #8a744a 0%, #5c4f33 45%, #3a352a 100%) border-box;
   border-radius: 6px;
   padding: 10px 12px;
   margin-bottom: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,235,180,0.08), 0 2px 6px rgba(0,0,0,0.4);
 }
 
 .guildBoostBalances {
@@ -108,16 +120,16 @@ body, html {
 .guildBoostBalance {
   font-size: 14px;
   font-weight: bold;
-  color: #ffe9a8;
+  color: #ffd75e;
 }
 
 .guildBoostBalance.goultines {
-  color: #9fd6ff;
+  color: #e8d9b8;
 }
 
 .guildBoostMyWallets {
   font-size: 11px;
-  color: #b7a98c;
+  color: #8f887a;
   margin-top: 3px;
 }
 
@@ -134,19 +146,18 @@ body, html {
   text-align: center;
   font-size: 12px;
   font-weight: bold;
-  color: #412926;
+  color: #e8d9b8;
   text-decoration: none;
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
-  /* Owner rule: NO background art (the old btn_empty.png border-image
-     chrome) — clean flat stone button, always readable. */
-  border: 1px solid #9c8b73;
+  /* CuervoDex palette: flat warm-contrast button, no background art. */
+  border: 1px solid #5c594f;
   border-radius: 4px;
-  background-color: #d7c9b8;
+  background-color: #2e2d28;
   min-width: 64px;
   padding: 4px 10px;
-  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
 }
 
 .guildBoostBtn:active {
@@ -162,17 +173,34 @@ body, html {
 
 /* Selected currency toggle: official soft glow on the stone button. */
 .guildBoostBtn.mini.on {
-  box-shadow: 0 0 6px rgba(242,201,76,0.65);
+  box-shadow: 0 0 6px rgba(216,180,90,0.65);
   filter: brightness(1.12);
 }
 
 .guildBoostBtn.buy {
   min-width: 86px;
+  /* Degradado dorado estilo botón de compra oficial. */
+  color: #241a08;
+  background: linear-gradient(180deg, #ffe9b0 0%, #f0d98a 45%, #c9a24b 100%);
+  border-color: #8a744a;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35);
+}
+
+.guildBoostBtn.buy.disabled {
+  color: #8f887a;
+  background: #2e2d28;
+  border-color: #5c594f;
+  text-shadow: none;
 }
 
 .guildBoostBtn.donate {
   margin-top: 8px;
   min-width: 110px;
+  /* Degradado verde acción positiva (mismo lenguaje que cdxAscendBtn). */
+  color: #101a2e;
+  background: linear-gradient(180deg, #8fe08a 0%, #5cb862 55%, #3f9e46 100%);
+  border-color: #a8e8a8;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
 }
 
 /* Disabled/Máx buttons: same chrome, inert. */
@@ -190,58 +218,8 @@ body, html {
   margin: 2px 0 4px;
 }
 
-/* ── Boost Guild tab: Recaudadores section (custom) ──────────────── */
-.guildBoostCollectors {
-  background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.2));
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin: 10px 0;
-}
-
-.guildBoostCollectorInfo {
-  margin: 2px 0 6px;
-}
-
-.guildBoostCollectorCount {
-  font-size: 12px;
-  font-weight: bold;
-  color: #ffe9a8;
-}
-
-.guildBoostCollectorRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 3px 0;
-  font-size: 12px;
-  color: #e8dcc0;
-}
-
-.guildBoostCollectorName {
-  flex: 1;
-}
-
-.guildBoostCollectorState {
-  color: #b7a98c;
-  font-size: 11px;
-}
-
-/* Fight states: attacked/placed pop like the official roster tags. */
-.guildBoostCollectorRow .guildBoostCollectorState:first-letter,
-.guildBoostCollectorState.warn {
-  color: #ff8f6b;
-}
-
-.guildBoostCollectorActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-}
-
 .guildBoostPayLabel {
-  color: #b7a98c;
+  color: #8f887a;
   font-size: 11px;
   margin-right: 2px;
 }
@@ -256,17 +234,17 @@ body, html {
   gap: 10px;
   padding: 6px 8px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
-  background: rgba(0,0,0,0.22);
+  background: rgba(46,45,40,0.35);
 }
 
 .guildBoostRow:nth-child(odd) {
-  background: rgba(0,0,0,0.12);
+  background: rgba(46,45,40,0.22);
 }
 
 .guildBoostRow.header {
-  background: rgba(0,0,0,0.45);
+  background: rgba(46,45,40,0.75);
   font-weight: bold;
-  color: #f2c94c;
+  color: #f0d98a;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -292,66 +270,114 @@ body, html {
 
 .guildBoostName {
   font-weight: bold;
-  color: #ffe9a8;
+  color: #f0d98a;
   font-size: 12px;
 }
 
 .guildBoostEffect {
   font-size: 11px;
-  color: #b7a98c;
+  color: #8f887a;
 }
 
 .guildBoostLevel {
   font-size: 12px;
   font-weight: bold;
-  color: #e8dcc0;
+  color: #d8d2c2;
   margin-bottom: 2px;
 }
 
 .guildBoostBar {
   height: 7px;
-  background: rgba(0,0,0,0.55);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(21,21,18,0.75);
+  border: 1px solid #5c594f;
   border-radius: 4px;
   overflow: hidden;
   margin-top: 2px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
 }
 
 .guildBoostBarFill {
   height: 100%;
-  background: linear-gradient(180deg, #f2c94c, #b8860b);
+  background: linear-gradient(180deg, #ffe9b0 0%, #ffd75e 40%, #b8860b 100%);
   border-radius: 4px;
   transition: width 0.3s ease;
+  box-shadow: 0 0 4px rgba(255,215,94,0.35);
 }
 
 .guildBoostPrice {
   font-size: 12px;
   font-weight: bold;
-  color: #ffe9a8;
+  color: #ffd75e;
 }
 
 .guildBoostPrice.alt {
   font-size: 10px;
-  color: #9fd6ff;
+  color: #c9c2ae;
   font-weight: normal;
 }
 
 /* Goultines-exclusive tag under the price of combat-changing boosts
-   (PA/PM/Alcance/Invocaciones/% Daños finales): goultines-gold tone to
-   match the currency, distinct from the blue alt-price line. */
+   (PA/MP/Alcance/Invocaciones/% Daños finales): goultines-bone tone to
+   match the currency, distinct from the gold alt-price line. */
 .guildBoostPrice.alt.onlyG {
-  color: #ffd76e;
+  color: #e8d9b8;
 }
 
 .guildBoostHint {
   padding: 10px;
-  color: #b7a98c;
+  color: #8f887a;
   font-style: italic;
   text-align: center;
 }
 
 .guildBoostDonations {
   margin-top: 4px;
+}
+
+/* ── Per-member XP contribution ─────────────────────────────────── */
+.guildBoostMemberXp {
+  margin-top: 4px;
+}
+
+.guildBoostMemberXpRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 11px;
+}
+
+.guildBoostMemberXpRow.me {
+  background: rgba(216,180,90,0.10);
+  border-left: 2px solid #d8b45a;
+  padding-left: 6px;
+}
+
+.guildBoostMemberXpRank {
+  flex: 0 0 22px;
+  color: #6f6a5c;
+  font-weight: bold;
+  text-align: center;
+}
+
+.guildBoostMemberXpRow.me .guildBoostMemberXpRank {
+  color: #d8b45a;
+}
+
+.guildBoostMemberXpName {
+  flex: 1 1 auto;
+  color: #f0d98a;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.guildBoostMemberXpValue {
+  flex: 0 0 auto;
+  color: #ffd75e;
+  font-weight: bold;
 }
 
 .guildBoostDonationRow {
@@ -365,7 +391,7 @@ body, html {
 
 .guildBoostDonationName {
   flex: 1 1 auto;
-  color: #ffe9a8;
+  color: #f0d98a;
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
@@ -374,13 +400,13 @@ body, html {
 
 .guildBoostDonationAmount {
   flex: 0 0 auto;
-  color: #e8dcc0;
+  color: #d8d2c2;
   font-weight: bold;
 }
 
 .guildBoostDonationWhen {
   flex: 0 0 auto;
-  color: #8a7d63;
+  color: #6f6a5c;
   font-size: 10px;
 }
 
@@ -395,19 +421,21 @@ body, html {
 }
 
 .guildBoostModal {
-  background: linear-gradient(180deg, #3a3020, #2a2317);
-  border: 2px solid #6b5a36;
+  background:
+    linear-gradient(180deg, rgba(46,45,40,0.98), rgba(33,32,28,0.98)) padding-box,
+    linear-gradient(180deg, #8a744a 0%, #5c4f33 50%, #3a352a 100%) border-box;
+  border: 2px solid transparent;
   border-radius: 8px;
   box-shadow: 0 6px 24px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.12);
   padding: 16px 18px;
   min-width: 280px;
   max-width: 340px;
-  color: #e8dcc0;
+  color: #d8d2c2;
   font-size: 12px;
 }
 
 .guildBoostModalTitle {
-  color: #f2c94c;
+  color: #f0d98a;
   font-size: 15px;
   font-weight: bold;
   text-align: center;
@@ -424,17 +452,17 @@ body, html {
 
 .guildBoostModalBalance {
   text-align: center;
-  color: #b7a98c;
+  color: #8f887a;
   margin-bottom: 8px;
 }
 
 .guildBoostModalInput {
   width: 100%;
   box-sizing: border-box;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(21,21,18,0.6);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 4px;
-  color: #ffe9a8;
+  color: #f0d98a;
   font-size: 14px;
   padding: 7px 8px;
   text-align: center;
@@ -443,8 +471,8 @@ body, html {
 }
 
 .guildBoostModalInput:focus {
-  border-color: #f2c94c;
-  box-shadow: 0 0 6px rgba(242,201,76,0.4);
+  border-color: #d8b45a;
+  box-shadow: 0 0 6px rgba(216,180,90,0.4);
 }
 
 .guildBoostModalBtns {
@@ -903,4 +931,325 @@ body, html {
   color: #e8d9b8;
   padding: 2px 4px 6px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.65);
+}
+
+/* ── CuervoDex window (custom unified UI: Prestigios + CuervoDex) ──
+   Paleta oficial Dofus Touch: azul profundo + dorado + texto hueso. */
+.cuervoDexWindow .windowBody {
+  background: linear-gradient(180deg, rgb(24,24,21) 0%, rgb(21,21,18) 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cuervoDexWindow .cdxTabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 12px 0;
+  border-bottom: 1px solid #4a4840;
+  flex: none;
+}
+.cuervoDexWindow .cdxTab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 10px 10px;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #b8b2a2;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  user-select: none;
+}
+.cuervoDexWindow .cdxTab:hover { color: #cfdcf2; }
+.cuervoDexWindow .cdxTab.active {
+  color: #f0d98a;
+  border-bottom-color: #d8b45a;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.cuervoDexWindow .cdxPanel {
+  padding: 14px 16px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.cuervoDexWindow .cdxSectionTitle {
+  font-size: 15px;
+  font-weight: bold;
+  color: #f0d98a;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #4a4840;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+}
+.cuervoDexWindow .cdxLevelRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+.cuervoDexWindow .cdxLevelLabel { color: #c9c2ae; font-size: 13px; }
+.cuervoDexWindow .cdxLevelValue {
+  color: #ffd75e;
+  font-size: 24px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(255,215,94,0.45);
+}
+.cuervoDexWindow .cdxDesc {
+  color: #b8b2a2;
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.cuervoDexWindow .cdxEmpty {
+  color: #7a7565;
+  font-size: 13px;
+  font-style: italic;
+  text-align: center;
+  padding: 30px 10px;
+}
+/* ── Prestigios ── */
+.cuervoDexWindow .cdxPrestigeList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cuervoDexWindow .cdxPrestigeCard {
+  background: linear-gradient(180deg, rgba(46,45,40,0.95), rgba(33,32,28,0.95));
+  border: 1px solid #5c594f;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.cuervoDexWindow .cdxPrestigeCard.next {
+  border-color: #d8b45a;
+  box-shadow: 0 0 12px rgba(216,180,90,0.18) inset;
+}
+.cuervoDexWindow .cdxPrestigeHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.cuervoDexWindow .cdxPrestigeName {
+  font-size: 14px;
+  font-weight: bold;
+  color: #e8ddba;
+  letter-spacing: 0.5px;
+}
+.cuervoDexWindow .cdxPrestigeTag {
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #1a1408;
+  background: linear-gradient(180deg, #e8c860, #b8902e);
+  border-radius: 3px;
+  padding: 2px 8px;
+}
+.cuervoDexWindow .cdxPrestigeTag.done {
+  color: #dfe8f5;
+  background: linear-gradient(180deg, #4a6a9a, #33507a);
+}
+.cuervoDexWindow .cdxReqList {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+.cuervoDexWindow .cdxReqItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #d6d0bd;
+  padding: 3px 0;
+}
+.cuervoDexWindow .cdxReqMark {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #0e1626;
+  background: #7a7565;
+}
+.cuervoDexWindow .cdxReqItem.done .cdxReqMark {
+  background: linear-gradient(180deg, #8fd06a, #5da33c);
+  color: #0e1a0c;
+}
+.cuervoDexWindow .cdxReqItem.todo .cdxReqMark { background: #8a3a3a; color: #f0d0d0; }
+.cuervoDexWindow .cdxReqItem.done { color: #b5ad97; }
+.cuervoDexWindow .cdxReqIcon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  object-fit: contain;
+}
+.cuervoDexWindow .cdxRewardRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed #4a4840;
+}
+.cuervoDexWindow .cdxRewardLabel {
+  font-size: 11px;
+  color: #d8b45a;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-right: 4px;
+}
+.cuervoDexWindow .cdxRewardChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #e8ddba;
+  background: rgba(216,180,90,0.14);
+  border: 1px solid rgba(216,180,90,0.4);
+  border-radius: 10px;
+  padding: 2px 9px;
+}
+.cuervoDexWindow .cdxRewardIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.cuervoDexWindow .cdxAscendBtn {
+  display: block;
+  text-align: center;
+  padding: 9px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #101a2e;
+  background: linear-gradient(180deg, #7fd47a, #3f9e46);
+  border: 1px solid #a8e8a8;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.45);
+}
+.cuervoDexWindow .cdxAscendBtn:hover { filter: brightness(1.12); }
+.cuervoDexWindow .cdxAscendBtn:active { transform: scale(0.98); }
+.cuervoDexWindow .cdxAscendBtn.disabled {
+  filter: grayscale(0.9) brightness(0.55);
+  cursor: not-allowed;
+}
+/* ── CuervoDex ── */
+.cuervoDexWindow .cdxBossGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.cuervoDexWindow .cdxBossCell {
+  background: linear-gradient(180deg, rgba(46,45,40,0.95), rgba(33,32,28,0.95));
+  border: 1px solid #5c594f;
+  border-radius: 6px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.cuervoDexWindow .cdxBossCell.unlocked {
+  border-color: #d8b45a;
+  box-shadow: 0 0 12px rgba(216,180,90,0.2);
+}
+.cuervoDexWindow .cdxBossIcon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: rgba(15,15,13,0.85);
+  border: 1px solid #3a3933;
+  overflow: hidden;
+}
+.cuervoDexWindow .cdxBossIcon img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+.cuervoDexWindow .cdxBossIcon.silhouette img {
+  filter: brightness(0) saturate(0);
+  opacity: 0.85;
+}
+.cuervoDexWindow .cdxBossName {
+  font-size: 12px;
+  font-weight: bold;
+  color: #e8ddba;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cuervoDexWindow .cdxBossCell.locked .cdxBossName { color: #7a7565; letter-spacing: 2px; }
+.cuervoDexWindow .cdxBossPts {
+  font-size: 11px;
+  color: #c9c2ae;
+}
+.cuervoDexWindow .cdxBossBar {
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(15,15,13,0.85);
+  border: 1px solid #3a3933;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.cuervoDexWindow .cdxBossBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #3f9e46, #8fd06a);
+}
+.cuervoDexWindow .cdxBossBonus {
+  font-size: 10px;
+  color: #9fbf8f;
+  margin-top: 4px;
+  line-height: 1.35;
+  word-break: break-word;
+}
+.cuervoDexWindow .cdxBossBonusTotal {
+  color: #d8b45a;
+}
+/* Tooltip del botón de la MenuBar (custom, sin depender del bundle) */
+.cdxMenuBtn .cdxMenuTip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 12px;
+  color: #e8ddba;
+  background: linear-gradient(180deg, #2e2d28, #1d1c18);
+  border: 1px solid #d8b45a;
+  border-radius: 4px;
+  padding: 5px 10px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+  pointer-events: none;
+  z-index: 9999;
+}
+/* Botón en la MenuBar */
+.menuBarIcon.cdxMenuBtn {
+  cursor: pointer;
+  position: relative;
+}
+.menuBarIcon.cdxMenuBtn .cdxMenuIcon {
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/png;base64,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");
+  background-size: 78%;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.7));
 }
